@@ -117,7 +117,7 @@ for(runName in runList$runname ){
   
   
  # Benefit provisions
-  paramlist$r.min  <- 45 # this is not required age of retirement benefit. 
+  paramlist$r.min  <- 55 # this is not required age of retirement benefit. 
   paramlist$r.max  <- 74 
   
   # paramlist$r.full <- 50 # age at which vested terms are assumed to retire(Temp, should use r.vben)
@@ -127,7 +127,7 @@ for(runName in runList$runname ){
  # Funding policy 
   paramlist$smooth_method <- "method1"
   paramlist$salgrowth_amort <- 0.055
-  paramlist$amort_type <- "open"
+  #paramlist$amort_type <- "open"
   
   paramlist$s.lower <- -Inf # No corridor for AA
   paramlist$s.upper <- Inf
@@ -145,10 +145,10 @@ for(runName in runList$runname ){
   
  # Demographic
   paramlist$Grouping    <- "fillin"
-  paramlist$newEnt_byTier <- c(t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 1)
+  paramlist$newEnt_byTier <- c(tCD = 0, tE = 0.85, t3 = 0.15)
 
   paramlist$pct.ca.M <-  0.8 # proportion of males who opt for ca upon retirement
-  paramlist$pct.ca.F <-  0.6
+  paramlist$pct.ca.F <-  0.6 
  
    
  # Investment returns
@@ -163,15 +163,15 @@ for(runName in runList$runname ){
   
   
 
-  if(paramlist$tier == "sumTiers"){
-    source("LAFPP_0_Master_allTiers.R")
-    save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, "_", runName, ".RData"))
-
-  } else {
-    Tier_select <- paramlist$tier
-    source("LAFPP_0_Master_singleTier.R")
-    save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, runName, ".RData"))
-  }
+  # if(paramlist$tier == "sumTiers"){
+  #   source("LAFPP_0_Master_allTiers.R")
+  #   save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, "_", runName, ".RData"))
+  # 
+  # } else {
+  #   Tier_select <- paramlist$tier
+  #   source("LAFPP_0_Master_singleTier.R")
+  #   save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, runName, ".RData"))
+  # }
 
 }
 

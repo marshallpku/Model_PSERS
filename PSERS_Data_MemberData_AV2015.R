@@ -387,7 +387,7 @@ nact.tF.AV <- 7280
 nact.tEF.AV <- nact.tE.AV + nact.tF.AV 
 
 share.tE <- 41189/(41189 + 7280)
-share.tF <- 1 - share.T_E
+share.tF <- 1 - share.tE
 
 # Higher salary for Tier F members
 factor.tF.sal <- 1.35
@@ -450,27 +450,27 @@ init_actives_all <- bind_rows(df_tCD,
 #                             Importing initial retirees                                         #####                  
 #*************************************************************************************************************
 
-# fn_ret.ben <- function(sheet, fileName_){
-#   
-# 
-#   # fileName_ = fileName
-#   # Tier_select = "t76"
-#   
-#   ldata <- import_retirees_byAge(fileName_, sheet, sheet)
-#   
-#   df_grouped <- ldata$data %>% select(planname, age, N, V) %>% mutate(planname = paste0(planname, "_grouped"))
-#   names(df_grouped)[names(df_grouped) == "N"] <- ldata$varNames["name_N"]
-#   names(df_grouped)[names(df_grouped) == "V"] <- ldata$varNames["name_V"]
-#   
-#   df_fillin  <- fillin.retirees(ldata) %>% ungroup %>% select(-age.cell)
-#   
-#   df_out <- bind_rows(df_fillin, df_grouped)
-# } 
-# 
-init_retirees_all      <- fn_ret.ben("Retirees_allTiers", file_memberData)
-init_beneficiaries_all <- fn_ret.ben("Beneficiaries_allTiers", file_memberData)
-init_disb_all          <- fn_ret.ben("Disb_allTiers", file_memberData)
-# 
+fn_ret.ben <- function(sheet, fileName_){
+
+
+  # fileName_ = fileName
+  # Tier_select = "t76"
+
+  ldata <- import_retirees_byAge(fileName_, sheet, sheet)
+
+  df_grouped <- ldata$data %>% select(planname, age, N, V) %>% mutate(planname = paste0(planname, "_grouped"))
+  names(df_grouped)[names(df_grouped) == "N"] <- ldata$varNames["name_N"]
+  names(df_grouped)[names(df_grouped) == "V"] <- ldata$varNames["name_V"]
+
+  df_fillin  <- fillin.retirees(ldata) %>% ungroup %>% select(-age.cell)
+
+  df_out <- bind_rows(df_fillin, df_grouped)
+}
+
+# init_retirees_all      <- fn_ret.ben("Retirees_allTiers", file_memberData)
+# init_beneficiaries_all <- fn_ret.ben("Beneficiaries_allTiers", file_memberData)
+# init_disb_all          <- fn_ret.ben("Disb_allTiers", file_memberData)
+#  
 # init_retirees_all
 # init_beneficiaries_all
 # init_disb_all
