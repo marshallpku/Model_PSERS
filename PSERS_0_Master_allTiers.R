@@ -121,47 +121,47 @@ mortality.post.model.tF <- list.decrements.tF$mortality.post.model
 
 # tier.param %<>% mutate(cola = cola - 0.0025)  
 
-
-### Calibration:
-
-# 1. PVFB.retirees
-  # By calibrating benefit factor for survivors   
-
-calibFactor_factor.ca <- 1
-tier.param %<>% mutate(factor.ca = pmin(1.1, factor.ca * calibFactor_factor.ca))
-row.names(tier.param) <- tier.param$tier
-
-
-# 2. PVFB.act
-  # By calibrating benefit factor for service retirees
-calibFactor_bfactor <- 1.08
-bfactor %<>% mutate_each(funs(pmin(1, .*calibFactor_bfactor)), -yos )
-
-
-# 3. EEC
-  # Aggregate EEC rate (total EEC / projected payroll) in 2016 AV is about 9.75%
-  # Tier specific ERC rates are no more than 9%. 
-  # Aggergate EEC rate is 9.64% after calibration  
-
-calibFactor_EEC.rate <- 1.1
-tier.param %<>% mutate(EEC.rate = pmin(1.1, EEC.rate * calibFactor_EEC.rate))
-row.names(tier.param) <- tier.param$tier
-
-
-# 3. Initial benefit payments
- # calibrated to match the budgeted non-DROP payment for FY2016-2017  
-init_beneficiaries_all %<>% mutate(benefit = benefit * 0.989589)
-init_retirees.ca_all   %<>% mutate(benefit = benefit * 0.989589)
-init_retirees.la_all   %<>% mutate(benefit = benefit * 0.989589)
-init_disb.ca_all       %<>% mutate(benefit = benefit * 0.989589)
-init_disb.la_all       %<>% mutate(benefit = benefit * 0.989589)
+# 
+# ### Calibration:
+# 
+# # 1. PVFB.retirees
+#   # By calibrating benefit factor for survivors   
+# 
+# calibFactor_factor.ca <- 1
+# tier.param %<>% mutate(factor.ca = pmin(1.1, factor.ca * calibFactor_factor.ca))
+# row.names(tier.param) <- tier.param$tier
+# 
+# 
+# # 2. PVFB.act
+#   # By calibrating benefit factor for service retirees
+# calibFactor_bfactor <- 1.08
+# bfactor %<>% mutate_each(funs(pmin(1, .*calibFactor_bfactor)), -yos )
+# 
+# 
+# # 3. EEC
+#   # Aggregate EEC rate (total EEC / projected payroll) in 2016 AV is about 9.75%
+#   # Tier specific ERC rates are no more than 9%. 
+#   # Aggergate EEC rate is 9.64% after calibration  
+# 
+# calibFactor_EEC.rate <- 1.1
+# tier.param %<>% mutate(EEC.rate = pmin(1.1, EEC.rate * calibFactor_EEC.rate))
+# row.names(tier.param) <- tier.param$tier
+# 
+# 
+# # 3. Initial benefit payments
+#  # calibrated to match the budgeted non-DROP payment for FY2016-2017  
+# init_beneficiaries_all %<>% mutate(benefit = benefit * 0.989589)
+# init_retirees.ca_all   %<>% mutate(benefit = benefit * 0.989589)
+# init_retirees.la_all   %<>% mutate(benefit = benefit * 0.989589)
+# init_disb.ca_all       %<>% mutate(benefit = benefit * 0.989589)
+# init_disb.la_all       %<>% mutate(benefit = benefit * 0.989589)
 
 
 
 #*********************************************************************************************************
 # 1.3  Actual investment return, for all tiers ####
 #*********************************************************************************************************
-source("LAFPP_Model_InvReturns.R")
+source("PSERS_Model_InvReturns.R")
 i.r <- gen_returns()
 #i.r[, 3] <-  c(paramlist$ir.mean, paramlist$ir.mean/2, rep(paramlist$ir.mean, Global_paramlist$nyear - 2))
 
@@ -174,86 +174,29 @@ source("LAFPP_Model_PrepData.R")
 
 # Create data for each tier
 
-salary.t1  <- get_salary_proc("t1")
-salary.t2  <- get_salary_proc("t2")
-salary.t3  <- get_salary_proc("t3")
-salary.t4  <- get_salary_proc("t4")
-salary.t5  <- get_salary_proc("t5")
-salary.t6  <- get_salary_proc("t6")
-
-benefit.t1 <- get_benefit_tier("t1")
-benefit.t2 <- get_benefit_tier("t2")
-benefit.t3 <- get_benefit_tier("t3")
-benefit.t4 <- get_benefit_tier("t4")
-benefit.t5 <- get_benefit_tier("t5")
-benefit.t6 <- get_benefit_tier("t6")
-
-benefit.disb.t1 <- get_benefit.disb_tier("t1")
-benefit.disb.t2 <- get_benefit.disb_tier("t2")
-benefit.disb.t3 <- get_benefit.disb_tier("t3")
-benefit.disb.t4 <- get_benefit.disb_tier("t4")
-benefit.disb.t5 <- get_benefit.disb_tier("t5")
-benefit.disb.t6 <- get_benefit.disb_tier("t6")
+salary.tCD  <- get_salary_proc("tCD")
+salary.tE  <- get_salary_proc("tE")
+salary.tF  <- get_salary_proc("tF")
 
 
-init_pop.t1 <- get_initPop_tier("t1")
-init_pop.t2 <- get_initPop_tier("t2")
-init_pop.t3 <- get_initPop_tier("t3")
-init_pop.t4 <- get_initPop_tier("t4")
-init_pop.t5 <- get_initPop_tier("t5")
-init_pop.t6 <- get_initPop_tier("t6")
+benefit.tCD <- get_benefit_tier("tCD")
+benefit.tE <- get_benefit_tier("tE")
+benefit.tF <- get_benefit_tier("tF")
 
 
-entrants_dist.t1  <- numeric(length(paramlist$range_ea))
-entrants_dist.t2  <- numeric(length(paramlist$range_ea))
-entrants_dist.t3  <- numeric(length(paramlist$range_ea))
-entrants_dist.t4  <- numeric(length(paramlist$range_ea))
-entrants_dist.t5  <- numeric(length(paramlist$range_ea))
-entrants_dist.t6  <- get_entrantsDist_tier("t6")
+benefit.disb.tCD <- get_benefit.disb_tier("tCD")
+benefit.disb.tE <- get_benefit.disb_tier("tE")
+benefit.disb.tF <- get_benefit.disb_tier("tF")
 
 
-get_tier.bfactor <- function(Tier_select_) bfactor %<>% select(yos, matches(Tier_select_)) %>%  rename_("bfactor" = paste0("bf.", Tier_select_))
-bfactor.t1 <- get_tier.bfactor("t1")
-bfactor.t2 <- get_tier.bfactor("t2")
-bfactor.t3 <- get_tier.bfactor("t3")
-bfactor.t4 <- get_tier.bfactor("t4")
-bfactor.t5 <- get_tier.bfactor("t5")
-bfactor.t6 <- get_tier.bfactor("t6")
+init_pop.tCD <- get_initPop_tier("tCD")
+init_pop.tE <- get_initPop_tier("tE")
+init_pop.tF <- get_initPop_tier("tF")
 
 
-
-# Modeling ERC cap: new hires of t6
-
-if (paramlist$ERC_cap.initiatives){
- 
- salary.t7  <- get_salary_proc("t6")
- benefit.t7 <- get_benefit_tier("t6")
- benefit.disb.t7 <- get_benefit.disb_tier("t6")
- bfactor.t7 <- get_tier.bfactor("t6")
- 
- entrants_dist.t7  <- get_entrantsDist_tier("t6")
- #entrants_dist.t6  <- numeric(length(paramlist$range_ea))
- 
- init_pop.t7       <- get_initPop_tier("t6")
- for (z in 1:length(init_pop.t7)) init_pop.t7[[z]][ , ] <- 0
- 
- paramlist$newEnt_byTier_before2019 <- c(t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 1)
- paramlist$newEnt_byTier_after2019  <- c(t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 1)
- }
-
-# # Chnange variable names
-# make_tierDec <- function(Tier_select_, df = decrement.ucrp){
-#   df %<>% rename_("pxT" = paste0("pxT.", Tier_select_),
-#                   "qxr.la"   = paste0("qxr.la.", Tier_select_),
-#                   "qxr.ca"   = paste0("qxr.ca.", Tier_select_),
-#                   "qxr.LSC"  = paste0("qxr.LSC.", Tier_select_),
-#                   "qxr"      = paste0("qxr.", Tier_select_),
-#                   "qxt"      = paste0("qxt.", Tier_select_))
-#   }
-# decrement.ucrp.t76  <- make_tierDec("t76")
-# decrement.ucrp.t13  <- make_tierDec("t13")
-# decrement.ucrp.tm13 <- make_tierDec("tm13")
-
+entrants_dist.tCD <- numeric(length(paramlist$range_ea))
+entrants_dist.tE  <- get_entrantsDist_tier("tE")
+entrants_dist.tF  <- get_entrantsDist_tier("tF")
 
 
 #*********************************************************************************************************

@@ -479,14 +479,35 @@ init_retirees_all      <- read_ExcelRange(file_memberData, sheet = "Retirees_det
 init_beneficiaries_all <- read_ExcelRange(file_memberData, sheet = "Beneficiaries_detailed", "B2", "B3", colTypes="numeric") %>% select(-benefit.tot)
 init_disb_all          <- read_ExcelRange(file_memberData, sheet = "Disabled_detailed",      "B2", "B3", colTypes="numeric") %>% select(-benefit.tot)
 
-init_retirees_all      %<>%  mutate(planname = "Retirees_allTiers_fillin")
-init_beneficiaries_all %<>%  mutate(planname = "Beneficiaries_allTiers_fillin")
-init_disb_all          %<>%  mutate(planname = "Disb_allTiers_fillin")
+
+
+init_retirees_all <- bind_rows(init_retirees_all %>% mutate(planname = "Retirees_tCD_fillin"),
+                               init_retirees_all %>% mutate(planname = "Retirees_tE_fillin", nretirees = 0, benefit = 0),
+                               init_retirees_all %>% mutate(planname = "Retirees_tF_fillin", nretirees = 0, benefit = 0)
+                               ) 
+
+
+init_beneficiaries_all <- bind_rows(init_beneficiaries_all %>%  mutate(planname = "Beneficiaries_tCD_fillin"),
+                                    init_beneficiaries_all %>%  mutate(planname = "Beneficiaries_tE_fillin", nbeneficiaries = 0, benefit = 0),
+                                    init_beneficiaries_all %>%  mutate(planname = "Beneficiaries_tF_fillin", nbeneficiaries = 0, benefit = 0)
+                                    )
+
+init_disb_all <- bind_rows(init_disb_all %>%  mutate(planname = "disb_tCD_fillin"),
+                                    init_disb_all %>%  mutate(planname = "disb_tE_fillin", ndisb = 0, benefit = 0),
+                                    init_disb_all %>%  mutate(planname = "disb_tF_fillin", ndisb = 0, benefit = 0)
+                                    )
 
 
 init_retirees_all
 init_beneficiaries_all
 init_disb_all
+
+
+
+
+
+
+
 #*************************************************************************************************************
 #                             Importing initial vested terms                                             #####                  
 #*************************************************************************************************************
@@ -514,6 +535,11 @@ get_init.terms.temp <- function(file, sheet, planname, cellStart = "B2", cellEnd
 }
 init_terms_all <- data.frame(planname = "Terms_allTiers_fillin", age = 21:74, nterms = 0, benefit = 0)
 
+
+init_terms_all <- bind_rows(init_terms_all %>%  mutate(planname = "terms_tCD_fillin"),
+                           init_terms_all %>%  mutate(planname = "terms_tE_fillin", nterms = 0, benefit = 0),
+                           init_terms_all %>%  mutate(planname = "terms_tF_fillin", nterms = 0, benefit = 0)
+)
 
 #*************************************************************************************************************
 #                           Post processing to make data usable to the model                             #####                  

@@ -50,6 +50,9 @@ list.decrements      <- get_decrements(Tier_select)
 decrement.model      <- list.decrements$decrement.model
 mortality.post.model <- list.decrements$mortality.post.model
 
+
+
+
 #**********************************************
 ##   Modify initial data ####
 #**********************************************
@@ -74,7 +77,7 @@ mortality.post.model <- list.decrements$mortality.post.model
 #*********************************************************************************************************
 # 1.3  Actual investment return, for all tiers ####
 #*********************************************************************************************************
-source("LAFPP_Model_InvReturns.R")
+source("PSERS_Model_InvReturns.R")
 i.r <- gen_returns()
 #i.r[, 3] <-  c(paramlist$ir.mean, paramlist$ir.mean/2, rep(paramlist$ir.mean, Global_paramlist$nyear - 2))
 
@@ -84,27 +87,19 @@ i.r <- gen_returns()
 # 1.2 Create plan data ####
 #*********************************************************************************************************
 
-source("LAFPP_Model_PrepData.R")
+source("PSERS_Model_PrepData.R")
 
 salary       <- get_salary_proc(Tier_select)
 benefit      <- get_benefit_tier(Tier_select)
 benefit.disb <- get_benefit.disb_tier(Tier_select)
 init_pop     <- get_initPop_tier(Tier_select)
 
-if(Tier_select == "t6"){
-  entrants_dist  <- get_entrantsDist_tier("t6")} else  
-  entrants_dist  <- numeric(length(paramlist$range_ea))
-
-
-bfactor %<>% select(yos, matches(Tier_select)) %>% 
-             rename_("bfactor" = paste0("bf.", Tier_select))
-
 
 
 #*********************************************************************************************************
 # 2. Demographics ####
 #*********************************************************************************************************
-source("LAFPP_Model_Demographics.R")
+source("PSERS_Model_Demographics.R")
 gc()
 pop <- get_Population()
 
