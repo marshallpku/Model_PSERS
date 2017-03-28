@@ -561,7 +561,7 @@ pct.female <-  1 - pct.male
 
 
 save(init_actives_all, init_retirees_all, init_beneficiaries_all, init_disb_all, init_terms_all,
-     pct.male, pct.female,
+     pct.male, pct.female, share.tE, share.tF,
      file = "Data_inputs/PSERS_MemberData_AV2015.RData")
 
 

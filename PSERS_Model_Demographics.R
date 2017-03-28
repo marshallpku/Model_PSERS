@@ -1,4 +1,4 @@
-# Simulation of the demograhics for a single tier in LAFPP
+# Simulation of the demograhics for a single tier in PSERS
 
 ## Modifications on the original model
   # 1. Need to calculate the number of new retirees opting for contingent annuity(by ea, age) for each year. (Can be calculated after the loop) 
@@ -136,7 +136,7 @@ p_active2term    <- make_dmat("qxt")
 p_active2disb    <- make_dmat("qxd")
 p_active2disb.la <- make_dmat("qxd.la")
 p_active2dead    <- make_dmat("qxm.pre")
-p_active2deathBen<- make_dmat("qxm.pre") * pct.QSS
+p_active2deathBen<- make_dmat("qxm.pre") # * pct.QSS
 p_active2retiree <- make_dmat("qxr")
 p_active2la      <- make_dmat("qxr.la")
 
@@ -152,7 +152,7 @@ p_disb.la2dead    <- make_dmat("qxm.d")
 
 
 # Where do the death beneficiaries go
-p_deathBen2dead <- make_dmat("qxm.deathBen") #need to modify later.
+p_deathBen2dead <- make_dmat("qxm.deathBen") # Simplified: weighted average of male and female mortality
 
 
 
@@ -355,7 +355,7 @@ wf_disb.la <- data.frame(expand.grid(ea = range_ea, age = range_age, year = init
 term_reduced <- wf_term %>% group_by(year, age) %>% summarise(number.v = sum(number.v, na.rm = TRUE))
 
 
-wf_active
+# wf_active
 
 #*************************************************************************************************************
 #                                     Number of new contingent annuitants   ####

@@ -93,7 +93,7 @@ salary       <- get_salary_proc(Tier_select)
 benefit      <- get_benefit_tier(Tier_select)
 benefit.disb <- get_benefit.disb_tier(Tier_select)
 init_pop     <- get_initPop_tier(Tier_select)
-
+entrants_dist <- get_entrantsDist_tier(Tier_select)
 
 
 #*********************************************************************************************************
@@ -107,7 +107,7 @@ pop <- get_Population()
 #*********************************************************************************************************
 # 3. Actuarial liabilities and benefits for contingent annuitants and survivors ####
 #*********************************************************************************************************
-source("LAFPP_Model_ContingentAnnuity.R")
+source("PSERS_Model_ContingentAnnuity.R")
 
 # For service retirement
 liab.ca <- get_contingentAnnuity(Tier_select, 
@@ -122,32 +122,6 @@ liab.disb.ca <- get_contingentAnnuity(Tier_select,
                                       range_age.disb, 
                                       apply_reduction = FALSE) %>% 
                 rename(age.disb = age.r)
-
-
-
-# liab.ca0 <- get_contingentAnnuity(Tier_select, 
-#                                  0 ,
-#                                  paramlist$range_age.r, 
-#                                  apply_reduction = FALSE)
-
-
-# liab.disb.ca0 <- get_contingentAnnuity(Tier_select, 
-#                                       0,
-#                                       range_age.disb, 
-#                                       apply_reduction = FALSE)
-
-# 
- #  liab.ca %>% filter(age.r + 10 == age)
- # # liab.ca0 %>% filter(age.r + 10 == age)
- # 
- # 
- # liab.disb.ca %>% filter(age.disb + 10 == age)
- # 
- # liab.disb.ca %>% filter(age.disb == 30)
- 
- # 
-# liab.disb.ca0 %>% filter(age.r + 1 == age)
-
 
 
 
