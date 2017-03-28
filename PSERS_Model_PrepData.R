@@ -228,7 +228,7 @@ get_benefit <- function(
   benefit <- avgben %>% 
     # filter(age>=r.max) %>% 
     mutate(year       = init.year,
-           ea         = r.min - 1,
+           ea         = min(age) - 1,
            age.r      = age,
            start.year = year - (age - ea)) %>% 
     select(start.year, ea, age, age.r, benefit)

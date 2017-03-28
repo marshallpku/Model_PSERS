@@ -52,7 +52,6 @@ mortality.post.model <- list.decrements$mortality.post.model
 
 
 
-
 #**********************************************
 ##   Modify initial data ####
 #**********************************************
@@ -140,7 +139,7 @@ liab <- get_indivLab(Tier_select)
 #*********************************************************************************************************
 # 5. Aggregate actuarial liabilities, normal costs and benenfits ####
 #*********************************************************************************************************
-source("LAFPP_Model_AggLiab.R")
+source("PSERS_Model_AggLiab.R")
 gc()
 
 AggLiab <- get_AggLiab(Tier_select,
@@ -153,7 +152,7 @@ AggLiab <- get_AggLiab(Tier_select,
 #*********************************************************************************************************
 # 6.  Simulation ####
 #*********************************************************************************************************
-source("LAFPP_Model_Sim.R")
+source("PSERS_Model_Sim.R")
 penSim_results <- run_sim(Tier_select, AggLiab)
 
 

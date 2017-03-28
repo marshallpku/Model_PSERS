@@ -64,6 +64,16 @@ source("Functions.R")
 # 2. Assume members are elgible for death benefit only after they are eligible for early or normal retirement. Assume the benefit
 
 
+## For PSERS death benefit: 
+#    1. Lump sum death benefit equal to PV of future benefit (Bx.death * ax.deathBen);
+#    2. Death benefit are assumed to be claimed 1 year after death     
+
+
+# For PSERS term benefit: 
+#   1. Vested terms begin to receive benefit 1 year after termination. (use the same method as disability benefit.)
+#   2. benefits are equal to accrued benefit up to the year of termination 
+#   3. Should be reduced later. 
+
 
 #### Model Parameters ####
 #********************************************************************************
@@ -152,8 +162,8 @@ for(runName in runList$runname ){
   paramlist$Grouping    <- "fillin"
   paramlist$newEnt_byTier <- c(tCD = 0, tE = 0.85, t3 = 0.15)
 
-  paramlist$pct.ca.M <-  0.8 # proportion of males who opt for ca upon retirement
-  paramlist$pct.ca.F <-  0.6 
+  paramlist$pct.ca.M <-  0 # proportion of males who opt for ca upon retirement
+  paramlist$pct.ca.F <-  0 
  
    
  # Investment returns

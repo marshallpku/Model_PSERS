@@ -109,6 +109,7 @@ termrates.model <- termRates %>%
                qxt.female * pct.female) %>% 
   select(age, ea, yos, qxt)
                                 
+termrates.model
 
 
 # retirement rates
@@ -204,23 +205,22 @@ decrement.model %<>%
          qxm.deathBen_tF  = qxm.deathBen_tCD,
          
          # Mortality for vested terms 
-         qxm.vested = ifelse(age < 50, qxm.pre, qxm.post.male * pct.male + qxm.post.female * pct.female)
+         qxm.term = ifelse(age < 50, qxm.pre, qxm.post.male * pct.male + qxm.post.female * pct.female)
 
          )
  
-decrement.model 
 
 # Adjustment to term rates
 # 1. extend qxt beyond age 61. (max in the AV)?
 # 2. Coerce termination rates to 0 when eligible for early retirement or reaching than r.full(when we assume terms start to receive benefits). 
 
 decrement.model %<>% mutate(
-  qxt.tCD = ifelse(elig_early == 0 & elig_super_tCD == 0, qxt, 0 ),
-  qxt.tE  = ifelse(elig_early == 0 & elig_super_tE == 0, qxt, 0 ),
-  qxt.tF  = ifelse(elig_early == 0 & elig_super_tF == 0, qxt, 0 )
+  qxt_tCD = ifelse(elig_early == 0 & elig_super_tCD == 0, qxt, 0 ),
+  qxt_tE  = ifelse(elig_early == 0 & elig_super_tE == 0, qxt, 0 ),
+  qxt_tF  = ifelse(elig_early == 0 & elig_super_tF == 0, qxt, 0 )
 )
   
-decrement.model
+
 
 
 
@@ -232,7 +232,7 @@ decrement.model
 
   decrement.model %<>% 
     mutate_(qxr = paste0("qxr_", Tier_select),
-            qxt = paste0("qxr_", Tier_select),
+            qxt = paste0("qxt_", Tier_select),
             qxm.deathBen = paste0("qxm.deathBen_", Tier_select),
             
             elig_super     = paste0("elig_super_",     Tier_select),
@@ -287,7 +287,8 @@ decrement.model %<>%
   group_by(ea) %>% 
   mutate( pxm.pre = 1 - qxm.pre,
           pxm.deathBen = 1 - qxm.deathBen,
-          pxm.d = 1 - qxm.d,
+          pxm.d        = 1 - qxm.d,
+          pxm.term     = 1 - qxm.term,
           
           pxT     = 1 - qxt - qxd - qxm.pre - qxr,                            
           
@@ -308,11 +309,9 @@ list(decrement.model = decrement.model,
 }
 
 
-#get_decrements("t5")
+# get_decrements("t5")
 
-
-
-
+# decrement.model %>% select(ea, age, px_r.vsuper_m, elig_super)
 
 
 

@@ -41,7 +41,7 @@ get_Population <- function(init_pop_         = init_pop,
  assign_parmsList(Global_paramlist_, envir = environment())
  assign_parmsList(paramlist_,        envir = environment())  
 
- pct.QSS <- pct.ca.F * pct.female + pct.ca.M * pct.male
+ # pct.QSS <- pct.ca.F * pct.female + pct.ca.M * pct.male
  
 #*************************************************************************************************************
 #                                     Creating arrays for each status ####

@@ -231,7 +231,7 @@ liab.disb.ca.tF  <- get_contingentAnnuity("tF", tier.param["tF", "factor.ca.disb
 #*********************************************************************************************************
 # 3. Individual actuarial liabilities, normal costs and benenfits ####
 #*********************************************************************************************************
-source("LAFPP_Model_IndivLiab.R")
+source("PSERS_Model_IndivLiab.R")
 gc()
 
 liab.tCD <- get_indivLab("tCD",
@@ -264,58 +264,12 @@ liab.tF <- get_indivLab("tF",
                         liab.ca.tF,
                         liab.disb.ca.tF)
 
-liab.t4 <- get_indivLab("t4",
-                        decrement.model.t4,
-                        salary.t4,
-                        benefit.t4,
-                        benefit.disb.t4,
-                        bfactor.t4,
-                        mortality.post.model.t4,
-                        liab.ca.t4,
-                        liab.disb.ca.t4)
 
-liab.t5 <- get_indivLab("t5",
-                        decrement.model.t5,
-                        salary.t5,
-                        benefit.t5,
-                        benefit.disb.t5,
-                        bfactor.t5,
-                        mortality.post.model.t5,
-                        liab.ca.t5,
-                        liab.disb.ca.t5)
-
-liab.t6 <- get_indivLab("t6",
-                        decrement.model.t6,
-                        salary.t6,
-                        benefit.t6,
-                        benefit.disb.t6,
-                        bfactor.t6,
-                        mortality.post.model.t6,
-                        liab.ca.t6,
-                        liab.disb.ca.t6)
-
-if (paramlist$ERC_cap.initiatives){
-# liab.t7 <- get_indivLab("t7",
-#                         decrement.model.t7,
-#                         salary.t7,
-#                         benefit.t7,
-#                         benefit.disb.t7,
-#                         bfactor.t7,
-#                         mortality.post.model.t7,
-#                         liab.ca.t7,
-#                         liab.disb.ca.t7)
-liab.t7 <- liab.t6
-
-}
-
-
-# liab.t5$disb.la %>% filter(year == 2015, !is.na(B.disb.la), B.disb.la !=0, age.disb == age)
-# init_disb.la_all
 
 #*********************************************************************************************************
 # 5. Aggregate actuarial liabilities, normal costs and benenfits ####
 #*********************************************************************************************************
-source("LAFPP_Model_AggLiab.R")
+source("PSERS_Model_AggLiab.R")
 gc()
 
 
@@ -343,39 +297,6 @@ AggLiab.tF <- get_AggLiab("tF",
                           mortality.post.model.tF) 
 
 
-AggLiab.t4 <- get_AggLiab("t4",
-                          liab.t4,
-                          liab.ca.t4,
-                          liab.disb.ca.t4,
-                          pop$pop.t4,
-                          mortality.post.model.t4) 
-
-
-AggLiab.t5 <- get_AggLiab("t5",
-                          liab.t5,
-                          liab.ca.t5,
-                          liab.disb.ca.t5,
-                          pop$pop.t5,
-                          mortality.post.model.t5) 
-
-
-AggLiab.t6 <- get_AggLiab("t6",
-                          liab.t6,
-                          liab.ca.t6,
-                          liab.disb.ca.t6,
-                          pop$pop.t6,
-                          mortality.post.model.t6)
-
-if (paramlist$ERC_cap.initiatives){
-AggLiab.t7 <- get_AggLiab("t7",
-                          liab.t7,
-                          liab.ca.t7,
-                          liab.disb.ca.t7,
-                          pop$pop.t7,
-                          mortality.post.model.t7)
-}
-
-
 AggLiab.sumTiers <- get_AggLiab_sumTiers(AggLiab.tCD, AggLiab.tE, AggLiab.tF,
                                          AggLiab.t4, AggLiab.t5, AggLiab.t6)
 
@@ -384,10 +305,9 @@ AggLiab.sumTiers <- get_AggLiab_sumTiers(AggLiab.tCD, AggLiab.tE, AggLiab.tF,
 #*********************************************************************************************************
 # 6.  Simulation ####
 #*********************************************************************************************************
-source("LAFPP_Model_Sim.R")
-source("LAFPP_Model_Sim_cap.R")
+source("PSERS_Model_Sim.R")
 
-
+# source("LAFPP_Model_Sim_cap.R")
 # if(paramlist$simTiers == "separate"){
 #   penSim_results.tCD  <- run_sim("tCD",  AggLiab.tCD)
 #   penSim_results.tE  <- run_sim("tE",  AggLiab.tE)
@@ -402,36 +322,6 @@ penSim_results.sumTiers <- run_sim("sumTiers", AggLiab.sumTiers) %>%
                            select(runname, sim, year, Tier, everything())
 
 
-##############################################################
-
-#penSim_results.sumTiers %>% filter(sim == 0)
-
-# x <- penSim_results.sumTiers %>% filter(sim == 0)
-# penSim_results.xt7 %>% filter(sim == 1)
-# penSim_results.t7 %>% filter(sim == 1)
-
-## Save outputs from RS1
-
-# list.RS1 <- list(liab.tCD = liab.tCD, liab.tE = liab.tE, liab.tF = liab.tF,liab.t4 = liab.t4, liab.t5 = liab.t5, liab.t6 = liab.t6,
-#                  AggLiab.tCD = AggLiab.tCD, AggLiab.tE = AggLiab.tE, AggLiab.tF = AggLiab.tF, AggLiab.t4 = AggLiab.t4, AggLiab.t5 = AggLiab.t5, AggLiab.t6 = AggLiab.t6,
-#                  AggLiab.sumTiers = AggLiab.sumTiers,
-#                  liab.disb.ca.t6 = liab.disb.ca.t6,
-#                  liab.ca.t6 = liab.ca.t6,
-#                  pop = pop)
-# 
-# save(list.RS1, file = "list.RS1.RData")
-# load("list.RS1.RData")
-# 
-# identical(list.RS1$liab.t6$disb.la, liab.t7$disb.la)
-# 
-# identical(list.RS1$AggLiab.tE, AggLiab.tE)
-# 
-# list.RS1$AggLiab.t6
-
- #identical(list.RS1$liab.disb.ca.t6, liab.disb.ca.t6)
- #identical(list.RS1$liab.ca.t6, liab.ca.t6)
-
-##############################################################
 
 if(paramlist$ERC_cap.initiatives){
   
