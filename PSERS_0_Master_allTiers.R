@@ -239,27 +239,26 @@ liab.tCD <- get_indivLab("tCD",
                          salary.tCD,
                          benefit.tCD,
                          benefit.disb.tCD,
-                         bfactor.tCD,
                          mortality.post.model.tCD,
                          liab.ca.tCD,
                          liab.disb.ca.tCD)
+
 
 liab.tE <- get_indivLab("tE",
                         decrement.model.tE,
                         salary.tE,
                         benefit.tE,
                         benefit.disb.tE,
-                        bfactor.tE,
                         mortality.post.model.tE,
                         liab.ca.tE,
                         liab.disb.ca.tE)
+
 
 liab.tF <- get_indivLab("tF",
                         decrement.model.tF,
                         salary.tF,
                         benefit.tF,
                         benefit.disb.tF,
-                        bfactor.tF,
                         mortality.post.model.tF,
                         liab.ca.tF,
                         liab.disb.ca.tF)
