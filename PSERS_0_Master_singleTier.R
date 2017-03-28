@@ -128,9 +128,8 @@ liab.disb.ca <- get_contingentAnnuity(Tier_select,
 #*********************************************************************************************************
 # 4. Individual actuarial liabilities, normal costs and benenfits ####
 #*********************************************************************************************************
-source("LAFPP_Model_IndivLiab.R")
+source("PSERS_Model_IndivLiab.R")
 gc()
-
 
 liab <- get_indivLab(Tier_select)
 

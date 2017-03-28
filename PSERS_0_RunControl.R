@@ -59,6 +59,10 @@ source("Functions.R")
 
 
 
+## Assumptions and simplifications
+# 1. Assume all terms take a lump sum benefit equal to the present value 
+# 2. Assume members are elgible for death benefit only after they are eligible for early or normal retirement. Assume the benefit
+
 
 
 #### Model Parameters ####
@@ -119,6 +123,7 @@ for(runName in runList$runname ){
  # Benefit provisions
   paramlist$r.min  <- 55 # this is not required age of retirement benefit. 
   paramlist$r.max  <- 74 
+  bfactor <- 2.5
   
   # paramlist$r.full <- 50 # age at which vested terms are assumed to retire(Temp, should use r.vben)
   # paramlist$r.vben <- 50 # age at which vested terms are assumed to retire.

@@ -198,10 +198,14 @@ decrement.model %<>%
          elig_vest_tE  = ifelse(yos >= 10, 1, 0),
          elig_vest_tF  = ifelse(yos >= 10, 1, 0),
          
-         # Mortality eligible for benefit (assume eligible if vested)
+         # Mortality for death benefit recievers (assume eligible if vested)
          qxm.deathBen_tCD = ifelse(age < 50, qxm.pre, qxm.post.male * pct.male + qxm.post.female * pct.female),
          qxm.deathBen_tE  = qxm.deathBen_tCD,
-         qxm.deathBen_tF  = qxm.deathBen_tCD
+         qxm.deathBen_tF  = qxm.deathBen_tCD,
+         
+         # Mortality for vested terms 
+         qxm.vested = ifelse(age < 50, qxm.pre, qxm.post.male * pct.male + qxm.post.female * pct.female)
+
          )
  
 decrement.model 
