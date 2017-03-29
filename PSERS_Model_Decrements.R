@@ -37,7 +37,13 @@ assign_parmsList(.paramlist,        envir = environment())
 mortality.model <- data.frame(age = range_age) %>% 
   left_join(mortality_PSERS) %>% 
   mutate(qxm.pre = qxm.pre.male  * pct.male + qxm.pre.female  * pct.female,   # mortality for actives
-         qxm.d   = (qxm.d.male    * pct.male + qxm.d.female  * pct.female) * 1
+         qxm.d   = (qxm.d.male    * pct.male + qxm.d.female  * pct.female) * 1,
+         
+         # PSERS: expand qxm.post.male/female with qxm.pre.male/female
+         qxm.post.male   = ifelse(age < 50, qxm.pre.male,   qxm.post.male),
+         qxm.post.female = ifelse(age < 50, qxm.pre.female, qxm.post.female)
+         
+         
          
          # qxm.deathBen = ifelse(age > max(age - 3), 1, lead(qxm.post.female, 3)) * pct.male + 
          #                ifelse(age < min(age + 3), qxm.post.male[age == min(age)],lag(qxm.post.male, 3)) * pct.female,
@@ -56,7 +62,9 @@ mortality.model <- data.frame(age = range_age) %>%
  
 
 mortality.post.model <- expand.grid(age   = range_age, 
-                                    age.r = min(range_age.r):max.age) %>% 
+                                    age.r = range_age # modified for init retirees of PSERS 
+                                    # min(range_age.r):max.age
+                                    ) %>% 
   left_join(mortality.model) %>%
   filter(age >= age.r) %>% 
   group_by(age.r) %>%  
@@ -81,6 +89,7 @@ mortality.post.model <- expand.grid(age   = range_age,
   mutate_all(funs(ifelse(is.nan(.), 0, .))) %>% 
   select(age.r, age, qxm.post.W, pxm.post.W, ax.r.W)
 
+# mortality.post.model
 
 # Construct mortality rate for terms: 
  # before r.vben: qxm.pre

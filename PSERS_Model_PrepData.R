@@ -309,7 +309,7 @@ get_initPop <- function (.actives,
   init_actives %<>% spread(age, nactives, fill = 0) %>% select(-ea) %>% as.matrix 
   
   
-  init_retirees <- .retirees %>% select(age, nretirees.la) %>% mutate(ea = r.min - 1) 
+  init_retirees <- .retirees %>% select(age, nretirees.la) %>% mutate(ea = min(age) - 1) 
   init_retirees <- expand.grid(ea = range_ea, age = range_age) %>% left_join(init_retirees) %>% 
     #mutate(nretirees = n_init_retirees * nretirees/sum(nretirees, na.rm = TRUE)) %>% 
     spread(age, nretirees.la, fill = 0) %>% select(-ea) %>% as.matrix

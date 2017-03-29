@@ -102,6 +102,7 @@ source("PSERS_Model_Demographics.R")
 gc()
 pop <- get_Population()
 
+pop$la %>% filter(year == 2015, year.r == 2015, number.la !=0)
 
 #*********************************************************************************************************
 # 3. Actuarial liabilities and benefits for contingent annuitants and survivors ####

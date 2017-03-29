@@ -74,6 +74,9 @@ source("Functions.R")
 #   2. benefits are equal to accrued benefit up to the year of termination 
 #   3. Should be reduced later. 
 
+# PSERS: expand qxm.post.male/female with qxm.pre.male/female
+
+
 
 #### Model Parameters ####
 #********************************************************************************
@@ -133,7 +136,7 @@ for(runName in runList$runname ){
  # Benefit provisions
   paramlist$r.min  <- 55 # this is not required age of retirement benefit. 
   paramlist$r.max  <- 74 
-  paramlist$bfactor <- 2.5
+  paramlist$bfactor <- 0.025
   
   # paramlist$r.full <- 50 # age at which vested terms are assumed to retire(Temp, should use r.vben)
   # paramlist$r.vben <- 50 # age at which vested terms are assumed to retire.

@@ -1,5 +1,4 @@
-# This script calculate aggregate annual ALs, NCs and benefit payments for LAFPP.
-
+# This script calculate aggregate annual ALs, NCs and benefit payments for PSERS.
 
 
 get_AggLiab <- function( Tier_select_,
@@ -31,7 +30,7 @@ get_AggLiab <- function( Tier_select_,
      # init_disb.ca_all_        = init_disb.ca_all
      # paramlist_ = paramlist
      # Global_paramlist_ = Global_paramlist
-     # 
+
    
    # for all tiers
      # Tier_select_ = "t6"
@@ -104,7 +103,6 @@ get_AggLiab <- function( Tier_select_,
            PVFBx.av.tot    = PVFBx.laca.tot + PVFBx.v.tot + PVFBx.death.tot + PVFBx.disb.tot,
            
            PR.tot  = sx * number.a,
-           EEC.tot = EEC * number.a,
            
            runname = runname)
   
@@ -130,7 +128,6 @@ get_AggLiab <- function( Tier_select_,
       PVFBx.av.sum   = sum(PVFBx.av.tot,   na.rm = TRUE),
       
       PR.sum    = sum(PR.tot,  na.rm = TRUE),
-      EEC.sum   = sum(EEC.tot, na.rm = TRUE),
       
       nactives  = sum(number.a,  na.rm = TRUE)) %>% 
     # mutate(AL = ALx.laca.sum + ALx.v.sum + ALx.death.sum + ALx.disb.sum + ALx.av.sum,
@@ -139,12 +136,12 @@ get_AggLiab <- function( Tier_select_,
       as.matrix # extracting elements from matrices is much faster than from data.frame
   
   
-   # active.agg
-  
+  active.agg %>% as.data.frame()
+   
+   
   #*************************************************************************************************************
   #                                     ## Liabilities and benefits for retirees (life annuitants)   ####
   #*************************************************************************************************************
-  
   
   liab_$la  <- data.table(liab_$la, key = "ea,age,year,year.r")
   pop_$la   <- data.table(pop_$la,  key = "ea,age,year,year.r")
@@ -155,21 +152,25 @@ get_AggLiab <- function( Tier_select_,
   liab_$la %<>% 
     mutate(ALx.la.tot      = ALx.la * number.la,
            B.la.tot        = B.la   * number.la,
-           EEC_DROP.la.tot = EEC_DROP.la * number.la,
-           sx_DROP.la.tot  = sx_DROP.la * number.la,
            runname         = runname)
   
   la.agg <- liab_$la %>% 
     group_by(year) %>% 
     summarise(ALx.la.sum      = sum(ALx.la.tot, na.rm = TRUE),
               B.la.sum        = sum(B.la.tot  , na.rm = TRUE),
-              EEC_DROP.la.sum = sum(EEC_DROP.la.tot, na.rm = TRUE),
-              sx_DROP.la.sum  = sum(sx_DROP.la.tot, na.rm = TRUE),
               nla             = sum(number.la , na.rm = TRUE)) %>% 
     # mutate(runname = runname) %>% 
     as.matrix
   
+  la.agg %>% as.data.frame
   
+  # liab_$la %>% filter(year == 2015) %>% select(year, ea, age, year.r, ALx.la, B.la) %>% filter(year.r == 2015)
+  # pop$la   %>% filter(year == 2015) %>% filter(number.la !=0)
+  # 
+  # liab_$la$
+  # 
+  # x <- pop_$la  %>% filter(year == 2015number.la)
+  # x$number.la %>% sum
   
   #*************************************************************************************************************
   #                                     ## Liabilities and benefits for death benefit   ####
@@ -194,6 +195,7 @@ get_AggLiab <- function( Tier_select_,
     # mutate(runname = runname) %>% 
     as.matrix
 
+  #death.agg
   
   #*************************************************************************************************************
   #                                     ## Liabilities and benefits for disability benefit (life annuitants)   ####
@@ -217,6 +219,8 @@ get_AggLiab <- function( Tier_select_,
               ndisb.la          = sum(number.disb.la , na.rm = TRUE)) %>% 
     # mutate(runname = runname) %>% 
     as.matrix
+  
+  disb.la.agg
   
   
   #*************************************************************************************************************
@@ -248,6 +252,7 @@ get_AggLiab <- function( Tier_select_,
     # mutate(runname = runname) %>% 
     as.matrix
  
+  #term.agg
 
   #*******************************************************************************************************************************
   #                                 ## Liabilities and benefits for contingent annuitants and survivors of service retirees   ####
@@ -333,9 +338,7 @@ get_AggLiab <- function( Tier_select_,
                    liab.ca.sum = new_ca * Bx.laca * liab.ca.sum.1,
                    B.ca.sum    = new_ca * Bx.laca * B.ca.sum.1,
                    n.R1        = new_ca * (n.R1S0.1 + n.R1S1.1), # Total number of living contingent annuitants
-                   n.R0S1      = new_ca * n.R0S1.1,              # Total number of survivors
-                   EEC_DROP.ca.sum = new_ca * sx * EEC_DROP.ca.sum.1,  # LAFPP DROP
-                   sx_DROP.ca.sum  = new_ca * sx * sx_DROP.ca.sum.1
+                   n.R0S1      = new_ca * n.R0S1.1               # Total number of survivors
                    ) %>%          
                    #filter(year.r == 2025, age.r == 50, ea == 20) %>%            
             group_by(year) %>% 
@@ -343,9 +346,8 @@ get_AggLiab <- function( Tier_select_,
                       B.ca.sum    = sum(B.ca.sum, na.rm = TRUE),
                       n.R1        = sum(n.R1, na.rm = TRUE),
                       n.R0S1      = sum(n.R0S1, na.rm = TRUE),
-                      n.new_ca    = sum(new_ca, na.rm = TRUE),
-                      EEC_DROP.ca.sum = sum(EEC_DROP.ca.sum, na.rm = TRUE),
-                      sx_DROP.ca.sum  = sum(sx_DROP.ca.sum, na.rm = TRUE)) 
+                      n.new_ca    = sum(new_ca, na.rm = TRUE)
+                      ) 
   
  
   
@@ -359,7 +361,7 @@ get_AggLiab <- function( Tier_select_,
                      liab.ca.sum = liab.ca.sum + liab.ca.sum.init + liab.ret.ca.sum.init) %>% 
               as.matrix
   
-   # ca.agg
+   ca.agg
    
    
    #*******************************************************************************************************************************
@@ -438,7 +440,7 @@ get_AggLiab <- function( Tier_select_,
      as.matrix
    
   
-  # ca.agg %>% data.frame
+  # disb.ca.agg %>% data.frame
   # active.agg %>% data.frame
   
   #return(

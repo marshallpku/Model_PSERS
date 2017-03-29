@@ -350,7 +350,7 @@ liab.term.init <- expand.grid(ea         = unique(init_terminated_$ea),
          age >= ea,
          age.term >= ea) %>%
   left_join(init_terminated_ %>% select(ea, age.term, start.year, yos, benefit.term = benefit)) %>%
-  left_join(select(liab.active, start.year, ea, age, bfactor, COLA.scale, pxRm, px_r.vben_m, px_r.vsuper_m, ax.vben, pxm.term)) %>%
+  left_join(select(liab.active, start.year, ea, age, COLA.scale, pxRm, px_r.vben_m, px_r.vsuper_m, ax.vben, pxm.term)) %>%
   # left_join(mortality.post.model_ %>% filter(age.r == r.vben) %>% select(age, ax.r.W.term = ax.r.W)) %>%
   group_by(start.year, ea, age.term) %>%
 
