@@ -4,7 +4,9 @@
 
 run_sim <- function(Tier_select_,
                     AggLiab_,
+                    PR.Tiers_ = PR.Tiers,
                     i.r_ = i.r,
+                    i.r_geoReturn_ = i.r_geoReturn,
                     # init_amort_raw_ = init_amort_raw, # amount.annual, year.remaining 
                     init_unrecReturns.unadj_ = init_unrecReturns.unadj,
                     paramlist_ = paramlist,
@@ -13,26 +15,40 @@ run_sim <- function(Tier_select_,
   # Run the section below when developing new features.
       # Tier_select_ =  "tCD" #  Tier_select
       # i.r_ = i.r
+      # i.r_geoReturn_ = i.r_geoReturn
       # AggLiab_        = AggLiab
+      # PR.Tiers_ = PR.Tiers
       # # init_amort_raw_ = init_amort_raw
       # init_unrecReturns.unadj_ = init_unrecReturns.unadj
       # paramlist_      = paramlist
       # Global_paramlist_ = Global_paramlist
+  
+     # Tier_select_ =  "sumTiers" #  Tier_select
+     # i.r_ = i.r
+     # PR.Tiers_ = PR.Tiers
+     # AggLiab_        = AggLiab.sumTiers
+     # i.r_geoReturn_ = i.r_geoReturn
+     # init_unrecReturns.unadj_ = init_unrecReturns.unadj
+     # paramlist_      = paramlist
+     # Global_paramlist_ = Global_paramlist
+  
 
-      # Tier_select_ =  "t7" #  Tier_select
-      # i.r_ = i.r
-      # AggLiab_        = AggLiab.t7
-      # init_amort_raw_ = init_amort_raw %<>% mutate(balance = 0, annual.payment = 0)
-      # init_unrecReturns.unadj_ = init_unrecReturns.unadj %<>% mutate(DeferredReturn = 0)
-      # paramlist_      = paramlist
-      # Global_paramlist_ = Global_paramlist
   
   assign_parmsList(Global_paramlist_, envir = environment())
   assign_parmsList(paramlist_,        envir = environment())
   
   # if(Tier_select_ != "sumTiers") init_amort_raw_ %<>% filter(tier == Tier_select_) 
 
-  EEC_rate <- tier.param[Tier_select_, "EEC_rate"]
+  if(Tier_select_ != "sumTiers") EEC_rate <- tier.param[Tier_select_, "EEC_rate"]
+  
+  if(Tier_select_ == "sumTiers"){
+    
+    EEC_baseRate_tCD <- tier.param["tCD", "EEC_rate"]
+    EEC_baseRate_tE  <- tier.param["tE", "EEC_rate"]
+    EEC_baseRate_tF  <- tier.param["tF", "EEC_rate"]
+    
+  } 
+  
   
   #*************************************************************************************************************
   #                                     Defining variables in simulation ####
@@ -133,13 +149,40 @@ run_sim <- function(Tier_select_,
   # Vector used in asset smoothing
   s.vector <- seq(0,1,length = s.year + 1)[-(s.year+1)]; s.vector  # a vector containing the porportion of 
   
-  
+
 
   
   
   #*************************************************************************************************************
   #                                 Defining variables in simulation  ####
   #*************************************************************************************************************
+  
+  # For PSERS
+  if(Tier_select_ == "sumTiers"){
+    penSim0$PR_tCD <- PR.Tiers_[, "PR_tCD"]
+    penSim0$PR_tE <-  PR.Tiers_[, "PR_tE"]
+    penSim0$PR_tF <-  PR.Tiers_[, "PR_tF"]
+    
+    penSim0$EEC.totRate_tCD <- tier.param["tCD", "EEC_rate"]
+    penSim0$EEC.totRate_tE  <- tier.param["tE",  "EEC_rate"]
+    penSim0$EEC.totRate_tF  <- tier.param["tF",  "EEC_rate"]
+    
+    penSim0$EEC_tCD <- rep(0, nyear)
+    penSim0$EEC_tE  <- rep(0, nyear)
+    penSim0$EEC_tF  <- rep(0, nyear)
+    
+    penSim0$sharedRisk.rate <- rep(0, nyear)
+    
+    penSim0$SharedRiskEval <- ((seq_len(nyear) + init.year - 1) - 2016) %% 3 == 0  # TRUE in the year to determine if the EEC rate should be changed
+
+    penSim0$i.r_geoReturn <- rep(0, nyear) # placeholder 
+        
+  }
+  
+  
+  
+  
+  
   
   # AL(j)
   penSim0$AL.act.laca <- AggLiab_$active[, "ALx.laca.sum"]
@@ -185,7 +228,7 @@ run_sim <- function(Tier_select_,
   # PR(j)
   penSim0$PR <- AggLiab_$active[, "PR.sum"]
 
-  
+
   
   # nactives, nretirees, nterms
   penSim0$nactives  <- AggLiab_$active[,  "nactives"]
@@ -253,12 +296,14 @@ run_sim <- function(Tier_select_,
   penSim_results <- foreach(k = -1:nsim, .packages = c("dplyr", "tidyr")) %dopar% {
     # k <- 1
     # initialize
-    penSim <- penSim0
+    penSim   <- penSim0
     SC_amort <- SC_amort0
     
     if(k == -1) SC_amort[,] <- 0
     
     penSim[["i.r"]] <- i.r_[, as.character(k)]
+    penSim[["i.r_geoReturn"]] <- i.r_geoReturn_[, as.character(k)]
+    
     
     source("Functions.R")
     
@@ -359,12 +404,62 @@ run_sim <- function(Tier_select_,
                              closed = sum(SC_amort[, j]),
                              open   = amort_LG(penSim$UAAL[j], i, m, salgrowth_amort, end = FALSE, method = amort_method)[1])
       
+      
+      
+      #**************************************************************************************************************
+      #                                        PSERS: shared-risk EEC rate 
       #**************************************************************************************************************
       
+      if(Tier_select_ == "sumTiers"){
+        if(j > 1){
+          
+          # in the re-evaluation year
+          if(penSim$SharedRiskEval[j - 1]){
+            
+            penSim$sharedRisk.rate[j] <-    ifelse(penSim$i.r_geoReturn[j - 1] >= i,                penSim$sharedRisk.rate[j - 1] - 0.005,
+                                                   ifelse(penSim$i.r_geoReturn[j - 1] < (i - 0.01), penSim$sharedRisk.rate[j - 1] + 0.005, 
+                                                                                                    penSim$sharedRisk.rate[j - 1]))
+            
+            penSim$sharedRisk.rate[j] <- ifelse(            penSim$sharedRisk.rate[j] > 0.02, 0.02,
+                                                    ifelse( penSim$sharedRisk.rate[j] <    0 ,   0,
+                                                            penSim$sharedRisk.rate[j])
+                                                )
+            
+            
+            penSim$sharedRisk.rate[j] <- ifelse( (penSim$MA[j - 1] / penSim$AL[j - 1]) > 1, 0, penSim$sharedRisk.rate[j])
+            
+            
+          } else {
+            # Not in the re-evaluation year  
+            penSim$sharedRisk.rate[j] <-  penSim$sharedRisk.rate[j - 1]
+            penSim$sharedRisk.rate[j] <-  penSim$sharedRisk.rate[j - 1]
+          }
+        } 
+        
+        if(useSharedRisk){ 
+          penSim$EEC.totRate_tE[j] <- EEC_baseRate_tE + penSim$sharedRisk.rate[j]
+          penSim$EEC.totRate_tF[j] <- EEC_baseRate_tF + penSim$sharedRisk.rate[j]
+        }
+        
+        penSim$EEC_tCD[j] <- with(penSim, PR_tCD[j] * EEC.totRate_tCD[j])
+        penSim$EEC_tE[j]  <- with(penSim, PR_tE[j]  * EEC.totRate_tE[j])
+        penSim$EEC_tF[j]  <- with(penSim, PR_tF[j]  * EEC.totRate_tF[j])
+        
+        penSim$EEC[j] <- penSim$EEC_tCD[j] + penSim$EEC_tE[j] + penSim$EEC_tF[j]    
       
-      # Employee contribution, based on payroll. May be adjusted later. 
-      penSim$EEC[j] <- with(penSim, PR[j] * EEC_rate)
-      #penSim$EEC[j] <- with(penSim, EEC[j])
+              
+      } else {
+        
+        # Employee contribution, based on payroll. May be adjusted later. 
+        penSim$EEC[j] <- with(penSim, PR[j] * EEC_rate)
+      }
+      
+      
+
+      
+      
+      #**************************************************************************************************************
+      
       
       
       # ADC(j)

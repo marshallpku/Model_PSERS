@@ -167,6 +167,22 @@ i.r <- gen_returns()
 
 
 
+i.r_supplement <-  
+  cbind(rep(paramlist$i, 4),
+        matrix(c(0.0343, 0.0796, 0.01491, 0.08), 4, Global_paramlist$nsim + 1))
+
+i.r_geoReturn <- rbind(i.r_supplement, i.r) %>% 
+  as.data.frame %>% 
+  mutate_all(funs(get_rollingReturns(., "moving", 10)))
+
+i.r_geoReturn[1:9, ] <- rbind(i.r_supplement, i.r)[1:9,] %>% 
+  as.data.frame %>% 
+  mutate_all(funs(get_rollingReturns(., "expanding"))) %>% 
+  as.matrix()
+
+i.r_geoReturn <- i.r_geoReturn[-(1:4),]
+
+
 #*********************************************************************************************************
 # 1.4 Create plan data ####
 #*********************************************************************************************************
@@ -221,9 +237,9 @@ liab.ca.tF  <- get_contingentAnnuity("tF", tier.param["tF", "factor.ca"], range_
 
 
 range_age.disb.ca <-  min(paramlist$range_age): 100 #max(paramlist$range_age.r)
-liab.disb.ca.tCD  <- get_contingentAnnuity("tCD", tier.param["tCD", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tCD) %>% rename(age.disb = age.r)
-liab.disb.ca.tE  <- get_contingentAnnuity("tE", tier.param["tE", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tE) %>% rename(age.disb = age.r)
-liab.disb.ca.tF  <- get_contingentAnnuity("tF", tier.param["tF", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tF) %>% rename(age.disb = age.r)
+liab.disb.ca.tCD  <-  get_contingentAnnuity("tCD", tier.param["tCD", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tCD) %>% rename(age.disb = age.r)
+liab.disb.ca.tE  <-   get_contingentAnnuity("tE", tier.param["tE", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tE) %>% rename(age.disb = age.r)
+liab.disb.ca.tF  <-   get_contingentAnnuity("tF", tier.param["tF", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tF) %>% rename(age.disb = age.r)
 
 
 
@@ -296,142 +312,35 @@ AggLiab.tF <- get_AggLiab("tF",
                           mortality.post.model.tF) 
 
 
-AggLiab.sumTiers <- get_AggLiab_sumTiers(AggLiab.tCD, AggLiab.tE, AggLiab.tF,
-                                         AggLiab.t4, AggLiab.t5, AggLiab.t6)
+AggLiab.sumTiers <- 
+  get_AggLiab_sumTiers(AggLiab.tCD, AggLiab.tE, AggLiab.tF) 
 
 
+if(paramlist$tier == "sumTiers"){  
+  PR.Tiers <- AggLiab.tCD$active %>% as.data.frame %>% select(year, PR_tCD = PR.sum)  %>% 
+    left_join(AggLiab.tE$active  %>% as.data.frame %>% select(year, PR_tE  = PR.sum)) %>% 
+    left_join(AggLiab.tF$active  %>% as.data.frame %>% select(year, PR_tF  = PR.sum)) %>% 
+    as.matrix
+} else {
+  PR.Tiers <- NULL 
+}
+    
 
 #*********************************************************************************************************
 # 6.  Simulation ####
 #*********************************************************************************************************
 source("PSERS_Model_Sim.R")
-
-# source("LAFPP_Model_Sim_cap.R")
-# if(paramlist$simTiers == "separate"){
-#   penSim_results.tCD  <- run_sim("tCD",  AggLiab.tCD)
-#   penSim_results.tE  <- run_sim("tE",  AggLiab.tE)
-#   penSim_results.tF  <- run_sim("tF",  AggLiab.tF)
-#   penSim_results.t4  <- run_sim("t4",  AggLiab.t4)
-#   penSim_results.t5  <- run_sim("t5",  AggLiab.t5)
-#   penSim_results.t6  <- run_sim("t6",  AggLiab.t6)
-# }
-
-if(!paramlist$ERC_cap.initiatives)
-penSim_results.sumTiers <- run_sim("sumTiers", AggLiab.sumTiers) %>% 
-                           select(runname, sim, year, Tier, everything())
+penSim_results.sumTiers <- run_sim("sumTiers", AggLiab.sumTiers)
 
 
 
-if(paramlist$ERC_cap.initiatives){
-  
-  
-  
-  # penSim_results.xt7 <- penSim_results.sumTiers %>% 
-  #                       mutate(Tier = "xt7")
-  # 
-  # penSim_results.t7 <- run_sim("t7", 
-  #                               AggLiab.t7,
-  #                               init_amort_raw_ = init_amort_raw %>% mutate(balance = 0, annual.payment = 0), 
-  #                               init_unrecReturns.unadj_ = init_unrecReturns.unadj %>% mutate(DeferredReturn = 0)
-  #                               ) %>%
-  #                      mutate_all(funs(ifelse(is.nan(.), 0, .))) %>% 
-  #                      select(runname, sim, year, Tier, everything())
-
-  
-  penSim_results.sumTiers <- run_sim.wt7("sumTiers",
-                      AggLiab.xt7_ = AggLiab.sumTiers,
-                      AggLiab.t7_  = AggLiab.t7,
-                      i.r_ = i.r,
-                      
-                      init_amort_raw.xt7_ = init_amort_raw, # amount.annual, year.remaining 
-                      init_unrecReturns.unadj.xt7_ = init_unrecReturns.unadj,
-                      
-                      init_amort_raw.t7_ = init_amort_raw %>% mutate(balance = 0, annual.payment = 0),
-                      init_unrecReturns.unadj.t7_ = init_unrecReturns.unadj %>% mutate(DeferredReturn = 0),
-                      
-                      paramlist_ = paramlist,
-                      Global_paramlist_ = Global_paramlist)
-  
-  
-  penSim_results.xt7 <-  penSim_results.sumTiers %>% filter(Tier == "xt7")
-  penSim_results.t7  <-  penSim_results.sumTiers %>% filter(Tier == "t7")
-  
-  penSim_results.sumTiers %<>%  
-    select(runname, run.returnScn, run.policyScn, sim, year, Tier, everything())   %>% 
-    group_by(runname, sim, year) %>% 
-    summarise_at(c(7:(ncol(penSim_results.sumTiers))),  funs(sum(., na.rm = TRUE))) %>% 
-    mutate(Tier    = "sumTiers",
-           run.returnScn = paramlist$run.returnScn, 
-           run.policyScn = paramlist$run.policyScn,
-           FR      = 100 * AA / exp(log(AL)),
-           FR_MA   = 100 * MA / exp(log(AL)),
-           UAAL_PR = 100 * UAAL / PR,
-           MA_PR   = 100 * MA / PR,
-           AA_PR   = 100 * AA / PR,
-           AL_PR   = 100 * AL / PR,
-           AL.act_PR    = 100 * AL.act / PR,
-           AL.la_PR    = 100 * AL.la / PR, 
-           AL.ca_PR    = 100 * AL.ca / PR, 
-           AL.term_PR   = 100 * AL.term / PR, 
-           #AL._PR    = 100 * AL.Ben / PR,
-           ADC_PR  = 100 * ADC / PR,
-           NC_PR   = 100 * NC / PR,
-           NC.laca_PR    = 100 * NC.laca / PR,
-           NC.v_PR   = 100 * NC.v / PR,
-           SC_PR   = 100 * SC / PR, 
-           ERC_PR  = 100 * ERC / PR,
-           EEC_PR  = 100 * EEC / PR, 
-           C_PR    = 100 * C / PR,
-           B_PR    = 100 * B / PR,
-           ExF     = C - B,
-           ExF_PR  = 100 * ExF / PR,
-           ExF_MA  = 100 * ExF / MA,
-           PR.growth = ifelse(year > 1, 100 * (PR / lag(PR) - 1), NA)) %>% 
-    select(runname, run.returnScn, run.policyScn, sim, year, Tier, everything())
-  
-  }
-
-
-# penSim_results.t7 %>% filter(sim == -1)
-# penSim_results.sumTiers%>% filter(sim == -1)
-# penSim_results.sumTiers1%>% filter(sim == -1)
 
 
 outputs_list <- list(paramlist = paramlist, 
                      Global_paramlist = Global_paramlist,
-                     
-                     #decrement = decrement,
-                     
-                     results     = penSim_results.sumTiers
-                     
-                     #ind_active  = AggLiab$ind_active, 
-                     #ind_retiree = AggLiab$ind_retiree,
-                     #ind_term    = AggLiab$ind_term,
-                     #demo_summary= pop$demo_summary,
-                     
-                     #liab  = if(paramlist$save.liab) liab else "Not saved",
-                     #demo  = if(paramlist$save.demo) pop else "Not saved",
-                     
-                     #entrant_dist = entrants_dist
-)
+                     results     = penSim_results.sumTiers)
 
-if(paramlist$ERC_cap.initiatives){
-  outputs_list$results.xt7 <- penSim_results.xt7
-  outputs_list$results.t7  <- penSim_results.t7
-}
-  
-# x <- outputs_list
-# x$results
-# 
-# load("./Results/results_sumTiers_RS1.RData")
-# 
-# outputs_list$results %>% filter(sim == 0) %>% mutate(EEC_PR = 100*EEC/PR) %>%  select(runname, sim, year, AL, MA, FR, ERC_PR, EEC_PR, ERC, PR, C_PR)
-# 
-# x$results %>% filter(sim == 1) %>% select(runname, sim, year, AL, MA, FR, ERC_PR, EEC_PR,ERC, PR, C_PR)
-# x$results.xt7 %>% filter(sim == 0) %>% select(runname, sim, year, AL, MA, FR, ERC_PR, EEC_PR, ERC, PR, C_PR)
-# x$results.t7 %>% filter(sim == 1) %>% select(runname, sim, year, AL, MA, FR, ERC_PR, EEC_PR, ERC, PR, C_PR)
-# 
-# x$results.t7 %>% filter(sim == 1)
+
 
 #*********************************************************************************************************
 # 7.1  Showing results: Joint simulation of all tiers ####
@@ -443,132 +352,79 @@ if(paramlist$ERC_cap.initiatives){
 #            when we simulate(do the loop) all tiers jointly. 
 
 
-var_display1 <- c("runname",  "Tier", "sim", "year", "FR", "MA", "AA", 
-                 "AL", 
-                 # "AL.act", "AL.act.laca", 
-                 "NC","SC", "NC.laca",   "AL.act", "AL.la", "AL.ca", "AL.term",
-                 "PVFB", 
-                 "B", # "B.la", "B.ca", "B.disb.la","B.disb.ca", 
-                 "C",   
-                 "PR", "NC_PR", "ERC_PR", "LG", "Amort_basis", "UAAL", "EUAAL")
 
-var_display2 <- c("Tier", "sim", "year", "FR", "MA", "AL", "AL.act", "NC", "SC", "C", "B", "EEC","ERC","PR", "PR_DROP", "EEC_DROP", "ERC_PR" ) # , "ADC") # ,"Amort_basis")
+var_display1 <- c("sim", "year", "FR_MA", "MA", "AL", 
+                  "AL.act", "AL.disb.la", "AL.act.disb", "AL.act.death", "AL.act.v", "AL.la", "AL.ca", "AL.term", "PVFB", "B",
+                  # "AL.disb.la", "AL.disb.ca", "AL.death", "PVFB",
+                  #"PVFB.laca", "PVFB.LSC", "PVFB.v", "PVFB", 
+                  # "B", "B.la", "B.ca", "B.v", "B.disb.la","B.disb.ca", 
+                  "PR", "NC_PR","SC_PR")
 
-var_display3 <- c("year", "nactives", "nretirees", "nla", "n.ca.R1", "n.ca.R0S1", 
-                  "ndisb.la", "ndisb.ca.R1", "ndisb.ca.R0S1")
+var_display2 <- c("Tier", "sim", "year", "FR_MA", "MA", "AL", "EEC","ERC","ERC_PR","B", "B.v", "SC", "C", 
+                  "nactives", "nretirees", "nla", "n.ca.R1", "n.ca.R0S1", "nterms", 
+                  "ndisb.la", "ndisb.ca.R1", "ndisb.ca.R0S1" )
 
-var_display.cali <- c("runname", "sim", "year", "FR", "MA", "AA", "AL", 
-                      "AL.act", "AL.initDROP",
-                      "PVFB", 
+
+var_display.cali <- c("runname", "sim", "year", "FR","FR_MA", "MA", "AA", "AL", 
+                      # "AL.act", "AL.disb.la", "AL.term",
+                      # "PVFB", 
                       "B", # "B.la", "B.ca", "B.disb.la","B.disb.ca", 
                       # "C",   
                       "NC","SC", "ERC", "EEC",
-                      "PR", "NC_PR", "ERC_PR")
+                      "PR", "nactives", "nla",
+                      "NC_PR", "SC_PR", #  "ERC_PR",
+                      "UAAL")
 
 
-kable(penSim_results.sumTiers %>% filter(sim == -1) %>% select(one_of(var_display2)), digits = 2) %>% print 
-#kable(penSim_results.sumTiers %>% filter(sim == -1) %>% select(one_of(var_display2)), digits = 2) %>% print 
-
-kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display3))) %>% print  # mutate(FR.AA = 100 * AA/AL) , digits = 2) %>%
+kable(penSim_results.sumTiers %>% filter(sim == -1) %>% select(one_of(var_display.cali)), digits = 2) %>%  print 
 kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display.cali)), digits = 2) %>% print 
 
-kable(penSim_results.sumTiers %>% filter(sim == 1) %>% select(one_of(var_display1)), digits = 2) %>% print 
-kable(penSim_results.sumTiers %>% filter(sim == 1) %>% select(one_of(var_display2)) %>% mutate(#ExF = C - B, 
-                                                                                               #ExF_MA = 100 * ExF/MA,
-                                                                                               PVFB.nonact = AL - AL.act,
-                                                                                               DROP.PR   = PR_DROP/PR,
-                                                                                               DROP.rate = EEC_DROP/EEC), digits = 2)  %>%  print 
+
+kable(penSim_results.sumTiers %>% filter(sim == -1) %>% select(one_of(var_display1)), digits = 2) %>% print 
+kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display1)), digits = 2) %>% print 
 
 
 
 #*********************************************************************************************************
-# 7.1  Showing results: Separate simulations of each tier ####
+#   8. Showing risk measures ####
 #*********************************************************************************************************
-# Currently for the purpose of checking model consistency. 
-# To make sense of separate simulation of each tier, we must allocate initial assets and amortization payments 
-# among the tiers. However, we currently lack information for doing this reasonably. 
+
+df_all.stch <- penSim_results.sumTiers  %>% 
+  filter(sim >= 0, year <= 2045)
 
 
+df_all.stch %<>%   
+  select(runname, sim, year, AL, MA, EEC, PR, ERC_PR) %>% 
+  group_by(runname, sim) %>% 
+  mutate(FR_MA     = 100 * MA / AL,
+         FR40less  = cumany(FR_MA <= 40),
+         FR100more  = cumany(FR_MA >= 100),
+         FR100more2 = FR_MA >= 100,
+         ERC_high  = cumany(ERC_PR >= 40), 
+         ERC_hike  = cumany(na2zero(ERC_PR - lag(ERC_PR, 5) >= 10))) %>% 
+  group_by(runname, year) %>% 
+  summarize(FR40less = 100 * sum(FR40less, na.rm = T)/n(),
+            FR100more = 100 * sum(FR100more, na.rm = T)/n(),
+            FR100more2= 100 * sum(FR100more2, na.rm = T)/n(),
+            ERC_high = 100 * sum(ERC_high, na.rm = T)/n(),
+            ERC_hike = 100 * sum(ERC_hike, na.rm = T)/n(),
+            
+            FR.q10   = quantile(FR_MA, 0.1,na.rm = T),
+            FR.q25   = quantile(FR_MA, 0.25, na.rm = T),
+            FR.q50   = quantile(FR_MA, 0.5, na.rm = T),
+            FR.q75   = quantile(FR_MA, 0.75, na.rm = T),
+            FR.q90   = quantile(FR_MA, 0.9, na.rm = T),
+            
+            ERC_PR.q10 = quantile(ERC_PR, 0.1, na.rm = T),
+            ERC_PR.q25 = quantile(ERC_PR, 0.25, na.rm = T),
+            ERC_PR.q50 = quantile(ERC_PR, 0.5, na.rm = T),
+            ERC_PR.q75 = quantile(ERC_PR, 0.75, na.rm = T),
+            ERC_PR.q90 = quantile(ERC_PR, 0.9, na.rm = T)
+            
+            
+  ) %>% 
+  ungroup()
 
-
-# var_display <- c("Tier", "sim", "year", "FR", "MA", "AL", 
-#                  #"AL.act", "AL.act.laca", "AL.act.v", "AL.act.LSC", "AL.la", "AL.ca", "AL.term", 
-#                  #"PVFB.laca", "PVFB.LSC", "PVFB.v", "PVFB", 
-#                  "B", "B.la", "B.ca", "B.LSC", "B.v", 
-#                  "nactives", "nterms", "PR", "NC_PR")
-# 
-# penSim_results_byTiers <- bind_rows(penSim_results.t76,
-#                                     penSim_results.tCD3,
-#                                     penSim_results.tm13)
-# 
-# penSim_results_sumTiers <- penSim_results_byTiers %>% 
-#   group_by(sim, year) %>% 
-#   summarise(MA = sum(MA)/1000,
-#             AL = sum(AL)/1000,
-#             NC = sum(NC)/1000,
-#             PVFB = sum(PVFB)/1000,
-#             B = sum(B)/1000,
-#             PR = sum(PR)/1000,
-#             nactives = sum(nactives)) %>% 
-#   mutate(NC_PR = NC/PR * 100,
-#          FR = MA/AL * 100)
-# 
-# 
-# penSim_results.t76  %>% filter(sim == -1) %>% select(one_of(var_display)) %>% data.frame
-# penSim_results.tCD3  %>% filter(sim == -1) %>% select(one_of(var_display)) %>% data.frame
-# penSim_results.tm13 %>% filter(sim == -1) %>% select(one_of(var_display)) %>% data.frame
-# 
-# penSim_results_sumTiers %>% filter(sim == -1) 
-
-
-
-#write.xlsx2(penSim_results_sumTiers %>% filter(sim == -1), file = "Data/detective_constant_wf.xlsx", sheet = "Total")
-
-
-# init_actives_all %>% summarise(avg.age = sum(age * nactives)/sum(nactives),
-#                                avg.yos = sum(yos * nactives)/sum(nactives),
-#                                avg.sal = sum(salary * nactives)/sum(nactives))
-# 
-# init_actives_all %>% 
-#   group_by(planname) %>% 
-#   summarise(avg.age = sum(age * nactives)/sum(nactives),
-#                                avg.yos = sum(yos * nactives)/sum(nactives),
-#                                avg.sal = sum(salary * nactives)/sum(nactives))
-
-
-
-# npv <- function(x, i){
-#   sum(x * (1/(1 + i))^(seq_along(x) - 1))
-# }
-# 
-# 
-# p.cp <- amort_cp(967866035, 0.075, 20, 0.04)
-# npv(p.cp, 0.075)
-# 
-# 
-# x <- colSums(SC_amort.init)
-# npv(x, 0.075) #  1526077697
-#               #  1561332747
-# 
-# 
-# 
-# SC_amort.init
-# 
-# init_amort_raw$balance %>% sum
-# 
-# 
-# (607 - 546)/607
-# (919 - 798)/919
-
-# load("../Model_Main/IO_M2.1_new/Outputs_D1F075-average.RData")
-# outputs_list$results %>% select(runname, sim ,year, AL, NC, B, MA, C, i.r) %>% head
-
-
-# load("Results/results_sumTiers_RS1.RData")
-# load("Results/results_sumTiers_RS1_cap.RData")
-# load("Results/results_sumTiers_RS1_cap.allTiers.RData")
-# outputs_list$results %>% filter(Tier == "sumTiers", sim == 1) %>% select(runname, sim, year, Tier, AL, MA, FR_MA, ERC_PR) %>%  head(100)
-
-
+df_all.stch
 
 
