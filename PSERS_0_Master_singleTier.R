@@ -153,9 +153,15 @@ AggLiab <- get_AggLiab(Tier_select,
 #*********************************************************************************************************
 # 6.  Simulation ####
 #*********************************************************************************************************
-source("PSERS_Model_Sim.R")
+source("PSERS_Model_Sim_singleTier.R")
 penSim_results <- run_sim(Tier_select, AggLiab)
 
+
+
+
+outputs_list <- list(paramlist = paramlist, 
+                     Global_paramlist = Global_paramlist,
+                     results     = penSim_results.sumTiers)
 
 
 
@@ -179,33 +185,8 @@ var_display2 <- c("Tier", "sim", "year", "FR", "MA", "AL", "EEC","ERC","ERC_PR",
 
 penSim_results %>% filter(sim == -1) %>% select(one_of(var_display1)) %>% print
 penSim_results %>% filter(sim == -1) %>% select(one_of(var_display2)) %>% print
-#penSim_results %>% filter(sim == -1) %>% data.frame
 
 
-
-
-
-# load("Check_allTiers.RData")
-# 
-# penSim_results %>% filter(sim == -1) %>% select(one_of(var_display1)) %>% print
-# penSim_results.t6 %>% filter(sim == -1) %>% select(one_of(var_display1)) %>% print
-# 
-# penSim_results %>% filter(sim == -1) %>% select(one_of(var_display2)) %>% print
-# penSim_results.t6 %>% filter(sim == -1) %>% select(one_of(var_display2)) %>% print
-
-
-
-#*********************************************************************************************************
-# Detecitve work: term rates ####
-#*********************************************************************************************************
-# The AL of actives becomes even higher when higher term rates are used. 
-
-# detective.t13 <- penSim_results
-# save(detective.t13, file= "detective.t13.RData")
-# 
-# load("detective.t13.RData")
-# detective.t13 %>% filter(sim == -1) %>% select(Tier,year, FR, MA, AL, AL.act,AL.act.laca, AL.act.v,AL.act.LSC, AL.la, AL.ca, AL.term, AL, PVFB.laca, PVFB.LSC, PVFB.v, PVFB, 
-#                         B, B.la, B.ca, B.LSC,B.v, nactives, nterms, PR, NC_PR) %>% data.frame
 
 
 

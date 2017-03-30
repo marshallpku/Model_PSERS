@@ -5,16 +5,16 @@
 run_sim <- function(Tier_select_,
                     AggLiab_,
                     i.r_ = i.r,
-                    init_amort_raw_ = init_amort_raw, # amount.annual, year.remaining 
+                    # init_amort_raw_ = init_amort_raw, # amount.annual, year.remaining 
                     init_unrecReturns.unadj_ = init_unrecReturns.unadj,
                     paramlist_ = paramlist,
                     Global_paramlist_ = Global_paramlist){
 
   # Run the section below when developing new features.
-      # Tier_select_ =  "sumTiers" #  Tier_select
+      # Tier_select_ =  "tCD" #  Tier_select
       # i.r_ = i.r
-      # AggLiab_        = AggLiab.sumTiers
-      # init_amort_raw_ = init_amort_raw
+      # AggLiab_        = AggLiab
+      # # init_amort_raw_ = init_amort_raw
       # init_unrecReturns.unadj_ = init_unrecReturns.unadj
       # paramlist_      = paramlist
       # Global_paramlist_ = Global_paramlist
@@ -30,8 +30,10 @@ run_sim <- function(Tier_select_,
   assign_parmsList(Global_paramlist_, envir = environment())
   assign_parmsList(paramlist_,        envir = environment())
   
-  if(Tier_select_ != "sumTiers") init_amort_raw_ %<>% filter(tier == Tier_select_) 
+  # if(Tier_select_ != "sumTiers") init_amort_raw_ %<>% filter(tier == Tier_select_) 
 
+  EEC_rate <- tier.param[Tier_select_, "EEC_rate"]
+  
   #*************************************************************************************************************
   #                                     Defining variables in simulation ####
   #*************************************************************************************************************  
@@ -132,17 +134,7 @@ run_sim <- function(Tier_select_,
   s.vector <- seq(0,1,length = s.year + 1)[-(s.year+1)]; s.vector  # a vector containing the porportion of 
   
   
-  #*************************************************************************************************************
-  #                                   Introducing external fund   #### 
-  #*************************************************************************************************************  
-  
-  # extFund$extFund <- rowSums(select(extFund, -year)) # total external fund
-  # 
-  # penSim0 %<>% left_join(extFund) %>% 
-  #              mutate(extFund = na2zero(extFund))
 
-  
-  
   
   
   #*************************************************************************************************************
@@ -192,14 +184,8 @@ run_sim <- function(Tier_select_,
   
   # PR(j)
   penSim0$PR <- AggLiab_$active[, "PR.sum"]
-  penSim0$PR_DROP <- (AggLiab_$la[, "sx_DROP.la.sum"] + AggLiab_$ca[, "sx_DROP.ca.sum"])*0.9  # payroll for DROP participants (LAFPP sepcific)
+
   
-  # EEC(j) (LAFPP sepcific)
-  penSim0$EEC      <- AggLiab_$active[,  "EEC.sum"]
-  penSim0$EEC_DROP <- (AggLiab_$la[, "EEC_DROP.la.sum"] + AggLiab_$ca[, "EEC_DROP.ca.sum"]) * 0.9
-  
-  if(EEC_DROP){penSim0$EEC <- penSim0$EEC + penSim0$EEC_DROP
-               penSim0$PR  <- penSim0$PR + penSim0$PR_DROP}
   
   # nactives, nretirees, nterms
   penSim0$nactives  <- AggLiab_$active[,  "nactives"]
@@ -217,98 +203,44 @@ run_sim <- function(Tier_select_,
   
   
   #*************************************************************************************************************
-  #                                  Adjust Benefit payments for DROP (LAFPP specific) ####
-  #*************************************************************************************************************  
-
-  B.model <- data.frame(year = 2016:2023, B = penSim0$B[1:8]) 
-  B.model$B
-  
-  B.GASB <- data.frame(year = 2016:2023,
-                       B    = 1e6*c(#970,
-                                    1104,
-                                    1050,
-                                    1149,
-                                    1267,
-                                    1212,
-                                    1283,
-                                    1350,
-                                    1416))
-  
-  # restriction 1: PVFB for 2016-2023
-  R1.PVFB <- sum(B.model$B / (1 + i)^(2016:2023 - 2016))
-  
-  # restriction 2: Schedule of payments from GASB projection
-  R2.GASB_scale <- B.GASB$B/B.GASB$B[1]
-  
-  # Adjustment factor
-  adj.factor <- R1.PVFB/sum(R2.GASB_scale / (1 + i)^(2016:2023 - 2016))
-  
-  # Adjusted Benefits
-  B.adj <-  data.frame(year = 2016:2023, 
-                       B.adj1 = R2.GASB_scale* adj.factor)
-  
-  # Extra benefits: approximate DROP balance accumulated before 2016
-  
-  B.adj %<>% mutate(B.extra = 0, B.extra.balance = 0) 
-  B.adj$B.extra.balance[1] <- 239562356 + 282080479 # DROP balance as of 6/30/2016 CAFR2016 pdf p37  # 1369*3*6132*12
-  for(z in 1:5){
-    
-    if(z == 1){B.adj$B.extra[z] <- 105000000
-     } else {
-      B.adj$B.extra[z] <-  B.adj$B.extra.balance[z] / (5 - z + 1)} 
-    
-    if(z != nrow(B.adj)) B.adj$B.extra.balance[z + 1] <-  (B.adj$B.extra.balance[z] - B.adj$B.extra[z]) * 1.05
-  }
-  
-  B.adj %<>% mutate(#B.extra = ifelse(year - 2015 < 5, B.extra/5, 0),
-                    B.adj2  = B.adj1 + B.extra)
-  
-  #if(Adj.benDROP) penSim0$B[1:9] <- B.adj$B.adj2
-  
-  penSim0$B.extra <- c(B.adj$B.extra, rep(0, nyear - nrow(B.adj)))
-  penSim0$AL.initDROP <- order_by(-seq_len(nyear), cumsum(penSim0$B.extra/(1 + i)^(seq_len(nyear) - 1))) 
-  
-  
-  
-  #*************************************************************************************************************
   #                                  Setting up initial amortization payments ####
   #*************************************************************************************************************  
   # matrix representation of amortization: better visualization but larger size
-  m.max <- max(init_amort_raw_$year.remaining)
+  m.max <- m # max(init_amort_raw_$year.remaining)
   SC_amort0 <- matrix(0, nyear + m.max, nyear + m.max)
   # SC_amort0
   # data frame representation of amortization: much smaller size, can be used in real model later.
   # SC_amort <- expand.grid(year = 1:(nyear + m), start = 1:(nyear + m))
   
-  # Amortization payment amounts for all prior years. 
-  SC_amort.init <- matrix(0, nrow(init_amort_raw_), nyear + m.max)
-  
-  
-  # Adjustment factor for initial amortization payments (LAFPP specific)
-    # Factor is defined as the initial model UAAL as a proportion of UAAL in AV2016.
-    # CAUTION: the following formula only works when init_AA =  AL_pct, which is the case for LAFPP
-  
-  # factor.initAmort <- penSim0$AL[1]/ 18337507075
-    factor.initAmort <- (penSim0$AL[1] + penSim0$AL.initDROP[1])/ 18798510534
-    #factor.initAmort <-   18808249455 / 18798510534
-    
-  
-  if(useAVamort){
-    SC_amort.init.list <- mapply(amort_LG, p = init_amort_raw_$balance * factor.initAmort , m = init_amort_raw_$year.remaining, method = init_amort_raw_$amort.method,
-                                 MoreArgs = list(i = i, g = salgrowth_amort, end = FALSE), SIMPLIFY = F)
-    
-    for(j in 1:nrow(SC_amort.init)){
-      SC_amort.init[j, 1:init_amort_raw_$year.remaining[j]] <- SC_amort.init.list[[j]]
-    }
-  }
-  
-  #17085208040/18337507075
-  
-  nrow.initAmort <- nrow(SC_amort.init)
-  
-  SC_amort0 <- rbind(SC_amort.init, SC_amort0)
-  # The amortization basis of year j should be placed in row nrow.initAmort + j - 1. 
-  # save(SC_amort0, file = "SC_amort0.RData")  
+  # # Amortization payment amounts for all prior years. 
+  # SC_amort.init <- matrix(0, nrow(init_amort_raw_), nyear + m.max)
+  # 
+  # 
+  # # Adjustment factor for initial amortization payments (LAFPP specific)
+  #   # Factor is defined as the initial model UAAL as a proportion of UAAL in AV2016.
+  #   # CAUTION: the following formula only works when init_AA =  AL_pct, which is the case for LAFPP
+  # 
+  # # factor.initAmort <- penSim0$AL[1]/ 18337507075
+  #   factor.initAmort <- (penSim0$AL[1] + penSim0$AL.initDROP[1])/ 18798510534
+  #   #factor.initAmort <-   18808249455 / 18798510534
+  #   
+  # 
+  # if(useAVamort){
+  #   SC_amort.init.list <- mapply(amort_LG, p = init_amort_raw_$balance * factor.initAmort , m = init_amort_raw_$year.remaining, method = init_amort_raw_$amort.method,
+  #                                MoreArgs = list(i = i, g = salgrowth_amort, end = FALSE), SIMPLIFY = F)
+  #   
+  #   for(j in 1:nrow(SC_amort.init)){
+  #     SC_amort.init[j, 1:init_amort_raw_$year.remaining[j]] <- SC_amort.init.list[[j]]
+  #   }
+  # }
+  # 
+  # #17085208040/18337507075
+  # 
+  nrow.initAmort <- 0
+
+  # SC_amort0 <- rbind(SC_amort.init, SC_amort0)
+  # # The amortization basis of year j should be placed in row nrow.initAmort + j - 1. 
+  # # save(SC_amort0, file = "SC_amort0.RData")  
   
   #*************************************************************************************************************
   #                                       Simuation  ####
@@ -325,12 +257,6 @@ run_sim <- function(Tier_select_,
     SC_amort <- SC_amort0
     
     if(k == -1) SC_amort[,] <- 0
-    
-    # if(Tier_select_ != "t7" & Adj.benDROP & k!= -1) penSim$B[1:9] <- B.adj$B.adj2  # Adjust benefit payments for DROP
-    if(Tier_select_ != "t7" & Adj.benDROP & k!= -1){
-      penSim$B[1:5] <- penSim$B[1:5] + B.adj$B.extra[1:5]  # Adjust benefit payments for DROP
-      penSim$AL     <- penSim$AL + penSim$AL.initDROP
-    }
     
     penSim[["i.r"]] <- i.r_[, as.character(k)]
     
@@ -423,10 +349,10 @@ run_sim <- function(Tier_select_,
       # # Amortize LG(j)
     
       #if(j > 1){ 
-      if(j > ifelse(useAVamort, 1, 0)){ 
-        # if useAVamort is TRUE, AV amort will be used for j = 1, not the one calcuated from the model. This may cause inconsistency in the model results 
-        if(amort_type == "closed") SC_amort[nrow.initAmort + j - 1, j:(j + m - 1)] <- amort_LG(penSim$Amort_basis[j], i, m, salgrowth_amort, end = FALSE, method = amort_method)  
-        }
+      # if(j > ifelse(useAVamort, 1, 0)){ 
+      #   # if useAVamort is TRUE, AV amort will be used for j = 1, not the one calcuated from the model. This may cause inconsistency in the model results 
+      #   if(amort_type == "closed") SC_amort[nrow.initAmort + j - 1, j:(j + m - 1)] <- amort_LG(penSim$Amort_basis[j], i, m, salgrowth_amort, end = FALSE, method = amort_method)  
+      #   }
       
       # Supplemental cost in j
       penSim$SC[j] <- switch(amort_type,
@@ -437,8 +363,8 @@ run_sim <- function(Tier_select_,
       
       
       # Employee contribution, based on payroll. May be adjusted later. 
-      # penSim$EEC[j] <- with(penSim, PR[j] * EEC_rate)
-      # penSim$EEC[j] <- with(penSim, EEC[j])
+      penSim$EEC[j] <- with(penSim, PR[j] * EEC_rate)
+      #penSim$EEC[j] <- with(penSim, EEC[j])
       
       
       # ADC(j)
@@ -478,33 +404,11 @@ run_sim <- function(Tier_select_,
                               ADC_cap = with(penSim, min(ADC.ER[j], PR_pct_cap * PR[j])), # ADC with cap. Cap is a percent of payroll 
                               Fixed   = with(penSim, PR_pct_fixed * PR[j])                # Fixed percent of payroll
       ) 
-      
-      # if(j %in% plan_contributions$year) {
-      #   penSim$ERC[j] <- as.numeric(plan_contributions[j == plan_contributions$year, "pct_ADC"]) * penSim$ERC[j]
-      # }
-      
-      
+    
       
       # C(j)
       penSim$C[j] <- with(penSim, EEC[j] + ERC[j])
       
-      
-      
-      
-      # ERC cap for LAFPP (all tiers)
-      
-      # The ERC cap is determined by the smaller one of:
-      # 13% of the total payroll. 
-      # 50% of the total normal cost. (we interpret the "total cost of retirement benefits" as the the total normal cost.)
-      # When the limit is triggered, the EEC is calculated as the total ADC minus the capped ERC. 
-      
-      if(ERC_cap_C50) penSim$ERC_cap[j] <- min(0.13 * penSim$PR[j], 0.5 * max(0, penSim$NC[j] + penSim$SC[j])) else
-                      penSim$ERC_cap[j] <- 0.13 * penSim$PR[j]
-      
-      if(ERC_cap.initiatives.allTiers){
-        penSim$ERC[j] <- with(penSim, ifelse(ERC[j] > ERC_cap[j], ERC_cap[j], ERC[j]))
-        penSim$EEC[j] <- with(penSim, C[j] - ERC[j])
-      }
       
       
       # C(j) - ADC(j)
