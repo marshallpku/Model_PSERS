@@ -394,14 +394,14 @@ df_all.stch <- penSim_results.sumTiers  %>%
 
 
 df_all.stch %<>%   
-  select(runname, sim, year, AL, MA, EEC, PR, ERC_PR) %>% 
+  select(runname, sim, year, AL, MA, EEC, PR, ERC.final_PR) %>% 
   group_by(runname, sim) %>% 
   mutate(FR_MA     = 100 * MA / AL,
          FR40less  = cumany(FR_MA <= 40),
          FR100more  = cumany(FR_MA >= 100),
          FR100more2 = FR_MA >= 100,
-         ERC_high  = cumany(ERC_PR >= 40), 
-         ERC_hike  = cumany(na2zero(ERC_PR - lag(ERC_PR, 5) >= 10))) %>% 
+         ERC_high  = cumany(ERC.final_PR >= 40), 
+         ERC_hike  = cumany(na2zero(ERC.final_PR - lag(ERC.final_PR, 5) >= 10))) %>% 
   group_by(runname, year) %>% 
   summarize(FR40less = 100 * sum(FR40less, na.rm = T)/n(),
             FR100more = 100 * sum(FR100more, na.rm = T)/n(),
@@ -415,11 +415,11 @@ df_all.stch %<>%
             FR.q75   = quantile(FR_MA, 0.75, na.rm = T),
             FR.q90   = quantile(FR_MA, 0.9, na.rm = T),
             
-            ERC_PR.q10 = quantile(ERC_PR, 0.1, na.rm = T),
-            ERC_PR.q25 = quantile(ERC_PR, 0.25, na.rm = T),
-            ERC_PR.q50 = quantile(ERC_PR, 0.5, na.rm = T),
-            ERC_PR.q75 = quantile(ERC_PR, 0.75, na.rm = T),
-            ERC_PR.q90 = quantile(ERC_PR, 0.9, na.rm = T)
+            ERC_PR.q10 = quantile(ERC.final_PR, 0.1, na.rm = T),
+            ERC_PR.q25 = quantile(ERC.final_PR, 0.25, na.rm = T),
+            ERC_PR.q50 = quantile(ERC.final_PR, 0.5, na.rm = T),
+            ERC_PR.q75 = quantile(ERC.final_PR, 0.75, na.rm = T),
+            ERC_PR.q90 = quantile(ERC.final_PR, 0.9, na.rm = T)
             
             
   ) %>% 

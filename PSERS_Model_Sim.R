@@ -177,6 +177,10 @@ run_sim <- function(Tier_select_,
     penSim0$SharedRiskEval <- ((seq_len(nyear) + init.year - 1) - 2016) %% 3 == 0  # TRUE in the year to determine if the EEC rate should be changed
 
     penSim0$i.r_geoReturn <- rep(0, nyear) # placeholder 
+    
+    penSim0$ERC.final <- rep(0, nyear)
+    
+    
         
   }
   
@@ -517,9 +521,25 @@ run_sim <- function(Tier_select_,
                               Fixed   = with(penSim, PR_pct_fixed * PR[j])                # Fixed percent of payroll
       ) 
     
+
+      #**************************************************************************************************************
+      #                                        PSERS: ERC cap 
+      #**************************************************************************************************************
+      # For fiscal years ending on or after June 30, 2014, the pension contribution rate can be no more than 4.5% of the total conpensation of all active members, 
+      # greater than the prior year's final contribution rate. 
+      
+      if(useERC_cap){
+        if(j == 1){
+          penSim$ERC.final[j] <- penSim$ERC[j]
+        } else {
+          penSim$ERC.final[j] <- min(penSim$ERC.final[j - 1] + 0.045, penSim$ERC[j])  
+          }
+        
+      } else penSim$ERC.final[j] <- penSim$ERC[j]
+      
       
       # C(j)
-      penSim$C[j] <- with(penSim, EEC[j] + ERC[j])
+      penSim$C[j] <- with(penSim, EEC[j] + ERC.final[j])
       
       
       
@@ -580,7 +600,8 @@ run_sim <- function(Tier_select_,
            NC.laca_PR    = 100 * NC.laca / PR,
            NC.v_PR   = 100 * NC.v / PR,
            SC_PR   = 100 * SC / PR, 
-           ERC_PR  = 100 * ERC / PR, 
+           ERC_PR  = 100 * ERC / PR,
+           ERC.final_PR = 100 * ERC.final / PR,
            EEC_PR  = 100 * EEC / PR, 
            C_PR    = 100 * C / PR,
            B_PR    = 100 * B / PR,
