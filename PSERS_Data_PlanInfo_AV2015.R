@@ -132,6 +132,35 @@ row.names(tier.param) <- tier.param$tier
 
 tier.param
 
+
+
+#*********************************************************************************************************
+#                      ## Initial Amortization Basis  ####
+#*********************************************************************************************************
+
+init_amort_raw <- read_ExcelRange(file_planInfo, sheet = "Init_amort", colTypes="character")
+
+init_amort_raw %<>% 
+  mutate_at(vars(-tier, -type, -amort.method), funs(as.numeric))
+
+#init_amort_raw %>% str
+#init_amort_raw
+
+# amort_cp(18104409000, 0.075, 20, 0.0214)
+# amort_cp(618361000,  0.075,  21, 0.0214)
+
+x <- mapply(amort_cp, p = init_amort_raw$balance, m = init_amort_raw$year.remaining,
+       MoreArgs = list(i = 0.075, g = 0.0213))
+
+pay1 <- numeric(length(x))
+for (i in 1:length(pay1)) pay1[i] <- x[[i]][1]
+
+data.frame(pay1.AV = init_amort_raw$annual.payment,
+           pay1.calc = pay1) %>%
+  mutate(diff.pct = 100*pay1.calc/pay1.AV - 100)
+
+
+
 #*********************************************************************************************************
 #                      ## Initial unrecognized return  ####
 #*********************************************************************************************************

@@ -7,7 +7,7 @@ run_sim <- function(Tier_select_,
                     PR.Tiers_ = PR.Tiers,
                     i.r_ = i.r,
                     i.r_geoReturn_ = i.r_geoReturn,
-                    # init_amort_raw_ = init_amort_raw, # amount.annual, year.remaining 
+                    init_amort_raw_ = init_amort_raw, # amount.annual, year.remaining 
                     init_unrecReturns.unadj_ = init_unrecReturns.unadj,
                     paramlist_ = paramlist,
                     Global_paramlist_ = Global_paramlist){
@@ -18,7 +18,7 @@ run_sim <- function(Tier_select_,
       # i.r_geoReturn_ = i.r_geoReturn
       # AggLiab_        = AggLiab
       # PR.Tiers_ = PR.Tiers
-      # # init_amort_raw_ = init_amort_raw
+      # init_amort_raw_ = init_amort_raw
       # init_unrecReturns.unadj_ = init_unrecReturns.unadj
       # paramlist_      = paramlist
       # Global_paramlist_ = Global_paramlist
@@ -28,6 +28,7 @@ run_sim <- function(Tier_select_,
      # PR.Tiers_ = PR.Tiers
      # AggLiab_        = AggLiab.sumTiers
      # i.r_geoReturn_ = i.r_geoReturn
+     # init_amort_raw_ = init_amort_raw
      # init_unrecReturns.unadj_ = init_unrecReturns.unadj
      # paramlist_      = paramlist
      # Global_paramlist_ = Global_paramlist
@@ -248,40 +249,55 @@ run_sim <- function(Tier_select_,
   #*************************************************************************************************************
   #                                  Setting up initial amortization payments ####
   #*************************************************************************************************************  
+  
   # matrix representation of amortization: better visualization but larger size
-  m.max <- m # max(init_amort_raw_$year.remaining)
+  m.max <- max(init_amort_raw_$year.remaining, m)
   SC_amort0 <- matrix(0, nyear + m.max, nyear + m.max)
   # SC_amort0
+  
   # data frame representation of amortization: much smaller size, can be used in real model later.
   # SC_amort <- expand.grid(year = 1:(nyear + m), start = 1:(nyear + m))
   
-  # # Amortization payment amounts for all prior years. 
-  # SC_amort.init <- matrix(0, nrow(init_amort_raw_), nyear + m.max)
-  # 
-  # 
-  # # Adjustment factor for initial amortization payments (LAFPP specific)
-  #   # Factor is defined as the initial model UAAL as a proportion of UAAL in AV2016.
-  #   # CAUTION: the following formula only works when init_AA =  AL_pct, which is the case for LAFPP
-  # 
-  # # factor.initAmort <- penSim0$AL[1]/ 18337507075
-  #   factor.initAmort <- (penSim0$AL[1] + penSim0$AL.initDROP[1])/ 18798510534
-  #   #factor.initAmort <-   18808249455 / 18798510534
-  #   
-  # 
-  # if(useAVamort){
-  #   SC_amort.init.list <- mapply(amort_LG, p = init_amort_raw_$balance * factor.initAmort , m = init_amort_raw_$year.remaining, method = init_amort_raw_$amort.method,
-  #                                MoreArgs = list(i = i, g = salgrowth_amort, end = FALSE), SIMPLIFY = F)
-  #   
-  #   for(j in 1:nrow(SC_amort.init)){
-  #     SC_amort.init[j, 1:init_amort_raw_$year.remaining[j]] <- SC_amort.init.list[[j]]
-  #   }
-  # }
-  # 
-  # #17085208040/18337507075
-  # 
-  nrow.initAmort <- 0
+  # Amortization payment amounts for all prior years. 
+   SC_amort.init <- matrix(0, nrow(init_amort_raw_), nyear + m.max)
+ 
+  # Adjustment factor for initial amortization payments (PSERS specific)
+      # Factor is defined as the initial model UAAL as a proportion of UAAL in AV2015.
+      # WARNING: Does not work with "method 2" for AA. 
+   
+   MA.year1 <- switch(init_MA, 
+                        MA = MA_0,                         # Use preset value
+                        AL = penSim0$AL[1],                # Assume inital fund equals inital liability.
+                        AL_pct = penSim0$AL[1] * MA_0_pct) # Inital MA is a proportion of inital AL
+   
+   AA.year1  <- ifelse(init_AA == "AL_pct",         penSim0$AL[1] * AA_0_pct, # Initial AA as a % of initial AL
+                           ifelse(init_AA == "AA0", AA_0,                     # preset value of AA
+                                                    with(penSim0, MA.year1))  # # Assume inital AA equals inital liability.
+   )
+                                  
+   AL.year1 <- penSim0$AL[1]
+   UAAL.year1 <- AL.year1 - AA.year1
+   
+   factor.initAmort <- UAAL.year1/ 35121184000 # AV2015 page93
 
-  # SC_amort0 <- rbind(SC_amort.init, SC_amort0)
+   
+        
+   
+  if(useAVamort){
+    SC_amort.init.list <- mapply(amort_LG, p = init_amort_raw_$balance * factor.initAmort , m = init_amort_raw_$year.remaining, method = init_amort_raw_$amort.method,
+                                 MoreArgs = list(i = i, g = salgrowth_amort, end = FALSE), SIMPLIFY = F)
+
+    for(j in 1:nrow(SC_amort.init)){
+      SC_amort.init[j, 1:init_amort_raw_$year.remaining[j]] <- SC_amort.init.list[[j]]
+    }
+  }
+
+  # SC_amort.init
+   
+   
+  nrow.initAmort <- nrow(SC_amort.init)
+
+  SC_amort0 <- rbind(SC_amort.init, SC_amort0)
   # # The amortization basis of year j should be placed in row nrow.initAmort + j - 1. 
   # # save(SC_amort0, file = "SC_amort0.RData")  
   
@@ -393,11 +409,12 @@ run_sim <- function(Tier_select_,
       
       # # Amortize LG(j)
     
-      #if(j > 1){ 
-      # if(j > ifelse(useAVamort, 1, 0)){ 
-      #   # if useAVamort is TRUE, AV amort will be used for j = 1, not the one calcuated from the model. This may cause inconsistency in the model results 
-      #   if(amort_type == "closed") SC_amort[nrow.initAmort + j - 1, j:(j + m - 1)] <- amort_LG(penSim$Amort_basis[j], i, m, salgrowth_amort, end = FALSE, method = amort_method)  
-      #   }
+      if(j > 1){
+      if(j > ifelse(useAVamort, 1, 0)){
+        # if useAVamort is TRUE, AV amort will be used for j = 1, not the one calcuated from the model. This may cause inconsistency in the model results
+        if(amort_type == "closed") SC_amort[nrow.initAmort + j - 1, j:(j + m - 1)] <- amort_LG(penSim$Amort_basis[j], i, m, salgrowth_amort, end = FALSE, method = amort_method)
+        }
+      }
       
       # Supplemental cost in j
       penSim$SC[j] <- switch(amort_type,

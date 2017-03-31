@@ -353,7 +353,7 @@ outputs_list <- list(paramlist = paramlist,
 
 
 
-var_display1 <- c("sim", "year", "FR_MA", "MA", "AL", 
+var_display1 <- c("sim", "year", "FR", "MA", "AL", 
                   "AL.act", "AL.disb.la", "AL.act.disb", "AL.act.death", "AL.act.v", "AL.la", "AL.ca", "AL.term", "PVFB", "B",
                   # "AL.disb.la", "AL.disb.ca", "AL.death", "PVFB",
                   #"PVFB.laca", "PVFB.LSC", "PVFB.v", "PVFB", 
