@@ -169,7 +169,7 @@ i.r <- gen_returns()
 
 i.r_supplement <-  
   cbind(rep(paramlist$i, 4),
-        matrix(c(0.0343, 0.0796, 0.01491, 0.08), 4, Global_paramlist$nsim + 1))
+        matrix(c(0.0343, 0.0796, 0.01491, 0.0304), 4, Global_paramlist$nsim + 1))
 
 i.r_geoReturn <- rbind(i.r_supplement, i.r) %>% 
   as.data.frame %>% 

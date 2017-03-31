@@ -144,7 +144,7 @@ for(runName in runList$runname ){
 
  # Funding policy 
   paramlist$smooth_method <- "method1"
-  paramlist$salgrowth_amort <- 0.055
+  paramlist$salgrowth_amort <- 0.035
   #paramlist$amort_type <- "open"
   
   paramlist$s.lower <- -Inf # No corridor for AA
@@ -157,8 +157,8 @@ for(runName in runList$runname ){
   
  # Economic assumption
   paramlist$infl <- 0.03
-  paramlist$prod <- 0.008
-  paramlist$startingSal_growth <- 0.038
+  paramlist$prod <- 0.01
+  paramlist$startingSal_growth <- 0.04
 
   
  # Demographic
