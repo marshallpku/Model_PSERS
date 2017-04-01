@@ -15,7 +15,7 @@ load("Data_inputs/PSERS_PlanInfo_AV2015.RData")    # for all tiers
 load("Data_inputs/PSERS_MemberData_AV2015.RData")  # for all tiers
 
 
-pct.init.ret.la <-  1
+pct.init.ret.la <-  0.75
 pct.init.ret.ca  <- 1 - pct.init.ret.la
 
 pct.init.disb.la <-  1
@@ -113,7 +113,7 @@ source("PSERS_Model_ContingentAnnuity.R")
 liab.ca <- get_contingentAnnuity(Tier_select, 
                                  tier.param[Tier_select, "factor.ca"],
                                  min(paramlist$range_age.r):100, 
-                                 apply_reduction = FALSE)
+                                 apply_reduction = TRUE)
 
 # For disability benefit
 range_age.disb <-  min(paramlist$range_age):100   # max(paramlist$range_age.r)

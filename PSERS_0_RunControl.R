@@ -165,8 +165,8 @@ for(runName in runList$runname ){
   paramlist$Grouping    <- "fillin"
   paramlist$newEnt_byTier <- c(tCD = 0, tE = 0.85, t3 = 0.15)
 
-  paramlist$pct.ca.M <-  0 # proportion of males who opt for ca upon retirement
-  paramlist$pct.ca.F <-  0 
+  paramlist$pct.ca.M <-  0.25 # proportion of males who opt for ca upon retirement
+  paramlist$pct.ca.F <-  0.25 
  
    
  # Investment returns

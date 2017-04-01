@@ -289,7 +289,7 @@ liab.active %<>%
   mutate(gx.v = ifelse(elig_vest == 1, 1, 0),  # actives become vested after reaching v.yos years of yos
          
          # For PSERS: Vested terms begin to receive benefit 1 year after termination. (use the same method as disability benefit.)
-         Bx.v  = gx.v * bfactor * yos * fas, 
+         Bx.v  = gx.v * bfactor * yos * fas * 0.777, 
          
          # This is the benefit level if the employee starts to CLAIM benefit at age x, not internally retire at age x. 
          TCx.v      = qxt * v * lead(Bx.v) *  lead(ax.vben) , # term cost of life annuity at the disability age x (start to claim benefit at age x + 1)

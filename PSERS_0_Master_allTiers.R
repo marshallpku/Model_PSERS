@@ -231,9 +231,9 @@ gc()
 source("PSERS_Model_ContingentAnnuity.R")
 
 range_age.r.ca <- min(paramlist$range_age.r):100
-liab.ca.tCD  <- get_contingentAnnuity("tCD", tier.param["tCD", "factor.ca"], range_age.r.ca, FALSE, decrement.model_ = decrement.model.tCD)
-liab.ca.tE  <- get_contingentAnnuity("tE", tier.param["tE", "factor.ca"], range_age.r.ca, FALSE, decrement.model_ = decrement.model.tE)
-liab.ca.tF  <- get_contingentAnnuity("tF", tier.param["tF", "factor.ca"], range_age.r.ca, FALSE, decrement.model_ = decrement.model.tF)
+liab.ca.tCD  <- get_contingentAnnuity("tCD", tier.param["tCD", "factor.ca"], range_age.r.ca, TRUE, decrement.model_ = decrement.model.tCD)
+liab.ca.tE  <- get_contingentAnnuity("tE", tier.param["tE", "factor.ca"], range_age.r.ca, TRUE, decrement.model_ = decrement.model.tE)
+liab.ca.tF  <- get_contingentAnnuity("tF", tier.param["tF", "factor.ca"], range_age.r.ca, TRUE, decrement.model_ = decrement.model.tF)
 
 
 range_age.disb.ca <-  min(paramlist$range_age): 100 #max(paramlist$range_age.r)
@@ -382,9 +382,9 @@ var_display.cali1 <- c("sim", "year", "FR","FR_MA", "MA", "AA", "AL","UAAL",
                       "UAAL")
 
 var_display.cali2 <- c("sim", "year", 
-                       "AL.act", "AL.disb.la", "AL.term",
+                       "AL.act", "AL.act.v", "AL.la", "AL.ca", "AL.disb.la", "AL.term",
                        "PVFB.laca", "PVFB.disb",  
-                       "B.la", "B.ca", "B.disb.la","B.disb.ca", 
+                       "B.la", "B.ca", "B.disb.la",   #  "B.disb.ca", 
                        "PR", "nactives", "nla")
 
 
