@@ -282,7 +282,7 @@ run_sim <- function(Tier_select_,
    AL.year1 <- penSim0$AL[1]
    UAAL.year1 <- AL.year1 - AA.year1
    
-   factor.initAmort <- UAAL.year1/ 35121184000 # AV2015 page93
+   factor.initAmort <- UAAL.year1/ 37335764000 # AV2016 page91
 
    
         
@@ -527,20 +527,28 @@ run_sim <- function(Tier_select_,
       #**************************************************************************************************************
       # For fiscal years ending on or after June 30, 2014, the pension contribution rate can be no more than 4.5% of the total conpensation of all active members, 
       # greater than the prior year's final contribution rate. 
+      # 
       
-      if(useERC_cap){
+      if(useERC_cap & k!= -1 ){
+        
         if(j == 1){
           penSim$ERC.final[j] <- penSim$ERC[j]
         } else {
-          penSim$ERC.final[j] <- min(penSim$ERC.final[j - 1] + 0.045, penSim$ERC[j])  
+          # Constraint 1: ERC.final as a % of payroll year in j+1 cannot be greater than the rate + 4.5% in year j
+          penSim$ERC.final[j] <- min(penSim$ERC.final[j - 1] + 0.045, penSim$ERC[j])
+          # Constraint 2: If contraint 1 is not triggered, then ERC.final should be at least as much as the employee NC rate (total NC - ERC).
+          if(useERC_floor) penSim$ERC.final[j] <- ifelse(penSim$ERC.final[j] == penSim$ERC[j],    
+                                                         max(penSim$ERC.final[j], penSim$NC[j] - penSim$EEC[j]),
+                                                         penSim$ERC.final[j])
           }
         
       } else penSim$ERC.final[j] <- penSim$ERC[j]
       
+      if(useERC_floor & k!= -1) penSim$ERC.final[j] <- max(penSim$ERC.final[j], penSim$NC[j] - penSim$EEC[j]  )
+      
       
       # C(j)
       penSim$C[j] <- with(penSim, EEC[j] + ERC.final[j])
-      
       
       
       # C(j) - ADC(j)

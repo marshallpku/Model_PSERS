@@ -353,6 +353,8 @@ outputs_list <- list(paramlist = paramlist,
 
 
 
+penSim_results.sumTiers %<>% mutate() 
+
 var_display1 <- c("sim", "year", "FR", "MA", "AL", 
                   "AL.act", "AL.disb.la", "AL.act.disb", "AL.act.death", "AL.act.v", "AL.la", "AL.ca", "AL.term", "PVFB", "B",
                   # "AL.disb.la", "AL.disb.ca", "AL.death", "PVFB",
@@ -360,30 +362,40 @@ var_display1 <- c("sim", "year", "FR", "MA", "AL",
                   # "B", "B.la", "B.ca", "B.v", "B.disb.la","B.disb.ca", 
                   "PR", "NC_PR","SC_PR")
 
+
+
 var_display2 <- c("Tier", "sim", "year", "FR_MA", "MA", "AL", "EEC","ERC","ERC_PR","B", "B.v", "SC", "C", 
                   "nactives", "nretirees", "nla", "n.ca.R1", "n.ca.R0S1", "nterms", 
                   "ndisb.la", "ndisb.ca.R1", "ndisb.ca.R0S1" )
 
 
-var_display.cali <- c("runname", "sim", "year", "FR","FR_MA", "MA", "AA", "AL", 
-                      # "AL.act", "AL.disb.la", "AL.term",
-                      # "PVFB", 
-                      "B", # "B.la", "B.ca", "B.disb.la","B.disb.ca", 
-                      # "C",   
-                      "NC","SC", "ERC", "EEC",
-                      "PR", "nactives", "nla",
-                      "NC_PR", "SC_PR", #  "ERC_PR",
+
+var_display.cali1 <- c("sim", "year", "FR","FR_MA", "MA", "AA", "AL","UAAL", 
+                       "PVFB", "AL.act",
+                     
+                      "NC","SC", "ERC", "ERC.final", "EEC",
+                      "PR",
+                      #"NC","SC",
+                      "NC_PR", "SC_PR", 
+                      "EEC_PR",
+                      "B",
                       "UAAL")
 
+var_display.cali2 <- c("sim", "year", 
+                       "AL.act", "AL.disb.la", "AL.term",
+                       "PVFB.laca", "PVFB.disb",  
+                       "B.la", "B.ca", "B.disb.la","B.disb.ca", 
+                       "PR", "nactives", "nla")
 
-kable(penSim_results.sumTiers %>% filter(sim == -1) %>% select(one_of(var_display.cali)), digits = 2) %>%  print 
-kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display.cali)), digits = 2) %>% print 
+
+kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display.cali1)), digits = 2) %>% print 
+kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display.cali2)), digits = 2) %>% print 
 
 
 kable(penSim_results.sumTiers %>% filter(sim == -1) %>% select(one_of(var_display1)), digits = 2) %>% print 
 kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display1)), digits = 2) %>% print 
 
-
+4106905621
 
 #*********************************************************************************************************
 #   8. Showing risk measures ####
