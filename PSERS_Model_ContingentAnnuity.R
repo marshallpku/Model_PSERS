@@ -166,13 +166,7 @@ get_liab.ben <- function(gender.R,
       # For each age, this is the sum of all future individual survivor liability weighed by the discount factor and 
       # the prob of the contingent annuity starting from that year. 
       
-      liab.ret.indiv.ca = get_surv.liab(pRxm.R, qxm.R, pxm.S, i_, liab.ben.indiv), # "ca" for contingent annuity
-      
-      
-      # LAFPP specific: DROP contribution 
-        # Contribution for $1 salary at retirement age. (age of participating DROP)
-      EEC_DROP.ca = ifelse(age - age.r < 5, 1.0475^(age - age.r) * EEC.rate, 0),
-      sx_DROP.ca = ifelse(age - age.r < 5, 1.0475^(age - age.r), 0)
+      liab.ret.indiv.ca = get_surv.liab(pRxm.R, qxm.R, pxm.S, i_, liab.ben.indiv) # "ca" for contingent annuity
       
       
     ) %>% 
@@ -226,7 +220,7 @@ get_liab.ben <- function(gender.R,
   ## Aggregate liability and benefit payment  ##
   
   df %<>% select(age.r,age, age.S, B.la, liab.ret.indiv.la, liab.ret.indiv.ca, liab.ben.indiv,
-                 n.R1S1, n.R1S0, n.R0S1, EEC_DROP.ca, sx_DROP.ca) %>% 
+                 n.R1S1, n.R1S0, n.R0S1) %>% 
     group_by(age.r) %>% 
     mutate(
       B.R1.sum   = (n.R1S1 + n.R1S0) * B.la,       # total annuity payment for retirees.
@@ -243,11 +237,7 @@ get_liab.ben <- function(gender.R,
       
       MA      = ifelse(age == min(age), liab.ca.sum, 0),
       B_R     = liab.R0S1.sum / (liab.R1S1.sum + liab.R1S0.sum),
-      B.S_B.R = B.R0S1.sum / B.R1.sum,
-      
-      # LAFPP specific: DROP contribution
-      EEC_DROP.ca.sum = EEC_DROP.ca * (n.R1S0 + n.R1S1),
-      sx_DROP.ca.sum  = sx_DROP.ca * (n.R1S0 + n.R1S1)
+      B.S_B.R = B.R0S1.sum / B.R1.sum
       )
   
   
@@ -315,17 +305,14 @@ pct.M.actives <- pct.male
 df.all <-   select(df.M, age.r, age, 
                    B.ca.sum.M = B.ca.sum, B.R1.sum.M = B.R1.sum, B.R0S1.sum.M = B.R0S1.sum, 
                    liab.ca.sum.M = liab.ca.sum, liab.R1S1.sum.M = liab.R1S1.sum, liab.R1S0.sum.M = liab.R1S0.sum, liab.R0S1.sum.M = liab.R0S1.sum,
-                   n.R1S1.M = n.R1S1, n.R1S0.M = n.R1S0, n.R0S1.M = n.R0S1,
-                   EEC_DROP.ca.sum.M = EEC_DROP.ca.sum,
-                   sx_DROP.ca.sum.M = sx_DROP.ca.sum) %>%  # LAFPP DROP
+                   n.R1S1.M = n.R1S1, n.R1S0.M = n.R1S0, n.R0S1.M = n.R0S1) %>% 
   
   left_join(select(df.F, age.r, age, 
                    B.ca.sum.F = B.ca.sum, B.R1.sum.F = B.R1.sum, B.R0S1.sum.F = B.R0S1.sum, 
                    liab.ca.sum.F = liab.ca.sum, liab.R1S1.sum.F = liab.R1S1.sum, liab.R1S0.sum.F = liab.R1S0.sum, liab.R0S1.sum.F = liab.R0S1.sum,
-                   n.R1S1.F = n.R1S1, n.R1S0.F = n.R1S0, n.R0S1.F = n.R0S1,
-                   EEC_DROP.ca.sum.F = EEC_DROP.ca.sum,
-                   sx_DROP.ca.sum.F = sx_DROP.ca.sum)) %>% #LAFPP DROP
-  mutate( # ".1" indicates that the values are for 1 initial individual with $1 of initial benefit.  
+                   n.R1S1.F = n.R1S1, n.R1S0.F = n.R1S0, n.R0S1.F = n.R0S1)) %>% 
+  mutate( 
+    # ".1" indicates that the values are for 1 initial individual with $1 of initial benefit.  
     liab.ca.sum.1   = pct.F.actives * liab.ca.sum.F   + pct.M.actives * liab.ca.sum.M,
     liab.R1S1.sum.1 = pct.F.actives * liab.R1S1.sum.F + pct.M.actives * liab.R1S1.sum.M,
     liab.R1S0.sum.1 = pct.F.actives * liab.R1S0.sum.F + pct.M.actives * liab.R1S0.sum.M,
@@ -338,11 +325,7 @@ df.all <-   select(df.M, age.r, age,
     n.R1S1.1   = pct.F.actives * n.R1S1.F + pct.M.actives * n.R1S1.M,
     n.R1S0.1   = pct.F.actives * n.R1S0.F + pct.M.actives * n.R1S0.M,
     n.R0S1.1   = pct.F.actives * n.R0S1.F + pct.M.actives * n.R0S1.M,
-    n.ca.1     = n.R1S1.1 + n.R1S0.1 + n.R0S1.1,
-    
-    # LAFPP DROP
-    EEC_DROP.ca.sum.1 = pct.F.actives * EEC_DROP.ca.sum.F + pct.M.actives * EEC_DROP.ca.sum.M,
-    sx_DROP.ca.sum.1  = pct.F.actives * sx_DROP.ca.sum.F + pct.M.actives * sx_DROP.ca.sum.M
+    n.ca.1     = n.R1S1.1 + n.R1S0.1 + n.R0S1.1
   )
 
 df.all
@@ -370,9 +353,7 @@ df.all
 
 liab.ca <- df.all %>% select(age.r, age, liab.ca.sum.1, liab.R1S1.sum.1, liab.R1S0.sum.1, liab.R0S1.sum.1,
                                          B.ca.sum.1, B.R1.sum.1, B.R0S1.sum.1,
-                                         n.R1S1.1, n.R1S0.1, n.R0S1.1, n.ca.1,
-                                         EEC_DROP.ca.sum.1,
-                                         sx_DROP.ca.sum.1) # LAFPP DROP
+                                         n.R1S1.1, n.R1S0.1, n.R0S1.1, n.ca.1)
 }
 
 

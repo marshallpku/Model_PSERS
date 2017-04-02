@@ -441,7 +441,7 @@ run_sim <- function(Tier_select_,
                                                    ifelse(penSim$i.r_geoReturn[j - 1] < (i - 0.01), penSim$sharedRisk.rate[j - 1] + 0.005, 
                                                                                                     penSim$sharedRisk.rate[j - 1]))
             
-            penSim$sharedRisk.rate[j] <- ifelse(            penSim$sharedRisk.rate[j] > 0.02, 0.02,
+            penSim$sharedRisk.rate[j] <- ifelse(            penSim$sharedRisk.rate[j] > SharedRisk_cap, SharedRisk_cap,
                                                     ifelse( penSim$sharedRisk.rate[j] <    0 ,   0,
                                                             penSim$sharedRisk.rate[j])
                                                 )
@@ -476,8 +476,8 @@ run_sim <- function(Tier_select_,
       }
       
       
-
       
+       
       
       #**************************************************************************************************************
       
@@ -535,7 +535,9 @@ run_sim <- function(Tier_select_,
           penSim$ERC.final[j] <- penSim$ERC[j]
         } else {
           # Constraint 1: ERC.final as a % of payroll year in j+1 cannot be greater than the rate + 4.5% in year j
-          penSim$ERC.final[j] <- min(penSim$ERC.final[j - 1] + 0.045, penSim$ERC[j])
+          penSim$ERC.final[j] <- ifelse(penSim$ERC[j]/penSim$PR[j] >= (penSim$ERC.final[j - 1]/penSim$PR[j - 1] + 0.045),
+                                        (penSim$ERC.final[j - 1]/penSim$PR[j - 1] + 0.045) * penSim$PR[j],
+                                        penSim$ERC[j])
           # Constraint 2: If contraint 1 is not triggered, then ERC.final should be at least as much as the employee NC rate (total NC - ERC).
           if(useERC_floor) penSim$ERC.final[j] <- ifelse(penSim$ERC.final[j] == penSim$ERC[j],    
                                                          max(penSim$ERC.final[j], penSim$NC[j] - penSim$EEC[j]),
@@ -545,6 +547,18 @@ run_sim <- function(Tier_select_,
       } else penSim$ERC.final[j] <- penSim$ERC[j]
       
       if(useERC_floor & k!= -1) penSim$ERC.final[j] <- max(penSim$ERC.final[j], penSim$NC[j] - penSim$EEC[j]  )
+      
+      
+      
+      
+      #**************************************************************************************************************
+      #                               PSERS: Limit ERC rate at model year 2015 (FY 2015-2016) to 25%
+      #**************************************************************************************************************
+      
+      if((j + init.year -1) == 2015 & k != -1) penSim$ERC.final[j] <- with(penSim, PR[j] * 0.25)
+      
+      
+      
       
       
       # C(j)
@@ -589,8 +603,9 @@ run_sim <- function(Tier_select_,
   penSim_results <- bind_rows(penSim_results) %>% 
     mutate(sim     = rep(-1:nsim, each = nyear),
            runname = runname,
-           run.returnScn = run.returnScn,
-           run.policyScn = run.policyScn,
+           returnScn = returnScn,
+           policy.SR = policy.SR,
+           policy.EL = policy.EL,
            Tier    = Tier_select_,
            FR      = 100 * AA / exp(log(AL)),
            FR_MA   = 100 * MA / exp(log(AL)),

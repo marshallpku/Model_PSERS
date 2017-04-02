@@ -37,12 +37,15 @@ assign_parmsList(.paramlist,        envir = environment())
 mortality.model <- data.frame(age = range_age) %>% 
   left_join(mortality_PSERS) %>% 
   mutate(qxm.pre = qxm.pre.male  * pct.male + qxm.pre.female  * pct.female,   # mortality for actives
-         qxm.d   = (qxm.d.male    * pct.male + qxm.d.female  * pct.female) * 1,
+         qxm.d   = (qxm.d.male    * pct.male + qxm.d.female  * pct.female),
          
+         # PSERS: expand qxm.d.male/female with qxm.d.male/female
+         qxm.d.male   = ifelse(age < 50, qxm.pre.male,   qxm.d.male),
+         qxm.d.female = ifelse(age < 50, qxm.pre.female, qxm.d.female),
+
          # PSERS: expand qxm.post.male/female with qxm.pre.male/female
          qxm.post.male   = ifelse(age < 50, qxm.pre.male,   qxm.post.male),
          qxm.post.female = ifelse(age < 50, qxm.pre.female, qxm.post.female)
-         
          
          
          # qxm.deathBen = ifelse(age > max(age - 3), 1, lead(qxm.post.female, 3)) * pct.male + 

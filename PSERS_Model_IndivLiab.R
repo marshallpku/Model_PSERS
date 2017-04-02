@@ -24,10 +24,6 @@
  # 2. Benefits for vested terms are currently modeled as life annuity. Later we may want to model it as contingent annuity. 
 
 
-
-
-
-
 get_indivLab <- function(Tier_select_,
                          decrement.model_ = decrement.model,
                          salary_          = salary,
@@ -53,16 +49,16 @@ get_indivLab <- function(Tier_select_,
   # liab.disb.ca_ = liab.disb.ca
   # paramlist_       =  paramlist
   # Global_paramlist_ =  Global_paramlist
-  # 
-  # # Tier_select_ = Tier_select
-  # decrement.model_ = decrement.model.t5
-  # salary_          = salary.t5
-  # benefit_         = benefit.t5
-  # benefit.disb_    = benefit.disb.t5
-  # bfactor_         = bfactor.t5
-  # mortality.post.model_ = mortality.post.model.t5
-  # liab.ca_ = liab.ca.t5
-  # liab.disb.ca_ = liab.disb.ca.t5
+   
+  # Tier_select_ = "tCD"
+  # decrement.model_ = decrement.model.tCD
+  # salary_          = salary.tCD
+  # benefit_         = benefit.tCD
+  # benefit.disb_    = benefit.disb.tCD
+  # #bfactor_         = bfactor.tCD
+  # mortality.post.model_ = mortality.post.model.tCD
+  # liab.ca_ = liab.ca.tCD
+  # liab.disb.ca_ = liab.disb.ca.tCD
   # init_terms_all_  = init_terms_all
   # paramlist_ = paramlist
   # Global_paramlist_ = Global_paramlist
@@ -207,11 +203,21 @@ liab.la <- rbind(
     # To simplified the calculation, it is assmed that all initial retirees entered the workforce at age r.min - 1 and 
     # retiree right in year 1. This assumption will cause the retirement age and yos of some of the retirees not compatible with the eligiblility rules,
     # but this is not an issue since the main goal is to generate the correct cashflow and liablity for the initial retirees/beneficiaries.
-  expand.grid(ea         = min(benefit_$age) - 1,
-              age.r      = benefit_$age, # This ensures that year of retirement is year 1.
-              start.year = init.year - (benefit_$age - (r.min - 1)),
-              age        = range_age[range_age >= min(benefit_$age)]) %>%
-  filter(age >= ea + 1 - start.year),
+  # expand.grid(ea         = min(benefit_$age) - 1,
+  #             age.r      = benefit_$age, # This ensures that year of retirement is year 1.
+  #             start.year = init.year - (benefit_$age - (r.min - 1)),
+  #             age        = range_age[range_age >= min(benefit_$age)]) %>%
+  # filter(age >= ea,
+  #        age >= age.r),
+  
+  expand.grid(
+    age.r      = benefit_$age, # This ensures that year of retirement is year 1.
+    age        = range_age[range_age >= min(benefit_$age)]) %>%
+    mutate(ea         = min(benefit_$age) - 1,
+           start.year = init.year - (age.r - ea)) %>% 
+    filter(# age >= ea,
+           age >= age.r),
+  
 
   # grids for who retire after year 1.
   expand.grid(ea         = range_ea[range_ea < r.max],
@@ -225,7 +231,15 @@ liab.la <- rbind(
            start.year + age - ea     >= init.year + 1) # not really necessary since we already have age >= age.r
 ) %>%
   data.table(key = "start.year,ea,age.r,age")
- 
+
+
+
+
+
+# x <- liab.la %>% mutate(year   = start.year + age - ea, year.r = start.year + age.r - ea) %>% filter(year == 2015, year.r == 2015)
+# x
+# benefit_%>% mutate(year   = start.year + age - ea, year.r = start.year + age.r - ea)
+
 
 liab.la <- liab.la[!duplicated(liab.la %>% select(start.year, ea, age, age.r ))]
  
@@ -601,11 +615,11 @@ liab.disb.la <- rbind(
   # To simplified the calculation, it is assmed that all initial disabled entered the workforce at age min.age and 
   # become disabled in year 1. This assumption will cause the age of disability and yos of some of the disabled not compatible with the eligiblility rules,
   # but this is not an issue since the main goal is to generate the correct cashflow and liablity for the initial disabled.
-  expand.grid(ea         = unique(benefit.disb_$ea),
-              age.disb   = benefit.disb_$age, # This ensures that year of retirement is year 1.
-              start.year = init.year - (benefit.disb_$age - min.age),
+  expand.grid(age.disb   = benefit.disb_$age, # This ensures that year of retirement is year 1.
               age        = range_age) %>%
-    filter(age >= ea + 1 - start.year),
+    mutate(ea            = unique(benefit.disb_$ea),
+           start.year    = init.year - (age.disb - ea)) %>% 
+    filter(age >= age.disb),
   
   # grids for who die after year 1.
   expand.grid(ea           = range_ea[range_ea < r.max],
@@ -619,6 +633,14 @@ liab.disb.la <- rbind(
            start.year + age - ea >= init.year + 1) # not really necessary since we already have age >= age.r
 ) %>%
   data.table(key = "start.year,ea,age.disb,age")
+
+
+# x <- liab.disb.la %>% mutate(year   = start.year + age - ea, year.disb = start.year + age.disb - ea) %>% filter(year == 2015, year.disb == 2015)
+# x
+# benefit.disb_%>% mutate(year   = start.year + age - ea, year.disb = start.year + age.disb - ea)
+
+
+
 
 liab.disb.la <- liab.disb.la[!duplicated(liab.disb.la %>% select(start.year, ea, age, age.disb ))]
 
@@ -652,8 +674,8 @@ liab.disb.la %<>% as.data.frame  %>%
   ) %>% ungroup %>%
   # select(start.year, year, ea, age, year.retire, age.retire,  B.r, ALx.r)# , ax, Bx, COLA.scale, gx.r)
   filter(year %in% seq(init.year, len = nyear) ) %>%
-  select(year, ea, age, year.disb, age.disb, start.year, B.disb.la, ALx.disb.la) %>% 
-  arrange(age.disb, start.year, ea, age)
+  select(year, ea, age, year.disb, age.disb, start.year, B.disb.la, ALx.disb.la) 
+  #%>%   arrange(age.disb, start.year, ea, age)
 
 
 # liab.disb %>% ungroup %>% arrange(start.year, ea, year.disb, age) %>%  head(100)

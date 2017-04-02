@@ -1,6 +1,6 @@
 # This script import demographic data of PSERS
 
-# Data source: Data_inputs/PSERS_MemberData_2016.xlsx
+# Data source: Data_inputs/PSERS_MemberData_2015.xlsx
 
 
 # Output list

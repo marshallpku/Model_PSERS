@@ -8,8 +8,8 @@ Tier_select <- paramlist$tier
 # 1.1 Load data,  for all tiers ####
 #*********************************************************************************************************
 # Plan information
- # source("PSERS_Data_PlanInfo_AV2015.R")
- # source("PSERS_Data_MemberData_AV2015.R")
+ source("PSERS_Data_PlanInfo_AV2015.R")
+ source("PSERS_Data_MemberData_AV2015.R")
 
 load("Data_inputs/PSERS_PlanInfo_AV2015.RData")    # for all tiers
 load("Data_inputs/PSERS_MemberData_AV2015.RData")  # for all tiers

@@ -144,7 +144,7 @@ for(runName in runList$runname ){
 
  # Funding policy 
   paramlist$smooth_method <- "method1"
-  paramlist$salgrowth_amort <- 0.0213   #   0.035
+  paramlist$salgrowth_amort <- 0.035   #   0.035 #0.213 # paryoll growth 5.5%, 3.5%, 2.13%
   #paramlist$amort_type <- "open"
   
   paramlist$s.lower <- -Inf # No corridor for AA
@@ -156,9 +156,9 @@ for(runName in runList$runname ){
 
   
  # Economic assumption
-  paramlist$infl <- 0.03
+  paramlist$infl <- 0.0275
   paramlist$prod <- 0.01
-  paramlist$startingSal_growth <- 0.04
+  paramlist$startingSal_growth <- paramlist$infl + paramlist$prod
 
   
  # Demographic
@@ -166,7 +166,9 @@ for(runName in runList$runname ){
   paramlist$newEnt_byTier <- c(tCD = 0, tE = 0.85, t3 = 0.15)
 
   paramlist$pct.ca.M <-  0.25 # proportion of males who opt for ca upon retirement
-  paramlist$pct.ca.F <-  0.25 
+  paramlist$pct.ca.F <-  0.25
+  
+  
  
    
  # Investment returns
@@ -176,7 +178,7 @@ for(runName in runList$runname ){
   # Parameters derived from the parameter list above. 
   paramlist$range_ea = with(Global_paramlist, min.ea:max.ea)
   paramlist$range_age = with(Global_paramlist, min.age:max.age)
-  paramlist$range_age.r = with(paramlist, r.min:r.max)
+  paramlist$range_age.r = with(paramlist, 25:r.max)
   paramlist$v     = with(paramlist, 1/(1 + i))
   
   

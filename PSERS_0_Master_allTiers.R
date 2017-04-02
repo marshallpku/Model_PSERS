@@ -13,16 +13,18 @@ source("PSERS_Data_MemberData_AV2015.R")
 load("Data_inputs/PSERS_PlanInfo_AV2015.RData")    # for all tiers
 load("Data_inputs/PSERS_MemberData_AV2015.RData")  # for all tiers
 
+init_beneficiaries_all %<>% filter(age >= 25) 
+
 
 ## Exclude selected type(s) of initial members
-# init_actives_all %<>% mutate(nactives = 0) 
-# init_retirees_all %<>% mutate(nretirees = 0)
-# init_beneficiaries_all %<>% mutate(n.R0S1 = 0)
-# init_terms_all %<>% mutate(nterm = 0)
-# init_disb_all  %<>% mutate(ndisb = 0) 
+ #init_actives_all %<>% mutate(nactives = 0) 
+ # init_retirees_all %<>% mutate(nretirees = 0)
+ # init_beneficiaries_all %<>% mutate(n.R0S1 = 0)
+ # init_terms_all %<>% mutate(nterm = 0)
+ # init_disb_all  %<>% mutate(ndisb = 0) 
 
 
-pct.init.ret.la <-  1
+pct.init.ret.la <-  0.75
 pct.init.ret.ca  <- 1 - pct.init.ret.la
 
 pct.init.disb.la <-  1
@@ -43,6 +45,10 @@ init_disb.la_all <- init_disb_all %>%
 init_disb.ca_all <- init_disb_all %>%
   mutate(ndisb.ca = ndisb * pct.init.disb.ca) %>% 
   select(-ndisb)
+
+
+init_retirees.la_all %>% summarise(sumb = sum(nretirees.la * benefit))
+
 
 
 #*********************************************************************************************************
@@ -73,6 +79,11 @@ mortality.post.model.tF <- list.decrements.tF$mortality.post.model
 ##   Calibration and Modification of initial data ####
 #*****************************************************
 
+# 1. PVFB and AL of actives
+paramlist$bfactor <- paramlist$bfactor * 1.1
+
+
+
 ## Exclude selected type(s) of initial members
  # init_actives_all %<>% mutate(nactives = 0) 
  # init_retirees_all %<>% mutate(nretirees = 0)
@@ -80,46 +91,7 @@ mortality.post.model.tF <- list.decrements.tF$mortality.post.model
  # init_terms_all %<>% mutate(nterm = 0)
  
 
-## Exclude initial terms with ea < 20: Data_population, line 504
- # init_terminated_all %<>% filter(age.term >= Global_paramlist$min.ea,
- #                                 ea >= Global_paramlist$min.ea)
-
-
-# ## Exclude the initial amortization basis when testing the program.
-#  if(!paramlist$useAVamort)  init_amort_raw %<>% mutate(amount.annual = 0) # CAUTION: For consistency check only; will make initial UAAL not amortized. 
-# 
-# 
-# ## Exclude the external fund. (currently only STIP borrowing)
-#  if(!paramlist$useExtFund) extFund %<>% mutate_each(funs(. * 0), -year)
-
-
-## Matching Segal cash flow
-
-# Matching Segal payroll 
-  # Payroll from model:
-    # Total: 11040551k
-    # t76:   9094102199
-    # tCD3:   1279359295 
-    # tm13:   667089761   
-  # Goal: 9659652k (from Segal projection and AV 2015) 
-  
-  # # Method: Applying adjustment factors to initial population and initial salary.
-  #   # Adjustment factor for initial workforce, applied to all 3 tiers (NEXT STEP? apply only to t76 tier.)
-  #     # Payroll of none-lab seg / Payroll of all segs(unit： $k): 
-  #       f1 <- 9659652 / 9927833 # 0.972987  
-  #   # Adjustment factor for initial salary
-  #     # payroll from vii table / payroll from model (both for all segs, unit $k):
-  #       f2 <- 9927833 / 11040551 # 0.8992154
-  #   # Total adjustment factor is 
-  #     # f1 * f2 = 0.8749248
-  # 
-  # # Adjusting initial workforce and salary:
-  #   init_actives_all %<>% mutate(nactives = nactives * f1,
-  #                                salary   = salary   * f2) 
-  # 
-
-
-# tier.param %<>% mutate(cola = cola - 0.0025)  
+ 
 
 # 
 # ### Calibration:
@@ -155,6 +127,9 @@ mortality.post.model.tF <- list.decrements.tF$mortality.post.model
 # init_retirees.la_all   %<>% mutate(benefit = benefit * 0.989589)
 # init_disb.ca_all       %<>% mutate(benefit = benefit * 0.989589)
 # init_disb.la_all       %<>% mutate(benefit = benefit * 0.989589)
+
+
+
 
 
 
@@ -213,6 +188,10 @@ init_pop.tF <- get_initPop_tier("tF")
 entrants_dist.tCD <- numeric(length(paramlist$range_ea))
 entrants_dist.tE  <- get_entrantsDist_tier("tE") * share.tE
 entrants_dist.tF  <- get_entrantsDist_tier("tF") * share.tF
+
+
+benefit.tCD
+benefit.disb.tCD
 
 
 #*********************************************************************************************************
@@ -326,14 +305,21 @@ if(paramlist$tier == "sumTiers"){
 }
     
 
+
+AggLiab.tCD$active
+AggLiab.tE$active
+AggLiab.tF$active
+
+
 #*********************************************************************************************************
 # 6.  Simulation ####
 #*********************************************************************************************************
 source("PSERS_Model_Sim.R")
+
+
+paramlist$salgrowth_amort <- 0.05
+
 penSim_results.sumTiers <- run_sim("sumTiers", AggLiab.sumTiers)
-
-
-
 
 
 outputs_list <- list(paramlist = paramlist, 
@@ -356,10 +342,12 @@ outputs_list <- list(paramlist = paramlist,
 penSim_results.sumTiers %<>% mutate() 
 
 var_display1 <- c("sim", "year", "FR", "MA", "AL", 
-                  "AL.act", "AL.disb.la", "AL.act.disb", "AL.act.death", "AL.act.v", "AL.la", "AL.ca", "AL.term", "PVFB", "B",
+                  # "AL.act", "AL.disb.la", "AL.act.disb", "AL.act.death", "AL.act.v", "AL.la", "AL.ca", "AL.term", "PVFB", "B",
                   # "AL.disb.la", "AL.disb.ca", "AL.death", "PVFB",
                   #"PVFB.laca", "PVFB.LSC", "PVFB.v", "PVFB", 
                   # "B", "B.la", "B.ca", "B.v", "B.disb.la","B.disb.ca", 
+                  "ERC", "ERC.final",
+                  "LG", "Amort_basis",
                   "PR", "NC_PR","SC_PR")
 
 
@@ -374,8 +362,9 @@ var_display.cali1 <- c("sim", "year", "FR","FR_MA", "MA", "AA", "AL","UAAL",
                        "PVFB", "AL.act",
                      
                       "NC","SC", "ERC", "ERC.final", "EEC",
-                      "PR",
+                      #"PR",
                       #"NC","SC",
+                      "ERC.final_PR",
                       "NC_PR", "SC_PR", 
                       "EEC_PR",
                       "B",
@@ -393,9 +382,8 @@ kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display
 
 
 kable(penSim_results.sumTiers %>% filter(sim == -1) %>% select(one_of(var_display1)), digits = 2) %>% print 
-kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display1)), digits = 2) %>% print 
+kable(penSim_results.sumTiers %>% filter(sim == 1) %>% select(one_of(var_display1)), digits = 2) %>% print 
 
-4106905621
 
 #*********************************************************************************************************
 #   8. Showing risk measures ####
@@ -438,5 +426,12 @@ df_all.stch %<>%
   ungroup()
 
 df_all.stch
+
+
+
+
+
+
+
 
 

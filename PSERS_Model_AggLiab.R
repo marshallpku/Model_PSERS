@@ -33,12 +33,12 @@ get_AggLiab <- function( Tier_select_,
 
    
    # for all tiers
-     # Tier_select_ = "t6"
-     # liab_   = liab.t6
-     # liab.ca_ = liab.ca.t6
-     # liab.disb.ca_ = liab.disb.ca.t6
-     # pop_    = pop$pop.t6
-     # mortality.post.model_ = mortality.post.model.t6
+     # Tier_select_ = "tCD"
+     # liab_   = liab.tCD
+     # liab.ca_ = liab.ca.tCD
+     # liab.disb.ca_ = liab.disb.ca.tCD
+     # pop_    = pop$pop.tCD
+     # mortality.post.model_ = mortality.post.model.tCD
      # 
      # init_beneficiaries_all_  = init_beneficiaries_all
      # init_retirees.ca_all_    = init_retirees.ca_all
@@ -162,8 +162,16 @@ get_AggLiab <- function( Tier_select_,
     # mutate(runname = runname) %>% 
     as.matrix
   
-  la.agg %>% as.data.frame
   
+  # 
+  # liab_   = liab.tCD
+  # la.agg %>% as.data.frame
+  # 
+  # x <- pop_$la %>% filter(year == 2015)
+  # x$number.la %>% sum
+  # 
+  # y <- liab_$la %>% filter(year == 2015, year.r == 2015)
+  # y
   # liab_$la %>% filter(year == 2015) %>% select(year, ea, age, year.r, ALx.la, B.la) %>% filter(year.r == 2015)
   # pop$la   %>% filter(year == 2015) %>% filter(number.la !=0)
   # 
@@ -268,7 +276,7 @@ get_AggLiab <- function( Tier_select_,
                                   year = init.year, 
                                   age = NULL)
   
-  init.ca.agg <- expand.grid(init.age = unique(init_beneficiaries_$init.age), age = r.min:max.age) %>%
+  init.ca.agg <- expand.grid(init.age = unique(init_beneficiaries_$init.age), age = min(init_beneficiaries_$init.age):max.age) %>%
                  filter(age >= init.age) %>% 
                  left_join(init_beneficiaries_) %>% 
                  group_by(init.age) %>% 
@@ -300,7 +308,7 @@ get_AggLiab <- function( Tier_select_,
     year = init.year) %>% 
     select(-age)
   
-  init.ret.ca.agg <- expand.grid(age.r = unique(init_retirees.ca_$age.r), age = r.min:max.age) %>%
+  init.ret.ca.agg <- expand.grid(age.r = unique(init_retirees.ca_$age.r), age = min(init_retirees.ca_$age.r):max.age) %>%
     filter(age >= age.r) %>% 
     left_join(init_retirees.ca_) %>%
     left_join(liab.ca_) %>% 
