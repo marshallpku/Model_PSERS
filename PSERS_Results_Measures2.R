@@ -169,7 +169,7 @@ df_all.stch <- results_all  %>%
 
 
 df_all.stch %<>%   
-  select(runname, sim, year, FR_MA, AL, MA, ERC, EEC, PR, ERC_PR, ERC.final_PR, ERC.final_GF) %>%
+  select(runname, returnScn, policy.SR, policy.EL, sim, year, FR_MA, AL, MA, ERC, EEC, PR, ERC_PR, ERC.final_PR, ERC.final_GF) %>%
   group_by(runname, sim) %>% 
   mutate(
          #FR_MA     = 100 * MA / AL,
@@ -180,7 +180,7 @@ df_all.stch %<>%
          ERC_GF_hike  = cumany(na2zero(ERC.final_GF - lag(ERC.final_GF, 5) >= 5)),
          EEC_PR       = 100 * EEC / PR
          ) %>% 
-  group_by(runname, year) %>% 
+  group_by(runname, returnScn, policy.SR, policy.EL, year) %>% 
   summarize(FR40less = 100 * sum(FR40less, na.rm = T)/n(),
             FR100more = 100 * sum(FR100more, na.rm = T)/n(),
             ERC_high = 100 * sum(ERC_high, na.rm = T)/n(),
@@ -302,7 +302,7 @@ results_all %>% filter(runname == "RS1_SR1EL1", sim > 0) %>%
 
 
 #*****************************************************
-## Deterministic run  ####
+## PA general fund revenue  ####
 #*****************************************************
 
 fig_projGenFund <- 
@@ -342,22 +342,19 @@ fig_distReturn
 
 
 
-#*****************************************************
-## 1 Assumption achieved; Different policies   ####
-#*****************************************************
+#**********************************************************
+## 1. Current policy: 3 investment return scenarios    ####
+#**********************************************************
 
-rn_RS1 <- paste0("RS1_", 
-                 c("SR1EL1",
-                   "SR1EL0",
-                   "SR0EL1",
-                   "SR0EL0"))
+
+## 1.1 Current policy: Assumption Achieved    ####
 
 # Distribution of funded ratio 
 fig.title <- "Distribution of funded ratios across simulations"
-fig.subtitle <- "Assumption achieved: expected compound return = 7.5%"
-fig_stchDet.FRdist <- df_all.stch %>% filter(runname %in% rn_RS1 ) %>% 
+fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.5% achieved"
+fig_CP.RS1.FRdist <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1") %>% 
   left_join(results_all  %>% 
-              filter(runname  %in% rn_RS1, sim == 0) %>% 
+              filter(runname  %in% "RS1_SR1EL1", sim == 0) %>% 
               select(runname, year, FR_det = FR_MA)) %>%  
   select(runname, year, FR.q25, FR.q50, FR.q75, FR_det) %>% 
   gather(type, value, -runname, -year) %>% 
@@ -365,11 +362,10 @@ fig_stchDet.FRdist <- df_all.stch %>% filter(runname %in% rn_RS1 ) %>%
              color = factor(type, levels = c("FR.q75", "FR.q50", "FR.q25", "FR_det")),
              shape = factor(type, levels = c("FR.q75", "FR.q50", "FR.q25", "FR_det"))
   )) + theme_bw() + 
-  facet_grid(.~runname) +
   geom_line() + 
   geom_point(size = 2) + 
   geom_hline(yintercept = 100, linetype = 2, size = 1) +
-  coord_cartesian(ylim = c(0,200)) + 
+  coord_cartesian(ylim = c(0,180)) + 
   scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_y_continuous(breaks = seq(0, 500, 20)) + 
   scale_color_manual(values = c(RIG.green, RIG.blue, RIG.red, "black"),  name = NULL, 
@@ -381,25 +377,25 @@ fig_stchDet.FRdist <- df_all.stch %>% filter(runname %in% rn_RS1 ) %>%
        x = NULL, y = "Percent") + 
   theme(axis.text.x = element_text(size = 8)) + 
   RIG.theme()
+fig_CP.RS1.FRdist
 
-fig_stchDet.FRdist
+
 
 
 
 # Distribution of ERC as % Payroll
-fig.title <- "Distribution of employer contribution as a percentage of general fund across simulations"
-fig.subtitle <- "Assumption achieved: expected compound return = 7.5%"
-fig_stchDet.ERCdist <- df_all.stch %>% filter(runname %in% rn_RS1) %>% 
+fig.title    <- "Distribution of employer contribution as a percentage of payroll across simulations"
+fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.5% achieved"
+fig_CP.RS1.ERCdist <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1") %>% 
   left_join(results_all  %>%
-              filter(runname  %in% rn_RS1, sim == 0) %>%
+              filter(runname  %in% "RS1_SR1EL1", sim == 0) %>%
               select(runname, year, ERC_det = ERC.final_PR)) %>%
-  select(runname, year, ERC_PR.q25, ERC_PR.q50, ERC_PR.q75) %>% 
+  select(runname, year, ERC_PR.q25, ERC_PR.q50, ERC_PR.q75, ERC_det) %>% 
   gather(type, value, -runname, -year) %>% 
   # mutate(runname = factor(runname, labels = c(lab_s1, lab_s2))) %>%  
   ggplot(aes(x = year, y = value,
-             color = factor(type, levels = c("ERC_PR.q75", "ERC_PR.q50", "ERC_PR.q25")),
-             shape = factor(type, levels = c("ERC_PR.q75", "ERC_PR.q50", "ERC_PR.q25")))) + 
-  facet_grid(. ~ runname) + 
+             color = factor(type, levels = c("ERC_PR.q75", "ERC_PR.q50", "ERC_PR.q25", "ERC_det")),
+             shape = factor(type, levels = c("ERC_PR.q75", "ERC_PR.q50", "ERC_PR.q25", "ERC_det")))) + 
   theme_bw() + 
   geom_line() + 
   geom_point(size = 2) + 
@@ -408,21 +404,21 @@ fig_stchDet.ERCdist <- df_all.stch %>% filter(runname %in% rn_RS1) %>%
   scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_y_continuous(breaks = seq(0, 500, 5)) + 
   scale_color_manual(values = c(RIG.red, RIG.blue, RIG.green, "black"),  name = NULL, 
-                     label  = c("75th percentile", "50th percentile", "25th percentile")) + 
+                     label  = c("75th percentile", "50th percentile", "25th percentile", "Deterministic")) + 
   scale_shape_manual(values = c(17, 16, 15, 18),  name = NULL, 
-                     label  = c("75th percentile", "50th percentile", "25th percentile")) +
+                     label  = c("75th percentile", "50th percentile", "25th percentile", "Deterministic")) +
   labs(title = fig.title,
        subtitle = fig.subtitle,
        x = NULL, y = "Percent of payroll") + 
   theme(axis.text.x = element_text(size = 8)) + 
   RIG.theme()
-fig_stchDet.ERCdist
+fig_CP.RS1.ERCdist
 
 
 # Risk of low funded ratio
 fig.title <- "Probability of funded ratio below 40% in any year up to the given year"
-fig.subtitle <- "Assumption achieved; expected compound return = 7.5%"
-fig_stchDet.FR40less <- df_all.stch %>% filter(runname %in% rn_RS1) %>% 
+fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.5% achieved"
+fig_CP.RS1.FR40less <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1") %>% 
   #mutate(runname = factor(runname, labels = c(lab_s1, lab_s2))) %>%  
   select(runname, year, FR40less) %>% 
   #mutate(FR40less.det = 0) %>% 
@@ -430,32 +426,33 @@ fig_stchDet.FR40less <- df_all.stch %>% filter(runname %in% rn_RS1) %>%
   ggplot(aes(x = year, y = FR40less)) + 
              # color = runname, shape = runname)) + 
   theme_bw() + 
-  facet_grid(. ~ runname) + 
-  geom_point(size = 2) + geom_line() + 
+  geom_point(size = 2, color = RIG.blue) + 
+  geom_line(color = RIG.blue) + 
   coord_cartesian(ylim = c(0,35)) + 
   scale_y_continuous(breaks = seq(0,200, 5)) +
   scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
-  scale_color_manual(values = c("black",RIG.red),  name = "") + 
+  scale_color_manual(values = c(RIG.blue),  name = "") + 
   scale_shape_manual(values = c(17,16),  name = "") +
   labs(title = fig.title,
        subtitle = fig.subtitle,
        x = NULL, y = "Probability (%)") + 
   guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
   RIG.theme()
-fig_stchDet.FR40less
-fig_stchDet.FR40less$data %>% filter(year == 2045)
+fig_CP.RS1.FR40less
+fig_CP.RS1.FR40less$data %>% filter(year == 2045)
+
 
 
 # Risk of sharp increase in ERC/PR
 fig.title <- "Probability of employer contribution rising more than 10% of payroll \nin a 5-year period at any time prior to and including the given year"
-fig.subtitle <- "Assumption achieved; expected compound return = 8%"
-fig_stchDet.ERChike <- df_all.stch %>% filter(runname %in% c(rn_RS1, "RS1_SR2EL1") ) %>% 
+fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.5% achieved"
+fig_CP.RS1.ERChike <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1" ) %>% 
   #mutate(runname = factor(runname, labels = c(lab_s1, lab_s2))) %>%  
   select(runname, year, ERC_hike) %>% 
   #mutate(ERChike.det = 0) %>% 
   #gather(variable, value, - year) %>% 
-  ggplot(aes(x = year, y = ERC_hike, color = runname, shape = runname)) + theme_bw() + 
-  geom_point(size = 2) + geom_line() + 
+  ggplot(aes(x = year, y = ERC_hike)) + theme_bw() + 
+  geom_point(size = 2, color = RIG.blue) + geom_line(color = RIG.blue) + 
   coord_cartesian(ylim = c(0,25)) + 
   scale_y_continuous(breaks = seq(0,200, 5)) +
   scale_x_continuous(breaks = c(2015, seq(2020, 2045, 5))) + 
@@ -466,8 +463,263 @@ fig_stchDet.ERChike <- df_all.stch %>% filter(runname %in% c(rn_RS1, "RS1_SR2EL1
        x = NULL, y = "Probability (%)") + 
   guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
   RIG.theme()
-fig_stchDet.ERChike
-fig_stchDet.ERChike$data %>% filter(year == 2045)
+fig_CP.RS1.ERChike
+fig_CP.RS1.ERChike$data %>% filter(year == 2045)
+
+
+
+## 1.2 Current policy: Assumption Achieved    ####
+
+lab.RS1 <- "Scenario 1: \nAssumption Achieved: \nBase Case"
+lab.RS2 <- "Scenario 2: \n15 Years of Low Returns"
+lab.RS3 <- "Scenario 3: \nHigh Volatility"
+
+
+# Risk of low funded ratio
+fig.title <- "Probability of funded ratio below 40% in any year up to the given year"
+fig.subtitle <- "Current PSERS funding policy"
+fig_CP.RS23.FR40less <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1" )  ) %>% 
+  mutate(runname = factor(runname, labels = c(lab.RS1, lab.RS2, lab.RS3))) %>%  
+  select(runname, year, FR40less) %>% 
+  #mutate(FR40less.det = 0) %>% 
+  #gather(variable, value, -year, -runname) %>% 
+  ggplot(aes(x = year, y = FR40less, color = runname, shape = runname)) + 
+  theme_bw() + 
+  geom_point(size = 2) + 
+  geom_line() + 
+  coord_cartesian(ylim = c(0,50)) + 
+  scale_y_continuous(breaks = seq(0,200, 5)) +
+  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red),  name = "") + 
+  scale_shape_manual(values = c(17,16, 15),  name = "") +
+  labs(title = fig.title,
+       subtitle = fig.subtitle,
+       x = NULL, y = "Probability (%)") + 
+  guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
+  RIG.theme()
+fig_CP.RS23.FR40less
+fig_CP.RS23.FR40less$data %>% filter(year == 2045)
+
+
+
+# Risk of sharp increase in ERC/PR
+fig.title <- "Probability of employer contribution rising more than 10% of payroll \nin a 5-year period at any time prior to and including the given year"
+fig.subtitle <- "Current PSERS funding policy"
+fig_CP.RS23.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1" )) %>% 
+  mutate(runname = factor(runname, labels = c(lab.RS1, lab.RS2, lab.RS3))) %>%  
+  select(runname, year, ERC_hike) %>% 
+  #mutate(ERChike.det = 0) %>% 
+  #gather(variable, value, - year) %>% 
+  ggplot(aes(x = year, y = ERC_hike, color = runname, shape = runname)) + theme_bw() + 
+  geom_point(size = 2) + geom_line() + 
+  coord_cartesian(ylim = c(0,40)) + 
+  scale_y_continuous(breaks = seq(0,200, 5)) +
+  scale_x_continuous(breaks = c(2015, seq(2020, 2045, 5))) + 
+  scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
+  scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
+  labs(title = fig.title,
+       subtitle = fig.subtitle,
+       x = NULL, y = "Probability (%)") + 
+  guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
+  RIG.theme()
+fig_CP.RS23.ERChike
+fig_CP.RS23.ERChike$data %>% filter(year == 2045)
+
+
+
+
+
+#**********************************************************
+## 2. Current policy: 3 investment return scenarios    ####
+#**********************************************************
+
+# # Risk of low funded ratio
+# fig.title <- "Probability of funded ratio below 40% in any year up to the given year"
+# fig.subtitle <- ""
+# fig_CP.RS23.FR40less <- df_all.stch %>% filter(runname %in% c("RS1_SR0EL0","RS2_SR1EL1", "RS3_SR1EL1",
+#                                                               "RS1_SR0EL1","RS2_SR1EL1", "RS3_SR1EL1",
+#                                                               "RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1")) %>% 
+#   mutate(runname = factor(runname, labels = c(lab.RS1, lab.RS2, lab.RS3)),
+#          ) %>%  
+#   select(runname, year, FR40less) %>% 
+#   #mutate(FR40less.det = 0) %>% 
+#   #gather(variable, value, -year, -runname) %>% 
+#   ggplot(aes(x = year, y = FR40less, color = runname, shape = runname)) + 
+#   theme_bw() + 
+#   geom_point(size = 2) + 
+#   geom_line() + 
+#   coord_cartesian(ylim = c(0,50)) + 
+#   scale_y_continuous(breaks = seq(0,200, 5)) +
+#   scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+#   scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red),  name = "") + 
+#   scale_shape_manual(values = c(17,16, 15),  name = "") +
+#   labs(title = fig.title,
+#        subtitle = fig.subtitle,
+#        x = NULL, y = "Probability (%)") + 
+#   guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
+#   RIG.theme()
+# fig_CP.RS23.FR40less
+# fig_CP.RS23.FR40less$data %>% filter(year == 2045)
+
+
+
+# Risk of sharp increase in ERC/PR
+fig.title <- "Probability of employer contribution rising more than 10% of payroll \nin a 5-year period at any time prior to and including the given year"
+fig.subtitle <- "Current PSERS funding policy"
+fig_SR.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR0EL1","RS2_SR0EL1", "RS3_SR0EL1",
+                                                        "RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1")) %>% 
+  mutate(policy.SR = factor(policy.SR, levels = c(1, 0), labels = c("Current policy", "No risk-sharing")),
+         returnScn = factor(returnScn, levels = c("RS1", "RS2", "RS3"), labels = c(lab.RS1, lab.RS2, lab.RS3))) %>%  
+  select(policy.SR, returnScn, year, ERC_hike) %>% 
+  #mutate(ERChike.det = 0) %>% 
+  # gather(variable, value, -year, -returnScn) %>% 
+  ggplot(aes(x = year, y = ERC_hike, color = policy.SR, shape = policy.SR)) + theme_bw() + 
+  facet_grid(. ~ returnScn) + 
+  geom_point(size = 2) + geom_line() + 
+  coord_cartesian(ylim = c(0,40)) + 
+  scale_y_continuous(breaks = seq(0,200, 5)) +
+  scale_x_continuous(breaks = c(2015, seq(2020, 2045, 5))) + 
+  scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
+  scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
+  labs(title = fig.title,
+       subtitle = fig.subtitle,
+       x = NULL, y = "Probability (%)") + 
+  guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
+  RIG.theme()
+fig_SR.ERChike
+fig_SR.ERChike$data %>% filter(year == 2045)
+
+
+
+
+#*************************************************************************
+##                        3. Fiscal analysis                              ####
+#*************************************************************************
+
+# Deterministic 
+fig.title <- "Employer contribution as a percentage of \nPennsylvania State general fund revenue"
+fig.subtitle <- "Current PSERS funding policy; Determinisc runs"
+fig_fiscal.det <- results_all %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1"), sim == 0) %>% 
+  mutate(returnScn = factor(returnScn, levels = c("RS1", "RS2"), labels = c("Scenario 1: Assumption Achived: \nDeterministic \nAnnual return = 7.5%",
+                                                                            "Scenario 2: 15 Years of Low Returns: \nDeterministic \nAnnual return = 6.1%"))) %>%  
+  select(runname, policy.SR, returnScn, year, ERC.final_GF) %>% 
+  #mutate(ERChike.det = 0) %>% 
+  # gather(variable, value, -year, -returnScn) %>% 
+  ggplot(aes(x = year, y = ERC.final_GF, color = returnScn, shape = returnScn)) + theme_bw() + 
+  geom_point(size = 2) + geom_line() + 
+  coord_cartesian(ylim = c(0,20)) + 
+  scale_y_continuous(breaks = seq(0,200, 2)) +
+  scale_x_continuous(breaks = c(2015, seq(2020, 2045, 5))) + 
+  scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
+  scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
+  labs(title = fig.title,
+       subtitle = fig.subtitle,
+       x = NULL, y = "Probability (%)") + 
+  guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
+  RIG.theme()
+fig_fiscal.det
+fig_fiscal.det$data %>% filter(year == 2045)
+
+
+# Risk of sharp increase in ERC/PR
+fig.title <- "Distribution of employer contribution as a percentage of Pennsylvania State general fund revenue \nunder different return scenarios"
+fig.subtitle <- "Current PSERS funding policy"
+fig_fiscal.stch <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1")) %>% 
+  select(returnScn, year, ERC_GF.q25, ERC_GF.q50, ERC_GF.q75) %>% 
+  gather(var, value, -year, -returnScn) %>% 
+  mutate(var       = factor(var, levels = c("ERC_GF.q75", "ERC_GF.q50", "ERC_GF.q25"),
+                                 labels = c("75th percentile", "50th percentile", "25th percentile")),
+         returnScn = factor(returnScn, levels = c("RS1", "RS2", "RS3"), 
+                                       labels = c(lab.RS1, lab.RS2, lab.RS3))) %>%  
+  # gather(variable, value, -year, -returnScn) %>% 
+  ggplot(aes(x = year, y = value, color = var, shape = var)) + theme_bw() + 
+  facet_grid(. ~ returnScn) + 
+  geom_point(size = 1.5) + geom_line() + 
+  coord_cartesian(ylim = c(0,20)) + 
+  scale_y_continuous(breaks = seq(0,200, 2)) +
+  scale_x_continuous(breaks = c(2015, seq(2020, 2045, 5))) + 
+  scale_color_manual(values = c(RIG.red, RIG.blue, RIG.green, RIG.green, RIG.purple),  name = "") + 
+  scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
+  labs(title = fig.title,
+       subtitle = fig.subtitle,
+       x = NULL, y = "Probability (%)") + 
+  guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
+  RIG.theme()
+fig_fiscal.stch
+fig_fiscal.stch$data %>% filter(year == 2045)
+
+
+
+
+#*************************************************************************
+##                        Summary table                              ####
+#*************************************************************************
+
+runs_report <- c("RS1_SR1EL1", "RS1_SR1EL0", "RS1_SR0EL1",
+                 "RS2_SR1EL1", "RS2_SR1EL0", "RS2_SR0EL1",
+                 "RS3_SR1EL1", "RS3_SR1EL0", "RS3_SR0EL1")
+
+lvl_measures  <- c("FR40less", "ERC_hike")
+
+# Summary tables for the three major risk measures
+tab_summary <- 
+  df_all.stch %>% filter(runname %in% c(runs_report ), year == 2045) %>% 
+  select(runname, FR40less, ERC_hike) %>% 
+  gather(Measure, value, -runname) %>% 
+  mutate(runname = factor(runname, levels = runs_report),
+         Measure = factor(Measure, levels = lvl_measures)) %>% 
+  spread(runname, value)
+
+tab_summary
+
+write.xlsx2(tab_summary, paste0(Outputs_folder, "tables.xlsx"), sheetName = "summary", append = TRUE)
+
+
+
+
+
+#*************************************************************************
+##                        Saving results                              ####
+#*************************************************************************
+
+g.height.1col <- 7*0.8
+g.width.1col  <- 10*0.8
+
+g.height.2col <- 6*0.8
+g.width.2col  <- 13*0.8
+
+g.height.3col <- 5*0.8
+g.width.3col  <- 15*0.8
+
+
+
+ggsave(file = paste0(Outputs_folder, "distReturn.png"),   fig_distReturn, height = g.height.1col, width = g.width.1col)
+
+# 1. Current policy
+ggsave(file = paste0(Outputs_folder, "CP.RS1.FRdist.png"),   fig_CP.RS1.FRdist,  height = g.height.1col, width = g.width.1col)
+ggsave(file = paste0(Outputs_folder, "CP.RS1.ERCdist.png"),  fig_CP.RS1.ERCdist, height = g.height.1col, width = g.width.1col)
+ggsave(file = paste0(Outputs_folder, "CP.RS1.FR40less.png"), fig_CP.RS1.FR40less,height = g.height.1col, width = g.width.1col*0.8)
+ggsave(file = paste0(Outputs_folder, "CP.RS1.ERChike.png"),  fig_CP.RS1.ERChike, height = g.height.1col, width = g.width.1col*0.8)
+
+
+# 1. Current policy
+ggsave(file = paste0(Outputs_folder, "CP.RS23.FR40less.png"), fig_CP.RS23.FR40less,height = g.height.1col, width = g.width.1col)
+ggsave(file = paste0(Outputs_folder, "CP.RS23.ERChike.png"),  fig_CP.RS23.ERChike, height = g.height.1col, width = g.width.1col)
+
+# 2. Impact of policies 
+ggsave(file = paste0(Outputs_folder, "SR.ERChike.png"),  fig_SR.ERChike, height = g.height.3col*0.9*1.15, width = g.width.3col*0.9)
+
+
+# 3. Fiscal
+ggsave(file = paste0(Outputs_folder, "fiscal.det.png"),  fig_fiscal.det, height = g.height.1col, width = g.width.1col*1.1)
+ggsave(file = paste0(Outputs_folder, "fiscal.stch.png"), fig_fiscal.stch, height = g.height.3col*0.9*1.15, width = g.width.3col*0.9)
+
+
+
+
+
+
+
 
 
 # Risk of high increase in ERC/GF
