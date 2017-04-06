@@ -276,6 +276,22 @@ results_all %>% filter(runname != "Dev.allTiers") %>%
 
 
 
+results_all %>% filter(runname == "RS1_SR1EL1", sim == 1) %>% 
+  group_by(runname, sim) %>%
+  mutate(PR.growth = PR/lag(PR) - 1 ) %>% 
+  select(sim, year, PR, PR.growth)
+  
+  
+
+
+
+
+
+
+
+
+
+
 # results_all %>% filter(runname == "RS1.closed", sim == 0, year %in% c(2015, 2016, 2030:2045) ) %>% select(runname, Tier, year, AL, AL.DC, PR, NC, NC.DC,B,SC, EEC,ERC, GenFund, ERC, nactives)
 # 
 # results_all %>% filter(runname == "RS1.closed", sim == 13 ) %>% select(runname,sim, Tier, year, AL, PR, NC,SC, EEC,ERC, GenFund, ERC, ERC_GF, i.r, UAAL, FR_MA) 

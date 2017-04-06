@@ -144,7 +144,7 @@ for(runName in runList$runname ){
 
  # Funding policy 
   paramlist$smooth_method <- "method1"
-  paramlist$salgrowth_amort <- 0.035   #   0.035 #0.213 # paryoll growth 5.5%, 3.5%, 2.13%
+  #paramlist$salgrowth_amort <- 0.035   #   0.035 #0.213 # paryoll growth 5.5%, 3.5%, 2.13%
   #paramlist$amort_type <- "open"
   
   paramlist$s.lower <- -Inf # No corridor for AA

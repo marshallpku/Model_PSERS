@@ -127,6 +127,9 @@ runs_RS1 <- paste0("RS1_", rn_policy)
 runs_RS2 <- paste0("RS2_", rn_policy)
 runs_RS3 <- paste0("RS3_", rn_policy)
 
+runs_alt <- c("RS1_SR1EL1.open", "RS1_SR1EL1.PR")
+
+
 
 runs_RS1_labels <- c("Assumption Achieved: Baseline",
                      "Assumption Achieved: Current Policy",
@@ -149,7 +152,7 @@ runs_RS3_labels <- c("High Volatility: Baseline",
                      "High Volatility: Risk-sharing 5% max",
                      "High Volatility: No ERC floor")
 
-
+runs_alt_labels <- c("open amortization", "lower payroll growth assumption for amort")
 
 
 # lab_s1 <- "Scenario 1 \nAssumption Achieved: \nClosed Plan"
@@ -160,8 +163,8 @@ runs_RS3_labels <- c("High Volatility: Baseline",
 # lab_s6 <- "Scenario 6 \nLower Return Assumption"
 
 
-runs_all <- c(runs_RS1, runs_RS2, runs_RS3)
-runs_all_labels <- c(runs_RS1_labels, runs_RS2_labels, runs_RS3_labels)
+runs_all <- c(runs_RS1, runs_RS2, runs_RS3, runs_alt)
+runs_all_labels <- c(runs_RS1_labels, runs_RS2_labels, runs_RS3_labels, runs_alt_labels)
 
 
 df_all.stch <- results_all  %>% 
@@ -220,6 +223,8 @@ df_all.stch %<>%
 
   
 df_all.stch %>% filter(runname == "RS1_SR1EL1")
+df_all.stch %>% filter(runname == "RS1_SR1EL1.PR")
+
 df_all.stch %>% filter(runname == "RS1_SR0EL1")
 df_all.stch %>% filter(runname == "RS1_SR1EL0")
 df_all.stch %>% filter(runname == "RS1_SR0EL0")
@@ -576,7 +581,7 @@ fig_SR.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR0EL1","RS2_SR0EL1
   ggplot(aes(x = year, y = ERC_hike, color = policy.SR, shape = policy.SR)) + theme_bw() + 
   facet_grid(. ~ returnScn) + 
   geom_point(size = 2) + geom_line() + 
-  coord_cartesian(ylim = c(0,40)) + 
+  coord_cartesian(ylim = c(0,45)) + 
   scale_y_continuous(breaks = seq(0,200, 5)) +
   scale_x_continuous(breaks = c(2015, seq(2020, 2045, 5))) + 
   scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
@@ -713,6 +718,10 @@ ggsave(file = paste0(Outputs_folder, "SR.ERChike.png"),  fig_SR.ERChike, height 
 # 3. Fiscal
 ggsave(file = paste0(Outputs_folder, "fiscal.det.png"),  fig_fiscal.det, height = g.height.1col, width = g.width.1col*1.1)
 ggsave(file = paste0(Outputs_folder, "fiscal.stch.png"), fig_fiscal.stch, height = g.height.3col*0.9*1.15, width = g.width.3col*0.9)
+
+ggsave(file = paste0(Outputs_folder, "projGenFun.png"),  fig_projGenFund,  height = g.height.1col, width = g.width.1col)
+
+
 
 
 
@@ -1266,9 +1275,24 @@ ggsave(file = paste0(Outputs_folder, "fig14_min5.FRdist.pdf"),  fig_min5.FRdist,
 
 
 
+results_all %>% 
+  filter(runname == "RS1_SR1EL1.PR", sim == 0) %>% 
+  mutate(ERC.prelim_PR = 100 * ERC / PR,
+         PR.growth = 100* PR/lag(PR) - 100,
+         SC.growth = 100* SC/lag(SC) - 100) %>% 
+  select(sim, year, NC_PR, SC_PR, EEC_PR, ERC.prelim_PR, ERC.final_PR, PR.growth, PR, FR) %>% 
+  kable(digit = 2)
 
 
-
+results_all %>% 
+  filter(runname == "RS1_SR1EL1", sim == 0) %>% 
+  mutate(ERC.prelim_PR = 100 * ERC / PR,
+         PR.growth = 100* PR/lag(PR) - 100,
+         NC.ER_PR = NC_PR - EEC_PR,
+         SC.growth = 100* SC/lag(SC) - 100) %>% 
+  select(sim, year,NC_PR, SC_PR, EEC_PR, ERC.prelim_PR, ERC.final_PR, PR.growth, PR, FR) %>% 
+  kable(digit = 2)
+  
 
 
 

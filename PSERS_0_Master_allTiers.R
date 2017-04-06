@@ -317,8 +317,6 @@ AggLiab.tF$active
 source("PSERS_Model_Sim.R")
 
 
-paramlist$salgrowth_amort <- 0.05
-
 penSim_results.sumTiers <- run_sim("sumTiers", AggLiab.sumTiers)
 
 
@@ -339,14 +337,14 @@ outputs_list <- list(paramlist = paramlist,
 
 
 
-penSim_results.sumTiers %<>% mutate() 
+# penSim_results.sumTiers %<>% mutate() 
 
 var_display1 <- c("sim", "year", "FR", "MA", "AL", 
                   # "AL.act", "AL.disb.la", "AL.act.disb", "AL.act.death", "AL.act.v", "AL.la", "AL.ca", "AL.term", "PVFB", "B",
                   # "AL.disb.la", "AL.disb.ca", "AL.death", "PVFB",
                   #"PVFB.laca", "PVFB.LSC", "PVFB.v", "PVFB", 
                   # "B", "B.la", "B.ca", "B.v", "B.disb.la","B.disb.ca", 
-                  "ERC", "ERC.final",
+                  "PR.growth", "ERC.final",
                   "LG", "Amort_basis",
                   "PR", "NC_PR","SC_PR")
 
@@ -430,6 +428,7 @@ df_all.stch
 
 
 
+paramlist$salgrowth_amort
 
 
 
