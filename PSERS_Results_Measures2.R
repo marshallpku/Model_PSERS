@@ -176,11 +176,11 @@ df_all.stch %<>%
   group_by(runname, sim) %>% 
   mutate(
          #FR_MA     = 100 * MA / AL,
-         FR40less  = cumany(FR_MA <= 40),
+         FR40less  = c(NA, cumany(FR_MA[year >= 2016] <= 40)),
          FR100more = FR_MA >= 100,
          ERC_high  = cumany(ERC.final_PR >= 50), 
-         ERC_hike     = cumany(na2zero(ERC.final_PR - lag(ERC.final_PR, 5) >= 10)),
-         ERC_GF_hike  = cumany(na2zero(ERC.final_GF - lag(ERC.final_GF, 5) >= 5)),
+         ERC_hike     = cumany(na2zero(ERC.final_PR - lag(ifelse(year == 2015, NA, ERC.final_PR), 5) >= 10)),
+         ERC_GF_hike  = cumany(na2zero(ERC.final_GF - lag(ifelse(year == 2015, NA, ERC.final_GF), 5) >= 5)),
          EEC_PR       = 100 * EEC / PR
          ) %>% 
   group_by(runname, returnScn, policy.SR, policy.EL, year) %>% 
@@ -224,6 +224,7 @@ df_all.stch %<>%
   
 df_all.stch %>% filter(runname == "RS1_SR1EL1")
 df_all.stch %>% filter(runname == "RS1_SR1EL1.PR")
+df_all.stch %>% filter(runname == "RS1_SR1EL1.open")
 
 df_all.stch %>% filter(runname == "RS1_SR0EL1")
 df_all.stch %>% filter(runname == "RS1_SR1EL0")
@@ -268,16 +269,45 @@ results_all %>%
   group_by(runname) %>% 
   summarise(ERC_PR = max(ERC_PR - lag(ERC_PR), na.rm = TRUE))
 
-results_all %>% filter(runname != "Dev.allTiers") %>% 
+results_all %>% filter(runname != "Dev.allTiers", year >= 2016, runname == "RS3_SR1EL1") %>% 
   group_by(runname, sim) %>%
   summarise(ERC_PR = max(ERC_PR - lag(ERC.final_PR), na.rm = TRUE)) %>% 
-  filter(ERC_PR >= 4.5)
+  filter(ERC_PR >= 3)
   
-results_all %>% filter(runname != "Dev.allTiers") %>% 
+results_all %>% filter(runname != "Dev.allTiers", year >= 2016, runname == "RS1_SR1EL1") %>% 
   group_by(runname, sim) %>%
   mutate(ERC_PR = ERC_PR - lag(ERC.final_PR)) %>% 
   filter(ERC_PR >= 4.5) %>% 
   select(runname, sim, year, ERC_PR, ERC.final_PR)
+
+
+results_all %>% filter(year >= 2016, sim >= 1, runname %in% c("RS1_SR1EL1", "RS1_SR0EL1","RS2_SR1EL1", "RS2_SR0EL1","RS3_SR1EL1", "RS3_SR0EL1")) %>% 
+  group_by(runname, sim) %>%
+  summarise(PV.ERC = sum(ERC.final / 1e6*(1 + 0.075)^(row_number() - 1))) %>% 
+  group_by(runname) %>% 
+  summarise(  PV.ERC.q10   = quantile(PV.ERC, 0.1,na.rm = T),
+           PV.ERC.q25   = quantile(PV.ERC, 0.25, na.rm = T),
+           PV.ERC.q50   = quantile(PV.ERC, 0.5, na.rm = T),
+           PV.ERC.q75   = quantile(PV.ERC, 0.75, na.rm = T),
+           PV.ERC.q90   = quantile(PV.ERC, 0.9, na.rm = T)
+  )
+
+
+results_all %>% select(runname, sim, year, ERC.final.0 = ERC.final) %>% filter(sim > 0, runname == "RS1_SR0EL1") %>%
+  left_join(results_all %>% filter(sim > 0, runname == "RS1_SR1EL1")%>% select(sim, year, ERC.final.1 = ERC.final)) %>% 
+  group_by(sim) %>% 
+  summarise(PV.ERC.0 = sum(ERC.final.0 / 1e6*(1 + 0.075)^(row_number() - 1)),
+         PV.ERC.1 = sum(ERC.final.1 / 1e6*(1 + 0.075)^(row_number() - 1))) %>%
+  mutate(diff.PV.ERC = 1 - PV.ERC.1 / PV.ERC.0 ) %>% 
+  ungroup() %>% 
+  summarise(diff.PV.ERC.q10   = quantile(diff.PV.ERC, 0.1,na.rm = T),
+            diff.PV.ERC.q25   = quantile(diff.PV.ERC, 0.25, na.rm = T),
+            diff.PV.ERC.q50   = quantile(diff.PV.ERC, 0.5, na.rm = T),
+            diff.PV.ERC.q75   = quantile(diff.PV.ERC, 0.75, na.rm = T),
+            diff.PV.ERC.q90   = quantile(diff.PV.ERC, 0.9, na.rm = T))
+
+
+
 
 
 
@@ -316,9 +346,9 @@ fig_projGenFund <-
   geom_bar(stat = "identity", fill = "skyblue2", color = "grey50", width = 0.5) + 
   theme_bw() + 
   RIG.theme() + 
-  scale_x_continuous(breaks = c(2015, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_y_continuous(breaks = seq(0, 100000, 5000), labels = comma(seq(0, 100000, 5000))) + 
-  labs(title = "Projected General fund of the State of Pennsylvania",
+  labs(title = "Projected General fund of the state of Pennsylvania",
        y = "$Million",
        x = NULL)
 fig_projGenFund
@@ -423,7 +453,7 @@ fig_CP.RS1.ERCdist
 # Risk of low funded ratio
 fig.title <- "Probability of funded ratio below 40% in any year up to the given year"
 fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.5% achieved"
-fig_CP.RS1.FR40less <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1") %>% 
+fig_CP.RS1.FR40less <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1", year >= 2016) %>% 
   #mutate(runname = factor(runname, labels = c(lab_s1, lab_s2))) %>%  
   select(runname, year, FR40less) %>% 
   #mutate(FR40less.det = 0) %>% 
@@ -451,7 +481,7 @@ fig_CP.RS1.FR40less$data %>% filter(year == 2045)
 # Risk of sharp increase in ERC/PR
 fig.title <- "Probability of employer contribution rising more than 10% of payroll \nin a 5-year period at any time prior to and including the given year"
 fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.5% achieved"
-fig_CP.RS1.ERChike <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1" ) %>% 
+fig_CP.RS1.ERChike <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1" , year >= 2016) %>% 
   #mutate(runname = factor(runname, labels = c(lab_s1, lab_s2))) %>%  
   select(runname, year, ERC_hike) %>% 
   #mutate(ERChike.det = 0) %>% 
@@ -460,7 +490,7 @@ fig_CP.RS1.ERChike <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1" ) %>%
   geom_point(size = 2, color = RIG.blue) + geom_line(color = RIG.blue) + 
   coord_cartesian(ylim = c(0,25)) + 
   scale_y_continuous(breaks = seq(0,200, 5)) +
-  scale_x_continuous(breaks = c(2015, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_color_manual(values = c("black", RIG.red, RIG.blue, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
   labs(title = fig.title,
@@ -483,7 +513,7 @@ lab.RS3 <- "Scenario 3: \nHigh Volatility"
 # Risk of low funded ratio
 fig.title <- "Probability of funded ratio below 40% in any year up to the given year"
 fig.subtitle <- "Current PSERS funding policy"
-fig_CP.RS23.FR40less <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1" )  ) %>% 
+fig_CP.RS23.FR40less <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1" ), year >= 2016  ) %>% 
   mutate(runname = factor(runname, labels = c(lab.RS1, lab.RS2, lab.RS3))) %>%  
   select(runname, year, FR40less) %>% 
   #mutate(FR40less.det = 0) %>% 
@@ -510,7 +540,7 @@ fig_CP.RS23.FR40less$data %>% filter(year == 2045)
 # Risk of sharp increase in ERC/PR
 fig.title <- "Probability of employer contribution rising more than 10% of payroll \nin a 5-year period at any time prior to and including the given year"
 fig.subtitle <- "Current PSERS funding policy"
-fig_CP.RS23.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1" )) %>% 
+fig_CP.RS23.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1" ), year >= 2016) %>% 
   mutate(runname = factor(runname, labels = c(lab.RS1, lab.RS2, lab.RS3))) %>%  
   select(runname, year, ERC_hike) %>% 
   #mutate(ERChike.det = 0) %>% 
@@ -519,7 +549,7 @@ fig_CP.RS23.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_S
   geom_point(size = 2) + geom_line() + 
   coord_cartesian(ylim = c(0,40)) + 
   scale_y_continuous(breaks = seq(0,200, 5)) +
-  scale_x_continuous(breaks = c(2015, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
   labs(title = fig.title,
@@ -572,7 +602,8 @@ fig_CP.RS23.ERChike$data %>% filter(year == 2045)
 fig.title <- "Probability of employer contribution rising more than 10% of payroll \nin a 5-year period at any time prior to and including the given year"
 fig.subtitle <- "Current PSERS funding policy"
 fig_SR.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR0EL1","RS2_SR0EL1", "RS3_SR0EL1",
-                                                        "RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1")) %>% 
+                                                        "RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1"), 
+                                         year >= 2016) %>% 
   mutate(policy.SR = factor(policy.SR, levels = c(1, 0), labels = c("Current policy", "No risk-sharing")),
          returnScn = factor(returnScn, levels = c("RS1", "RS2", "RS3"), labels = c(lab.RS1, lab.RS2, lab.RS3))) %>%  
   select(policy.SR, returnScn, year, ERC_hike) %>% 
@@ -583,7 +614,7 @@ fig_SR.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR0EL1","RS2_SR0EL1
   geom_point(size = 2) + geom_line() + 
   coord_cartesian(ylim = c(0,45)) + 
   scale_y_continuous(breaks = seq(0,200, 5)) +
-  scale_x_continuous(breaks = c(2015, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
   labs(title = fig.title,
@@ -602,7 +633,7 @@ fig_SR.ERChike$data %>% filter(year == 2045)
 #*************************************************************************
 
 # Deterministic 
-fig.title <- "Employer contribution as a percentage of \nPennsylvania State general fund revenue"
+fig.title <- "Employer contribution as a percentage of \nPennsylvania state general fund revenue"
 fig.subtitle <- "Current PSERS funding policy; Determinisc runs"
 fig_fiscal.det <- results_all %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1"), sim == 0) %>% 
   mutate(returnScn = factor(returnScn, levels = c("RS1", "RS2"), labels = c("Scenario 1: Assumption Achived: \nDeterministic \nAnnual return = 7.5%",
@@ -614,7 +645,7 @@ fig_fiscal.det <- results_all %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1
   geom_point(size = 2) + geom_line() + 
   coord_cartesian(ylim = c(0,20)) + 
   scale_y_continuous(breaks = seq(0,200, 2)) +
-  scale_x_continuous(breaks = c(2015, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
   labs(title = fig.title,
@@ -623,13 +654,13 @@ fig_fiscal.det <- results_all %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1
   guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
   RIG.theme()
 fig_fiscal.det
-fig_fiscal.det$data %>% filter(year == 2045)
+fig_fiscal.det$data #%>% filter(year == 2045)
 
 
 # Risk of sharp increase in ERC/PR
-fig.title <- "Distribution of employer contribution as a percentage of Pennsylvania State general fund revenue \nunder different return scenarios"
+fig.title <- "Distribution of employer contribution as a percentage of Pennsylvania state general fund revenue \nunder different return scenarios"
 fig.subtitle <- "Current PSERS funding policy"
-fig_fiscal.stch <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1")) %>% 
+fig_fiscal.stch <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1"), year >= 2016) %>% 
   select(returnScn, year, ERC_GF.q25, ERC_GF.q50, ERC_GF.q75) %>% 
   gather(var, value, -year, -returnScn) %>% 
   mutate(var       = factor(var, levels = c("ERC_GF.q75", "ERC_GF.q50", "ERC_GF.q25"),
@@ -642,7 +673,7 @@ fig_fiscal.stch <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL
   geom_point(size = 1.5) + geom_line() + 
   coord_cartesian(ylim = c(0,20)) + 
   scale_y_continuous(breaks = seq(0,200, 2)) +
-  scale_x_continuous(breaks = c(2015, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_color_manual(values = c(RIG.red, RIG.blue, RIG.green, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
   labs(title = fig.title,
@@ -651,7 +682,7 @@ fig_fiscal.stch <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL
   guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
   RIG.theme()
 fig_fiscal.stch
-fig_fiscal.stch$data %>% filter(year == 2045)
+fig_fiscal.stch$data %>% filter(year == 2034)
 
 
 
@@ -677,7 +708,7 @@ tab_summary <-
 
 tab_summary
 
-write.xlsx2(tab_summary, paste0(Outputs_folder, "tables.xlsx"), sheetName = "summary", append = TRUE)
+write.xlsx2(tab_summary, paste0(Outputs_folder, "tables.xlsx"), sheetName = "summary")
 
 
 
