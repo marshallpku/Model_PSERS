@@ -5,6 +5,7 @@
 run_sim <- function(Tier_select_,
                     AggLiab_,
                     PR.Tiers_ = PR.Tiers,
+                    DC.Tiers_ = DC.Tiers,
                     i.r_ = i.r,
                     i.r_geoReturn_ = i.r_geoReturn,
                     init_amort_raw_ = init_amort_raw, # amount.annual, year.remaining 
@@ -40,13 +41,24 @@ run_sim <- function(Tier_select_,
   
   # if(Tier_select_ != "sumTiers") init_amort_raw_ %<>% filter(tier == Tier_select_) 
 
-  if(Tier_select_ != "sumTiers") EEC_rate <- tier.param[Tier_select_, "EEC_rate"]
+  if(Tier_select_ != "sumTiers"){
+    if(!DC_reform) EEC_rate <- tier.param[Tier_select_, "EEC_rate"]
+    if(DC_reform)  EEC_rate <- tier.param[Tier_select_, "ScnDC_EEC_DB.rate"]
+  } 
   
   if(Tier_select_ == "sumTiers"){
     
+    if(!DC_reform){
     EEC_baseRate_tCD <- tier.param["tCD", "EEC_rate"]
     EEC_baseRate_tE  <- tier.param["tE", "EEC_rate"]
     EEC_baseRate_tF  <- tier.param["tF", "EEC_rate"]
+    }
+    
+    if(DC_reform){
+      EEC_baseRate_tCD <- tier.param["tCD", "ScnDC_EEC_DB.rate"]
+      EEC_baseRate_tE  <- tier.param["tE",  "ScnDC_EEC_DB.rate"]
+      EEC_baseRate_tF  <- tier.param["tF",  "ScnDC_EEC_DB.rate"]
+    }
     
   } 
   
@@ -181,6 +193,14 @@ run_sim <- function(Tier_select_,
     penSim0$ERC.final <- rep(0, nyear)
     
     
+    
+    penSim0$DC_EEC_tCD <-  DC.Tiers_[, "DC_EEC_tCD"]
+    penSim0$DC_EEC_tE  <-  DC.Tiers_[, "DC_EEC_tE"]
+    penSim0$DC_EEC_tF  <-  DC.Tiers_[, "DC_EEC_tF"]
+    
+    penSim0$DC_ERC_tCD <-  DC.Tiers_[, "DC_ERC_tCD"]
+    penSim0$DC_ERC_tE  <-  DC.Tiers_[, "DC_ERC_tE"]
+    penSim0$DC_ERC_tF  <-  DC.Tiers_[, "DC_ERC_tF"]
         
   }
   
@@ -630,8 +650,16 @@ run_sim <- function(Tier_select_,
            B_PR    = 100 * B / PR,
            ExF     = C - B,
            ExF_PR  = 100 * ExF / PR,
-           ExF_MA  = 100 * ExF / MA,
-           PR.growth = ifelse(year > 1, 100 * (PR / lag(PR) - 1), NA)) %>%
+           ExF_MA  = 100 * ExF / MA, 
+           PR.growth = ifelse(year > 1, 100 * (PR / lag(PR) - 1), NA),
+           
+           DC_EEC = DC_EEC_tCD + DC_EEC_tE + DC_EEC_tF,
+           DC_ERC = DC_ERC_tCD + DC_ERC_tE + DC_ERC_tF,
+           
+           DC_ERC_PR.tEF = 100 * DC_ERC / (PR_tE + PR_tF),
+           DC_ERC_PR     = 100 * DC_ERC / PR
+           
+           ) %>%
     select(runname, sim, year, everything())
   
   return(penSim_results)

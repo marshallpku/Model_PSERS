@@ -12,6 +12,7 @@ source("PSERS_Data_MemberData_AV2015.R")
 
 load("Data_inputs/PSERS_PlanInfo_AV2015.RData")    # for all tiers
 load("Data_inputs/PSERS_MemberData_AV2015.RData")  # for all tiers
+load("Data_inputs/DC_rate.tot.RData")              
 
 init_beneficiaries_all %<>% filter(age >= 25) 
 
@@ -259,6 +260,8 @@ liab.tF <- get_indivLab("tF",
                         liab.disb.ca.tF)
 
 
+liab.tE$active %>% filter(year == 2017, ea == 30) %>% select(year, ea, age, DC_EEC)
+
 
 #*********************************************************************************************************
 # 5. Aggregate actuarial liabilities, normal costs and benenfits ####
@@ -304,11 +307,19 @@ if(paramlist$tier == "sumTiers"){
   PR.Tiers <- NULL 
 }
     
+if(paramlist$tier == "sumTiers"){  
+  DC.Tiers <- AggLiab.tCD$active %>% as.data.frame %>% select(year, DC_EEC_tCD = DC_EEC.sum, DC_ERC_tCD = DC_ERC.sum)  %>% 
+    left_join(AggLiab.tE$active  %>% as.data.frame %>% select(year, DC_EEC_tE  = DC_EEC.sum, DC_ERC_tE  = DC_ERC.sum)) %>% 
+    left_join(AggLiab.tF$active  %>% as.data.frame %>% select(year, DC_EEC_tF  = DC_EEC.sum, DC_ERC_tF  = DC_ERC.sum)) %>% 
+    as.matrix
+} else {
+  DC.Tiers <- NULL 
+}
 
 
-AggLiab.tCD$active
-AggLiab.tE$active
-AggLiab.tF$active
+# AggLiab.tCD$active
+# AggLiab.tE$active
+# AggLiab.tF$active
 
 
 #*********************************************************************************************************
@@ -363,6 +374,7 @@ var_display.cali1 <- c("sim", "year", "FR","FR_MA", "MA", "AA", "AL","UAAL",
                       #"PR",
                       #"NC","SC",
                       "ERC.final_PR",
+                      "DC_ERC_PR",
                       "NC_PR", "SC_PR", 
                       "EEC_PR",
                       "B",
@@ -430,6 +442,8 @@ df_all.stch
 
 paramlist$salgrowth_amort
 
+
+liab.tE$active %>% filter(year == 2017, ea == age) %>%  select(year, age, ea, sx, starts_with("NCx"))
 
 
 

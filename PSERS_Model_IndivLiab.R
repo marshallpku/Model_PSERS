@@ -50,15 +50,15 @@ get_indivLab <- function(Tier_select_,
   # paramlist_       =  paramlist
   # Global_paramlist_ =  Global_paramlist
    
-  # Tier_select_ = "tCD"
-  # decrement.model_ = decrement.model.tCD
-  # salary_          = salary.tCD
-  # benefit_         = benefit.tCD
-  # benefit.disb_    = benefit.disb.tCD
-  # #bfactor_         = bfactor.tCD
-  # mortality.post.model_ = mortality.post.model.tCD
-  # liab.ca_ = liab.ca.tCD
-  # liab.disb.ca_ = liab.disb.ca.tCD
+  # Tier_select_ = "tE"
+  # decrement.model_ = decrement.model.tE
+  # salary_          = salary.tE
+  # benefit_         = benefit.tE
+  # benefit.disb_    = benefit.disb.tE
+  # #bfactor_         = bfactor.tE
+  # mortality.post.model_ = mortality.post.model.tE
+  # liab.ca_ = liab.ca.tE
+  # liab.disb.ca_ = liab.disb.ca.tE
   # init_terms_all_  = init_terms_all
   # paramlist_ = paramlist
   # Global_paramlist_ = Global_paramlist
@@ -76,10 +76,13 @@ v.yos    <- tier.param[Tier_select_, "v.yos"]
 cola     <- tier.param[Tier_select_, "cola"]
 #EEC.rate <- tier.param[Tier_select_, "EEC.rate"]
 
+EEC_DC.rate <- tier.param[Tier_select_, "ScnDC_EEC_DC.rate"]
+bfactor.reduction <- ifelse(DC_reform, tier.param[Tier_select_, "ScnDC_bf.reduction"], 0)
+bfactor <- bfactor * (1 - bfactor.reduction)
+
 
 init_terminated_ <-  get_tierData(init_terms_all_, Tier_select_)
-
-
+  
 #*************************************************************************************************************
 #                               1. Preparation                        #####                  
 #*************************************************************************************************************
@@ -102,6 +105,7 @@ liab.active <- expand.grid(start.year = min.year:(init.year + nyear - 1) ,
   mutate(year = start.year + age - ea) %>%  # year index in the simulation)
   arrange(start.year, ea, age) %>% 
   left_join(salary_) %>%
+  left_join(DC_rate.tot) %>% 
 # left_join(.benefit) %>% # must make sure the smallest age in the retirement benefit table is smaller than the single retirement age. (smaller than r.min with multiple retirement ages)
   left_join(decrement.model_) %>% 
   left_join(mortality.post.model_ %>% filter(age == age.r) %>% select(age, ax.r.W)) %>%
@@ -114,6 +118,11 @@ liab.active <- expand.grid(start.year = min.year:(init.year + nyear - 1) ,
   # Calculate salary and benefits
   mutate(
     yos= age - ea,
+    
+    # PSERS: DC contribution 
+    DC_rate.tot = ifelse(Tier_select_ == "tCD", 0, DC_rate.tot),
+    DC_EEC      = sx * EEC_DC.rate,
+    DC_ERC      = sx * max(0, (DC_rate.tot - EEC_DC.rate)),
     
     # years of service
     Sx = ifelse(age == min(age), 0, lag(cumsum(sx))),  # Cumulative salary
@@ -710,7 +719,7 @@ var.names <- c("sx", ALx.laca.method, NCx.laca.method,
                      ALx.v.method, NCx.v.method, 
                      ALx.death.method, NCx.death.method,
                      ALx.disb.method, NCx.disb.method,
-                     "PVFBx.laca", "PVFBx.v", "PVFBx.death", "PVFBx.disb", "Bx.laca", "Bx.disb")
+                     "PVFBx.laca", "PVFBx.v", "PVFBx.death", "PVFBx.disb", "Bx.laca", "Bx.disb", "DC_EEC", "DC_ERC")
 liab.active %<>% 
   filter(year %in% seq(init.year, len = nyear)) %>%
   select(year, ea, age, one_of(var.names)) %>%

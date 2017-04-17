@@ -104,6 +104,9 @@ get_AggLiab <- function( Tier_select_,
            
            PR.tot  = sx * number.a,
            
+           DC_EEC.tot = DC_EEC * number.a,
+           DC_ERC.tot = DC_ERC * number.a,
+           
            runname = runname)
   
   active.agg <- liab_$active %>%  
@@ -128,6 +131,9 @@ get_AggLiab <- function( Tier_select_,
       PVFBx.av.sum   = sum(PVFBx.av.tot,   na.rm = TRUE),
       
       PR.sum    = sum(PR.tot,  na.rm = TRUE),
+      
+      DC_EEC.sum = sum(DC_EEC.tot, na.rm = TRUE),
+      DC_ERC.sum = sum(DC_ERC.tot, na.rm = TRUE),
       
       nactives  = sum(number.a,  na.rm = TRUE)) %>% 
     # mutate(AL = ALx.laca.sum + ALx.v.sum + ALx.death.sum + ALx.disb.sum + ALx.av.sum,

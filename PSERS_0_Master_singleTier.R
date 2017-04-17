@@ -13,6 +13,9 @@ Tier_select <- paramlist$tier
 
 load("Data_inputs/PSERS_PlanInfo_AV2015.RData")    # for all tiers
 load("Data_inputs/PSERS_MemberData_AV2015.RData")  # for all tiers
+load("Data_inputs/DC_rate.tot.RData")             
+
+init_beneficiaries_all %<>% filter(age >= 25) 
 
 
 pct.init.ret.la <-  0.75
@@ -102,7 +105,7 @@ source("PSERS_Model_Demographics.R")
 gc()
 pop <- get_Population()
 
-pop$la %>% filter(year == 2015, year.r == 2015, number.la !=0)
+# pop$la %>% filter(year == 2015, year.r == 2015, number.la !=0)
 
 #*********************************************************************************************************
 # 3. Actuarial liabilities and benefits for contingent annuitants and survivors ####

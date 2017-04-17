@@ -756,7 +756,7 @@ ggsave(file = paste0(Outputs_folder, "projGenFun.png"),  fig_projGenFund,  heigh
 
 
 
-
+fig_fiscal.stch$data
 
 
 
