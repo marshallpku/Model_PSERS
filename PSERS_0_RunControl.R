@@ -169,7 +169,7 @@ for(runName in runList$runname ){
   paramlist$pct.ca.F <-  0.25
   
   
- 
+  
    
  # Investment returns
   paramlist$seed <- 1234
@@ -194,6 +194,13 @@ for(runName in runList$runname ){
   }
 
 }
+
+
+
+amort_cd(212607844, 0.0725, 7, end = F)
+
+
+
 
 
 
