@@ -302,7 +302,7 @@ run_sim <- function(Tier_select_,
    AL.year1 <- penSim0$AL[1]
    UAAL.year1 <- AL.year1 - AA.year1
    
-   factor.initAmort <- UAAL.year1/ 37335764000 # AV2016 page91
+   factor.initAmort <- UAAL.year1/ 42723895000   # # AV2016 page17  AV2015 value: 37335764000 
 
    
         
@@ -575,7 +575,7 @@ run_sim <- function(Tier_select_,
       #                               PSERS: Limit ERC rate at model year 2015 (FY 2015-2016) to 25%
       #**************************************************************************************************************
       
-      if((j + init.year -1) == 2015 & k != -1) penSim$ERC.final[j] <- with(penSim, PR[j] * 0.25)
+      if((j + init.year -1) == 2016 & k != -1) penSim$ERC.final[j] <- with(penSim, PR[j] * 0.295)
       
       
       

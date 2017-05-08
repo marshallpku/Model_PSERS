@@ -63,6 +63,12 @@ source("Functions.R")
 # 1. Assume all terms take a lump sum benefit equal to the present value 
 # 2. Assume members are elgible for death benefit only after they are eligible for early or normal retirement. Assume the benefit
 
+# 3. Calculate the number of actives with yos <= 4, who are supposed to be Class E/F members according to rule (members after 2011)
+  # However, the number of activs with yos <= 4 (68271) is greater than the number of Class E/F members in the AV (57921). 
+  # In the model, actual number of E/F members (57921) are allocated to tEF, and the rest are allocated to tCD. 
+# 4. Assume the average salay of Class F members is 35% higher than that of Class E members. 
+# 5. 2016 ERC cap = 29.5%
+
 
 ## For PSERS death benefit: 
 #    1. Lump sum death benefit equal to PV of future benefit (Bx.death * ax.deathBen);
@@ -136,6 +142,8 @@ for(runName in runList$runname ){
  # Benefit provisions
   paramlist$r.min  <- 55 # this is not required age of retirement benefit. 
   paramlist$r.max  <- 74 
+  #
+  
   paramlist$bfactor <- 0.025
   
   # paramlist$r.full <- 50 # age at which vested terms are assumed to retire(Temp, should use r.vben)
@@ -196,8 +204,6 @@ for(runName in runList$runname ){
 }
 
 
-
-amort_cd(212607844, 0.0725, 7, end = F)
 
 
 

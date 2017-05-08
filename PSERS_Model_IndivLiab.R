@@ -75,10 +75,12 @@ r.vben   <- tier.param[Tier_select_, "r.vben"]
 v.yos    <- tier.param[Tier_select_, "v.yos"]
 cola     <- tier.param[Tier_select_, "cola"]
 #EEC.rate <- tier.param[Tier_select_, "EEC.rate"]
+bfactor  <- tier.param[Tier_select_, "bfactor"]
 
-EEC_DC.rate <- tier.param[Tier_select_, "ScnDC_EEC_DC.rate"]
+
+EEC_DC.rate       <- tier.param[Tier_select_, "ScnDC_EEC_DC.rate"]
 bfactor.reduction <- ifelse(DC_reform, tier.param[Tier_select_, "ScnDC_bf.reduction"], 0)
-bfactor <- bfactor * (1 - bfactor.reduction)
+bfactor           <- bfactor * (1 - bfactor.reduction)
 
 
 init_terminated_ <-  get_tierData(init_terms_all_, Tier_select_)

@@ -7,11 +7,11 @@ gc()
 
 
 # Plan information
-source("PSERS_Data_PlanInfo_AV2015.R")
-source("PSERS_Data_MemberData_AV2015.R")
+source("PSERS_Data_PlanInfo_AV2016.R")
+source("PSERS_Data_MemberData_AV2016.R")
 
-load("Data_inputs/PSERS_PlanInfo_AV2015.RData")    # for all tiers
-load("Data_inputs/PSERS_MemberData_AV2015.RData")  # for all tiers
+load("Data_inputs/PSERS_PlanInfo_AV2016.RData")    # for all tiers
+load("Data_inputs/PSERS_MemberData_AV2016.RData")  # for all tiers
 load("Data_inputs/DC_rate.tot.RData")              
 
 init_beneficiaries_all %<>% filter(age >= 25) 
@@ -81,9 +81,9 @@ mortality.post.model.tF <- list.decrements.tF$mortality.post.model
 #*****************************************************
 
 # 1. PVFB and AL of actives
-paramlist$bfactor <- paramlist$bfactor * 1.1
-
-
+# paramlist$bfactor <- paramlist$bfactor * 1.1
+tier.param %<>% mutate(bfactor = bfactor * 1.1) 
+row.names(tier.param) <- tier.param$tier  # using "mutate" removes row names, need to add row names back
 
 ## Exclude selected type(s) of initial members
  # init_actives_all %<>% mutate(nactives = 0) 
@@ -142,10 +142,10 @@ i.r <- gen_returns()
 #i.r[, 3] <-  c(paramlist$ir.mean, paramlist$ir.mean/2, rep(paramlist$ir.mean, Global_paramlist$nyear - 2))
 
 
-
+# Investment return (MV) for 2011 - 2015
 i.r_supplement <-  
-  cbind(rep(paramlist$i, 4),
-        matrix(c(0.0343, 0.0796, 0.01491, 0.0304), 4, Global_paramlist$nsim + 1))
+  cbind(rep(paramlist$i, 5),
+        matrix(c(0.0343, 0.0796, 0.01491, 0.0304, 0.0129), 5, Global_paramlist$nsim + 1))
 
 i.r_geoReturn <- rbind(i.r_supplement, i.r) %>% 
   as.data.frame %>% 
@@ -156,7 +156,7 @@ i.r_geoReturn[1:9, ] <- rbind(i.r_supplement, i.r)[1:9,] %>%
   mutate_all(funs(get_rollingReturns(., "expanding"))) %>% 
   as.matrix()
 
-i.r_geoReturn <- i.r_geoReturn[-(1:4),]
+i.r_geoReturn <- i.r_geoReturn[-(1:5),]
 
 
 #*********************************************************************************************************
@@ -191,8 +191,8 @@ entrants_dist.tE  <- get_entrantsDist_tier("tE") * share.tE
 entrants_dist.tF  <- get_entrantsDist_tier("tF") * share.tF
 
 
-benefit.tCD
-benefit.disb.tCD
+# benefit.tCD
+# benefit.disb.tCD
 
 
 #*********************************************************************************************************
@@ -260,7 +260,7 @@ liab.tF <- get_indivLab("tF",
                         liab.disb.ca.tF)
 
 
-liab.tE$active %>% filter(year == 2017, ea == 30) %>% select(year, ea, age, DC_EEC)
+# liab.tE$active %>% filter(year == 2017, ea == 30) %>% select(year, ea, age, DC_EEC)
 
 
 #*********************************************************************************************************
@@ -315,6 +315,11 @@ if(paramlist$tier == "sumTiers"){
 } else {
   DC.Tiers <- NULL 
 }
+
+
+
+AggLiab.sumTiers$term
+
 
 
 # AggLiab.tCD$active
