@@ -99,7 +99,7 @@ returnScenarios <- read_excel(path_RunControl, sheet="returns", skip = 0) %>% fi
 
 # Import global parameters
 Global_paramlist <- read_excel(path_RunControl, sheet="GlobalParams") %>% filter(!is.na(init.year)) %>% 
-                 as.list
+                    as.list
 
 
 #### Run Models and Save  ####
@@ -191,15 +191,15 @@ for(runName in runList$runname ){
   
   
 
-  if(paramlist$tier == "sumTiers"){
-    source("PSERS_0_Master_allTiers.R")
-    save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, "_", runName, ".RData"))
-
-  } else {
-    Tier_select <- paramlist$tier
-    source("PSERS_0_Master_singleTier.R")
-    save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, runName, ".RData"))
-  }
+  # if(paramlist$tier == "sumTiers"){
+  #   source("PSERS_0_Master_allTiers.R")
+  #   save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, "_", runName, ".RData"))
+  # 
+  # } else {
+  #   Tier_select <- paramlist$tier
+  #   source("PSERS_0_Master_singleTier.R")
+  #   save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, runName, ".RData"))
+  # }
 
 }
 

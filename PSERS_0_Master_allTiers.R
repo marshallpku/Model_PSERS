@@ -82,8 +82,46 @@ mortality.post.model.tF <- list.decrements.tF$mortality.post.model
 
 # 1. PVFB and AL of actives
 # paramlist$bfactor <- paramlist$bfactor * 1.1
-tier.param %<>% mutate(bfactor = bfactor * 1.1) 
+tier.param %<>% mutate(bfactor = bfactor * 1.11) 
 row.names(tier.param) <- tier.param$tier  # using "mutate" removes row names, need to add row names back
+
+
+# 2. AL and PVFB for actives and NC 
+# Issue: PVFB too high, AL too low => PVFNC too high
+#        NC too highs
+
+# Effect of calibrating factors:
+#    - benefit factor: +AL, +PVFB, +PVFNC, +NC
+#    - higher growth in early years and slower growth in later years, with the same career growth:
+#      0PVFB, -PVFNC, +AL, 0NCRate, +NC
+
+salgrowth.original <- salgrowth
+
+salInc20_60 <- prod((salgrowth %>% filter(age %in% 19:60))$salgrowth + 1)
+
+salInc20_60
+
+sal.adj <- TRUE
+f.adj <- 1
+f1 <- 0.05   
+f2 <- -0.06
+
+f1 <- ifelse(sal.adj, 1 + f1 * f.adj, 1)
+f2 <- ifelse(sal.adj, 1 + f2 * f.adj, 1)
+
+#salgrowth <- salgrowth.original
+salgrowth %<>% mutate(salgrowth.unadj = salgrowth,
+                            
+                            # adj.factor.add = 0, # 0.0075,
+                            # salgrowth = salgrowth.unadj + adj.factor.add
+                            
+                            adj.factor = c(seq(f1, f2, length.out = 36), rep(f2, 20)),
+                            salgrowth = salgrowth.unadj * adj.factor
+)
+
+salgrowth
+
+prod((salgrowth %>% filter(age %in% 19:60))$salgrowth + 1)
 
 ## Exclude selected type(s) of initial members
  # init_actives_all %<>% mutate(nactives = 0) 
@@ -93,42 +131,6 @@ row.names(tier.param) <- tier.param$tier  # using "mutate" removes row names, ne
  
 
  
-
-# 
-# ### Calibration:
-# 
-# # 1. PVFB.retirees
-#   # By calibrating benefit factor for survivors   
-# 
-# calibFactor_factor.ca <- 1
-# tier.param %<>% mutate(factor.ca = pmin(1.1, factor.ca * calibFactor_factor.ca))
-# row.names(tier.param) <- tier.param$tier
-# 
-# 
-# # 2. PVFB.act
-#   # By calibrating benefit factor for service retirees
-# calibFactor_bfactor <- 1.08
-# bfactor %<>% mutate_each(funs(pmin(1, .*calibFactor_bfactor)), -yos )
-# 
-# 
-# # 3. EEC
-#   # Aggregate EEC rate (total EEC / projected payroll) in 2016 AV is about 9.75%
-#   # Tier specific ERC rates are no more than 9%. 
-#   # Aggergate EEC rate is 9.64% after calibration  
-# 
-# calibFactor_EEC.rate <- 1.1
-# tier.param %<>% mutate(EEC.rate = pmin(1.1, EEC.rate * calibFactor_EEC.rate))
-# row.names(tier.param) <- tier.param$tier
-# 
-# 
-# # 3. Initial benefit payments
-#  # calibrated to match the budgeted non-DROP payment for FY2016-2017  
-# init_beneficiaries_all %<>% mutate(benefit = benefit * 0.989589)
-# init_retirees.ca_all   %<>% mutate(benefit = benefit * 0.989589)
-# init_retirees.la_all   %<>% mutate(benefit = benefit * 0.989589)
-# init_disb.ca_all       %<>% mutate(benefit = benefit * 0.989589)
-# init_disb.la_all       %<>% mutate(benefit = benefit * 0.989589)
-
 
 
 
@@ -317,10 +319,46 @@ if(paramlist$tier == "sumTiers"){
 }
 
 
+#***************************************************************
+## PSERS calibration: Initial vested who are not in pay status
+#***************************************************************
 
-AggLiab.sumTiers$term
+# Assume the PVFB for initial vestees are paid up through out the next 50 years. 
+
+AL.init.v <- 1829457000 # AV2016 pdf p17
+
+df_init.vested <- data.frame(
+  year = 1:51 + Global_paramlist$init.year - 1,
+  B.init.v.sum = c(0, amort_cd(AL.init.v, paramlist$i, 50, TRUE))
+) %>% 
+  mutate(ALx.init.v.sum = ifelse(year == Global_paramlist$init.year, AL.init.v, 0))
+
+for(i_v in 2:nrow(df_init.vested)){
+  df_init.vested$ALx.init.v.sum[i_v] <- 
+    with(df_init.vested, (ALx.init.v.sum[i_v - 1] - B.init.v.sum[i_v - 1]) * (1 + paramlist$i))
+}
+
+AggLiab.sumTiers$term %<>% 
+  as.data.frame() %>% 
+  left_join(df_init.vested) %>% 
+  mutate_each(funs(na2zero)) %>% 
+  mutate(ALx.v.sum = ALx.v.sum + ALx.init.v.sum,
+         B.v.sum   = B.v.sum + B.init.v.sum) %>% 
+  as.matrix
 
 
+
+#************************************************************************
+## PSERS calibration: year-1 lump sum benefit payment as external fund
+#************************************************************************  
+
+B.lumpSumY1 <- 686988000
+
+AggLiab.sumTiers$la %<>%
+  data.frame %>% 
+  mutate(B.la.sum = ifelse(year == 2016, B.la.sum + B.lumpSumY1, B.la.sum),
+         ALx.la.sum = ifelse(year == 2016, ALx.la.sum + B.lumpSumY1, ALx.la.sum)) %>% 
+  as.matrix
 
 # AggLiab.tCD$active
 # AggLiab.tE$active
