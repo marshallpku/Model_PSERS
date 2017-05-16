@@ -305,19 +305,32 @@ run_sim <- function(Tier_select_,
    factor.initAmort <- UAAL.year1/ 42723895000   # # AV2016 page17  AV2015 value: 37335764000 
 
    
-        
+  
+   ## Adjustment for PSERS
+   # The payments for 2016 experience and assumption changes will start in 2017(FY2017-2018), 
+   # therefore the annual payment should be calculated based on the outstanding balance on 7/1/2017,
+   # which is equal to the 2016 balance muliplied by (1 + discount rate 7.25%).
+   # The payment schedule in Model_Sim must be adjusted accordingly. (payment starts in the 2nd column)
+  
+   init_amort_raw_ %<>% 
+     mutate(balance = balance * factor.initAmort,
+            balance = ifelse(year.est == 2017, balance * (1 + i), balance))
    
-  if(useAVamort){
-    SC_amort.init.list <- mapply(amort_LG, p = init_amort_raw_$balance * factor.initAmort , m = init_amort_raw_$year.remaining, method = init_amort_raw_$amort.method,
+   if(useAVamort){
+     SC_amort.init.list <- mapply(amort_LG, p = init_amort_raw_$balance , m = init_amort_raw_$year.remaining, method = init_amort_raw_$amort.method,
                                  MoreArgs = list(i = i, g = salgrowth_amort, end = FALSE), SIMPLIFY = F)
 
     for(j in 1:nrow(SC_amort.init)){
-      SC_amort.init[j, 1:init_amort_raw_$year.remaining[j]] <- SC_amort.init.list[[j]]
+      
+      # PSERS: payments for 2016 experience and changes start in 2017.
+      if(j < 9)  SC_amort.init[j, 1:init_amort_raw_$year.remaining[j]] <- SC_amort.init.list[[j]]
+      if(j >=9)  SC_amort.init[j, (1:init_amort_raw_$year.remaining[j]) + 1 ] <- SC_amort.init.list[[j]]
+      
     }
   }
 
   # SC_amort.init
-   
+
    
   nrow.initAmort <- nrow(SC_amort.init)
 
@@ -552,7 +565,12 @@ run_sim <- function(Tier_select_,
       if(useERC_cap & k!= -1 ){
         
         if(j == 1){
-          penSim$ERC.final[j] <- penSim$ERC[j]
+          #PSERS: Limit ERC rate at model year 2016 (FY 2016-2017) to 29.5%
+          
+          penSim$ERC.final[j] <- ifelse(penSim$ERC[j]/penSim$PR[j] >= 0.295,
+                                        0.295 * penSim$PR[j],
+                                        penSim$ERC[j])
+          
         } else {
           # Constraint 1: ERC.final as a % of payroll year in j+1 cannot be greater than the rate + 4.5% in year j
           penSim$ERC.final[j] <- ifelse(penSim$ERC[j]/penSim$PR[j] >= (penSim$ERC.final[j - 1]/penSim$PR[j - 1] + 0.045),
@@ -567,19 +585,8 @@ run_sim <- function(Tier_select_,
       } else penSim$ERC.final[j] <- penSim$ERC[j]
       
       if(useERC_floor & k!= -1) penSim$ERC.final[j] <- max(penSim$ERC.final[j], penSim$NC[j] - penSim$EEC[j]  )
-      
-      
-      
-      
-      #**************************************************************************************************************
-      #                               PSERS: Limit ERC rate at model year 2015 (FY 2015-2016) to 25%
-      #**************************************************************************************************************
-      
-      if((j + init.year -1) == 2016 & k != -1) penSim$ERC.final[j] <- with(penSim, PR[j] * 0.295)
-      
-      
-      
-      
+  
+    
       
       # C(j)
       penSim$C[j] <- with(penSim, EEC[j] + ERC.final[j])

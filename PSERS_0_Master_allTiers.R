@@ -52,6 +52,9 @@ init_retirees.la_all %>% summarise(sumb = sum(nretirees.la * benefit))
 
 
 
+
+
+
 #*********************************************************************************************************
 # 1.2 Create decrement tables ####
 #*********************************************************************************************************
@@ -119,9 +122,16 @@ salgrowth %<>% mutate(salgrowth.unadj = salgrowth,
                             salgrowth = salgrowth.unadj * adj.factor
 )
 
-salgrowth
+# salgrowth
 
-prod((salgrowth %>% filter(age %in% 19:60))$salgrowth + 1)
+# prod((salgrowth %>% filter(age %in% 19:60))$salgrowth + 1)
+
+
+# 3. Amortization payments are too low with salary growth assumption of 3.5%
+
+
+
+
 
 ## Exclude selected type(s) of initial members
  # init_actives_all %<>% mutate(nactives = 0) 
@@ -145,9 +155,13 @@ i.r <- gen_returns()
 
 
 # Investment return (MV) for 2011 - 2015
+# Return of 2011-2013: AV2016 pdf page 15
+# Return of 2015: CAFR2015 pdf page 78 
+# Return of 2016: CAFR2016 pdf page 76
+
 i.r_supplement <-  
   cbind(rep(paramlist$i, 5),
-        matrix(c(0.0343, 0.0796, 0.01491, 0.0304, 0.0129), 5, Global_paramlist$nsim + 1))
+        matrix(c(0.0343, 0.0796, 0.1491, 0.0304, 0.0129), 5, Global_paramlist$nsim + 1))
 
 i.r_geoReturn <- rbind(i.r_supplement, i.r) %>% 
   as.data.frame %>% 
@@ -410,18 +424,20 @@ var_display2 <- c("Tier", "sim", "year", "FR_MA", "MA", "AL", "EEC","ERC","ERC_P
 
 
 
-var_display.cali1 <- c("sim", "year", "FR","FR_MA", "MA", "AA", "AL","UAAL", 
+var_display.cali1 <- c("sim", "year", 
+                       #"FR",
+                       "FR_MA", 
+                       "MA", "AA", "AL","UAAL", 
                        "PVFB", "AL.act",
-                     
                       "NC","SC", "ERC", "ERC.final", "EEC",
                       #"PR",
                       #"NC","SC",
                       "ERC.final_PR",
-                      "DC_ERC_PR",
-                      "NC_PR", "SC_PR", 
+                      #"DC_ERC_PR",
+                      "NC_PR", 
+                      "SC_PR", 
                       "EEC_PR",
-                      "B",
-                      "UAAL")
+                      "B")
 
 var_display.cali2 <- c("sim", "year", 
                        "AL.act", "AL.act.v", "AL.la", "AL.ca", "AL.disb.la", "AL.term",
@@ -432,6 +448,9 @@ var_display.cali2 <- c("sim", "year",
 
 kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display.cali1)), digits = 2) %>% print 
 kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display.cali2)), digits = 2) %>% print 
+
+kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(year, i.r, i.r_geoReturn,PR, PR_tCD,PR_tE,PR_tF, EEC.totRate_tCD, EEC.totRate_tE, EEC.totRate_tF), digits = 5) %>% print 
+
 
 
 kable(penSim_results.sumTiers %>% filter(sim == -1) %>% select(one_of(var_display1)), digits = 2) %>% print 

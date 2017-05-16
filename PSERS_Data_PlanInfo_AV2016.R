@@ -143,6 +143,10 @@ init_amort_raw <- read_ExcelRange(file_planInfo, sheet = "Init_amort", colTypes=
 init_amort_raw %<>% 
   mutate_at(vars(-tier, -type, -amort.method), funs(as.numeric))
 
+
+
+
+
 #init_amort_raw %>% str
 #init_amort_raw
 
@@ -152,10 +156,10 @@ init_amort_raw %<>%
 # Check year-1 payments 
 
 # x <- mapply(amort_cp, p = init_amort_raw$balance, m = init_amort_raw$year.remaining,
-#        MoreArgs = list(i = 0.0725, g = 0.035, end = TRUE))
+#        MoreArgs = list(i = 0.0725, g = 0.035, end = F))
 # 
 # pay1 <- numeric(length(x))
-# for (i in 1:length(pay1)) pay1[i] <- x[[i]][1]
+# for (i in 1:length(pay1)) pay1[i] <- x[[i]][3]
 # 
 # df.amort <- data.frame(pay1.AV = init_amort_raw$annual.payment,
 #                        pay1.calc = pay1) %>%
@@ -165,6 +169,9 @@ init_amort_raw %<>%
 # df.amort %>% summarise(pay.tot.AV = sum(pay1.AV),
 #                        pay.tot.calc = sum(pay1.calc)) %>%
 #   mutate(diff.pct = 100 * pay.tot.calc/pay.tot.AV - 100)
+
+
+
 
 
 #*********************************************************************************************************
