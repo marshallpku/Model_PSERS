@@ -1,16 +1,20 @@
 
+# use run "RS1_SR1EL1" in RunControl.xlsx
+# PSERS_0_RunColtrol without sourcing the master file.
+# Run PSERS_0_Master_allTiers upto the line "source("PSERS_Model_IndivLiab.R")".
 
 
 
-decrement.model_ = decrement.model
-salary_          = salary
-benefit_         = benefit
-benefit.disb_    = benefit.disb
+
+decrement.model_ = decrement.model.tE
+salary_          = salary.tE
+benefit_         = benefit.tE
+benefit.disb_    = benefit.disb.tE
 init_terms_all_ = init_terms_all # get_tierData(init_terms_all, Tier_select)
-Tier_select_     = Tier_select
-mortality.post.model_ = mortality.post.model
-liab.ca_         = liab.ca
-liab.disb.ca_ = liab.disb.ca
+Tier_select_     = "tE"
+mortality.post.model_ = mortality.post.model.tE
+liab.ca_         = liab.ca.tE
+liab.disb.ca_ = liab.disb.ca.tE
 paramlist_       =  paramlist
 Global_paramlist_ =  Global_paramlist
 
@@ -106,10 +110,9 @@ liab.active <- expand.grid(start.year = min.year:(init.year + nyear - 1) ,
   )
 
 
-liab.active %>% select(ea, age, ax.disb.la, ax.vben)
+#liab.active %>% select(ea, age, ax.disb.la, ax.vben)
+#liab.active %>% filter(start.year == 2016, ea == 30) %>% select(start.year, ea, age, sx, Bx.DC, Bx)
 
-
-liab.active %>% filter(start.year == 2016, ea == 30) %>% select(start.year, ea, age, sx, Bx.DC, Bx)
 #*************************************************************************************************************
 #                        2.1  ALs and NCs of life annuity and contingent annuity for actives             #####                  
 #*************************************************************************************************************

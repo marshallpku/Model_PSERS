@@ -83,6 +83,33 @@ source("Functions.R")
 # PSERS: expand qxm.post.male/female with qxm.pre.male/female
 
 
+# Notes on pension reform (introducing DC component and lowering DB benefits)
+ # 1. Employee contribution rates (specified in tier.param)
+ #  - EEC to DB plan: 3.75% for class E, 5.15% for class F
+ #  - EEC to DC plan: 3.75% for class E, 5.15% for class F
+ 
+ # 2. Employer contribution rates
+ #  - ERC to DB plan: ADC - EEC for DB plan
+ #  - ERC to DC plan: (PSERS_DC_ContRate.R) 
+ #     - For each entry age, ERC rate is determined so that the PVFB at entry age for the combined DC + DB benefits is equal to the PVFB at entry age 
+ #       for the re-reform DB-only benefits, under deteriministic annual return of 7.25%
+
+ # 3. DC account
+ #  -  Since the main purpose of this study it to look at the impact of the DC reform on ERC, the DC account of employees and the DC benefit payments are not tracked
+ #  -  The DC balance/benefit upon retirement can be calculated separately using results from Model_IndivLiab.R
+
+ # 4. Only retirement benefits is reduced.
+
+
+
+
+
+
+
+
+
+
+
 
 #### Model Parameters ####
 #********************************************************************************
@@ -191,15 +218,15 @@ for(runName in runList$runname ){
   
   
 
-  if(paramlist$tier == "sumTiers"){
-    source("PSERS_0_Master_allTiers.R")
-    save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, "_", runName, ".RData"))
-
-  } else {
-    Tier_select <- paramlist$tier
-    source("PSERS_0_Master_singleTier.R")
-    save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, runName, ".RData"))
-  }
+  # if(paramlist$tier == "sumTiers"){
+  #   source("PSERS_0_Master_allTiers.R")
+  #   save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, "_", runName, ".RData"))
+  # 
+  # } else {
+  #   Tier_select <- paramlist$tier
+  #   source("PSERS_0_Master_singleTier.R")
+  #   save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, runName, ".RData"))
+  # }
 
 }
 
