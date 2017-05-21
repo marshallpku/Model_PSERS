@@ -24,14 +24,62 @@ init_beneficiaries_all %<>% filter(age >= 25)
  # init_terms_all %<>% mutate(nterm = 0)
  # init_disb_all  %<>% mutate(ndisb = 0) 
 
+init_retirees_all <- bind_rows(
+  init_retirees_all,
+  init_retirees_all %>% filter(str_detect(planname, "tE|tF")) %>% 
+    mutate(planname = str_replace(planname,"tE", "tNE"),
+           planname = str_replace(planname,"tF", "tNF"),
+           nretirees = 0,
+           benefit   = 0)
+) 
 
-pct.init.ret.la <-  0.75
+
+init_disb_all <- bind_rows(
+  init_disb_all,
+  init_disb_all %>% filter(str_detect(planname, "tE|tF")) %>% 
+    mutate(planname = str_replace(planname,"tE", "tNE"),
+           planname = str_replace(planname,"tF", "tNF"),
+           ndisb = 0,
+           benefit = 0)
+) 
+
+init_beneficiaries_all <- bind_rows(
+  init_beneficiaries_all,
+  init_beneficiaries_all %>% filter(str_detect(planname, "tE|tF")) %>% 
+    mutate(planname = str_replace(planname,"tE", "tNE"),
+           planname = str_replace(planname,"tF", "tNF"),
+           nbeneficiaries = 0,
+           benefit   = 0)
+) 
+
+init_terms_all <- bind_rows(
+  init_terms_all,
+  init_terms_all %>% filter(str_detect(planname, "tE|tF")) %>% 
+    mutate(planname = str_replace(planname,"tE", "tNE"),
+           planname = str_replace(planname,"tF", "tNF"),
+           nterms = 0,
+           benefit   = 0)
+) 
+
+init_actives_all <- bind_rows(
+  init_actives_all,
+  init_actives_all %>% filter(str_detect(planname, "tE|tF")) %>% 
+    mutate(planname = str_replace(planname,"tE", "tNE"),
+           planname = str_replace(planname,"tF", "tNF"),
+           nactives = 0,
+           salary   = 0)
+) 
+
+
+
+
+pct.init.ret.la  <-  0.75
 pct.init.ret.ca  <- 1 - pct.init.ret.la
 
-pct.init.disb.la <-  1
+pct.init.disb.la  <- 1
 pct.init.disb.ca  <- 1 - pct.init.disb.la
 
-init_retirees.la_all <- init_retirees_all %>%
+init_retirees.la_all  <- init_retirees_all %>%
   mutate(nretirees.la = nretirees * pct.init.ret.la) %>% 
   select(-nretirees)
 
@@ -48,12 +96,6 @@ init_disb.ca_all <- init_disb_all %>%
   select(-ndisb)
 
 
-init_retirees.la_all %>% summarise(sumb = sum(nretirees.la * benefit))
-
-
-
-
-
 
 #*********************************************************************************************************
 # 1.2 Create decrement tables ####
@@ -67,7 +109,6 @@ list.decrements.tE <- get_decrements("tE")
 list.decrements.tF <- get_decrements("tF")
 
 
-
 decrement.model.tCD      <- list.decrements.tCD$decrement.model
 mortality.post.model.tCD <- list.decrements.tCD$mortality.post.model
 
@@ -76,6 +117,17 @@ mortality.post.model.tE <- list.decrements.tE$mortality.post.model
 
 decrement.model.tF      <- list.decrements.tF$decrement.model
 mortality.post.model.tF <- list.decrements.tF$mortality.post.model
+
+
+
+if(paramlist$DC_reform){
+  decrement.model.tNE      <- decrement.model.tE      
+  mortality.post.model.tNE <- mortality.post.model.tE
+  
+  decrement.model.tNF      <- decrement.model.tF
+  mortality.post.model.tNF <- mortality.post.model.tF
+}
+
 
 
 
@@ -125,10 +177,6 @@ salgrowth %<>% mutate(salgrowth.unadj = salgrowth,
 # salgrowth
 
 # prod((salgrowth %>% filter(age %in% 19:60))$salgrowth + 1)
-
-
-# 3. Amortization payments are too low with salary growth assumption of 3.5%
-
 
 
 
@@ -198,27 +246,60 @@ benefit.disb.tF <- get_benefit.disb_tier("tF")
 
 
 init_pop.tCD <- get_initPop_tier("tCD")
-init_pop.tE <- get_initPop_tier("tE")
-init_pop.tF <- get_initPop_tier("tF")
+init_pop.tE <-  get_initPop_tier("tE")
+init_pop.tF <-  get_initPop_tier("tF")
 
 
 entrants_dist.tCD <- numeric(length(paramlist$range_ea))
-entrants_dist.tE  <- get_entrantsDist_tier("tE") * share.tE
-entrants_dist.tF  <- get_entrantsDist_tier("tF") * share.tF
+entrants_dist.tE  <- get_entrantsDist_tier("tE")
+entrants_dist.tF  <- get_entrantsDist_tier("tF")
+paramlist$newEnt_byTier   <- c(tCD = 0, tE = share.tE, tF = share.tF)
 
 
-# benefit.tCD
-# benefit.disb.tCD
+
+if (paramlist$DC_reform){
+  
+  salary.tNE  <- get_salary_proc("tE")
+  benefit.tNE <- get_benefit_tier("tE")
+  benefit.disb.tNE <- get_benefit.disb_tier("tE")
+  entrants_dist.tNE  <- get_entrantsDist_tier("tE")
+
+  salary.tNF  <- get_salary_proc("tF")
+  benefit.tNF <- get_benefit_tier("tF")
+  benefit.disb.tNF <- get_benefit.disb_tier("tF")
+  entrants_dist.tNF  <- get_entrantsDist_tier("tF")
+  
+  init_pop.tNE       <- get_initPop_tier("tE")
+  for (z in 1:length(init_pop.tNE)) init_pop.tNE[[z]][ , ] <- 0
+  
+  init_pop.tNF       <- get_initPop_tier("tF")
+  for (z in 1:length(init_pop.tNF)) init_pop.tNF[[z]][ , ] <- 0
+  
+  paramlist$newEnt_byTier_preReform   <- c(tCD = 0, tE = share.tE, tF = share.tF, tNE = 0,        tNF = 0)
+  paramlist$newEnt_byTier_postReform  <- c(tCD = 0, tE = 0,        tF = 0,        tNE = share.tE, tNF = share.tF)
+}
+
+
 
 
 #*********************************************************************************************************
 # 2. Demographics ####
 #*********************************************************************************************************
 
-source("PSERS_Model_Demographics_allTiers.R")
-pop <- get_Population_allTiers_PSERS()
+
+if(!paramlist$DC_reform){
   
+  source("PSERS_Model_Demographics_allTiers.R")
+  pop <- get_Population_allTiers_PSERS()
+
+  } else {
+  
+    source("PSERS_Model_Demographics_allTiers_reform.R")
+    pop <- get_Population_allTiers_PSERS()
+}
+
 gc()
+
 
 
 #*********************************************************************************************************
@@ -228,15 +309,25 @@ source("PSERS_Model_ContingentAnnuity.R")
 
 range_age.r.ca <- min(paramlist$range_age.r):100
 liab.ca.tCD  <- get_contingentAnnuity("tCD", tier.param["tCD", "factor.ca"], range_age.r.ca, TRUE, decrement.model_ = decrement.model.tCD)
-liab.ca.tE  <- get_contingentAnnuity("tE", tier.param["tE", "factor.ca"], range_age.r.ca, TRUE, decrement.model_ = decrement.model.tE)
-liab.ca.tF  <- get_contingentAnnuity("tF", tier.param["tF", "factor.ca"], range_age.r.ca, TRUE, decrement.model_ = decrement.model.tF)
+liab.ca.tE   <- get_contingentAnnuity("tE",  tier.param["tE", "factor.ca"], range_age.r.ca, TRUE, decrement.model_ = decrement.model.tE)
+liab.ca.tF   <- get_contingentAnnuity("tF",  tier.param["tF", "factor.ca"], range_age.r.ca, TRUE, decrement.model_ = decrement.model.tF)
 
 
 range_age.disb.ca <-  min(paramlist$range_age): 100 #max(paramlist$range_age.r)
 liab.disb.ca.tCD  <-  get_contingentAnnuity("tCD", tier.param["tCD", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tCD) %>% rename(age.disb = age.r)
-liab.disb.ca.tE  <-   get_contingentAnnuity("tE", tier.param["tE", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tE) %>% rename(age.disb = age.r)
-liab.disb.ca.tF  <-   get_contingentAnnuity("tF", tier.param["tF", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tF) %>% rename(age.disb = age.r)
+liab.disb.ca.tE   <-  get_contingentAnnuity("tE", tier.param["tE", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tE) %>% rename(age.disb = age.r)
+liab.disb.ca.tF   <-  get_contingentAnnuity("tF", tier.param["tF", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tF) %>% rename(age.disb = age.r)
 
+
+if(paramlist$DC_reform){
+  liab.ca.tNE   <- get_contingentAnnuity("tNE",  tier.param["tNE", "factor.ca"], range_age.r.ca, TRUE, decrement.model_ = decrement.model.tNE)
+  liab.ca.tNF   <- get_contingentAnnuity("tNF",  tier.param["tNF", "factor.ca"], range_age.r.ca, TRUE, decrement.model_ = decrement.model.tNF)
+  
+  liab.disb.ca.tNE   <-  get_contingentAnnuity("tNE", tier.param["tNE", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tNE) %>% rename(age.disb = age.r)
+  liab.disb.ca.tNF   <-  get_contingentAnnuity("tNF", tier.param["tNF", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tNF) %>% rename(age.disb = age.r)
+  
+  
+}
 
 
 
@@ -276,6 +367,31 @@ liab.tF <- get_indivLab("tF",
                         liab.disb.ca.tF)
 
 
+
+if(paramlist$DC_reform){
+  
+   liab.tNE <- get_indivLab("tNE",
+                           decrement.model.tNE,
+                           salary.tNE,
+                           benefit.tNE,
+                           benefit.disb.tNE,
+                           mortality.post.model.tNE,
+                           liab.ca.tNE,
+                           liab.disb.ca.tNE)
+   
+   
+   liab.tNF <- get_indivLab("tNF",
+                           decrement.model.tNF,
+                           salary.tNF,
+                           benefit.tNF,
+                           benefit.disb.tNF,
+                           mortality.post.model.tNF,
+                           liab.ca.tNF,
+                           liab.disb.ca.tNF)
+}
+
+
+
 # liab.tE$active %>% filter(year == 2017, ea == 30) %>% select(year, ea, age, DC_EEC)
 
 
@@ -310,27 +426,84 @@ AggLiab.tF <- get_AggLiab("tF",
                           mortality.post.model.tF) 
 
 
-AggLiab.sumTiers <- 
-  get_AggLiab_sumTiers(AggLiab.tCD, AggLiab.tE, AggLiab.tF) 
+if(paramlist$DC_reform){
+  AggLiab.tNE <- get_AggLiab("tNE",
+                            liab.tNE,
+                            liab.ca.tNE,
+                            liab.disb.ca.tNE,
+                            pop$pop.tNE,
+                            mortality.post.model.tNE) 
+  
+  
+  AggLiab.tNF <- get_AggLiab("tNF",
+                            liab.tNF,
+                            liab.ca.tNF,
+                            liab.disb.ca.tNF,
+                            pop$pop.tNF,
+                            mortality.post.model.tNF) 
+}
 
 
-if(paramlist$tier == "sumTiers"){  
-  PR.Tiers <- AggLiab.tCD$active %>% as.data.frame %>% select(year, PR_tCD = PR.sum)  %>% 
-    left_join(AggLiab.tE$active  %>% as.data.frame %>% select(year, PR_tE  = PR.sum)) %>% 
-    left_join(AggLiab.tF$active  %>% as.data.frame %>% select(year, PR_tF  = PR.sum)) %>% 
-    as.matrix
-} else {
-  PR.Tiers <- NULL 
+
+if(!paramlist$DC_reform){
+  
+  AggLiab.sumTiers <- 
+    get_AggLiab_sumTiers(AggLiab.tCD, AggLiab.tE, AggLiab.tF) 
+  
+  
+  if(paramlist$tier == "sumTiers"){  
+    PR.Tiers <- AggLiab.tCD$active %>% as.data.frame %>% select(year, PR_tCD = PR.sum)  %>% 
+      left_join(AggLiab.tE$active  %>% as.data.frame %>% select(year, PR_tE  = PR.sum)) %>% 
+      left_join(AggLiab.tF$active  %>% as.data.frame %>% select(year, PR_tF  = PR.sum)) %>% 
+      as.matrix
+  } else {
+    PR.Tiers <- NULL 
+  }
+  
+  
+  if(paramlist$tier == "sumTiers"){  
+    DC.Tiers <- AggLiab.tCD$active %>% as.data.frame %>% select(year, DC_EEC_tCD = DC_EEC.sum, DC_ERC_tCD = DC_ERC.sum)  %>% 
+      left_join(AggLiab.tE$active  %>% as.data.frame %>% select(year, DC_EEC_tE  = DC_EEC.sum, DC_ERC_tE  = DC_ERC.sum)) %>% 
+      left_join(AggLiab.tF$active  %>% as.data.frame %>% select(year, DC_EEC_tF  = DC_EEC.sum, DC_ERC_tF  = DC_ERC.sum)) %>% 
+      as.matrix
+  } else {
+    DC.Tiers <- NULL 
+  }
 }
-    
-if(paramlist$tier == "sumTiers"){  
-  DC.Tiers <- AggLiab.tCD$active %>% as.data.frame %>% select(year, DC_EEC_tCD = DC_EEC.sum, DC_ERC_tCD = DC_ERC.sum)  %>% 
-    left_join(AggLiab.tE$active  %>% as.data.frame %>% select(year, DC_EEC_tE  = DC_EEC.sum, DC_ERC_tE  = DC_ERC.sum)) %>% 
-    left_join(AggLiab.tF$active  %>% as.data.frame %>% select(year, DC_EEC_tF  = DC_EEC.sum, DC_ERC_tF  = DC_ERC.sum)) %>% 
-    as.matrix
-} else {
-  DC.Tiers <- NULL 
+
+if(paramlist$DC_reform){
+  
+  AggLiab.sumTiers <- 
+    get_AggLiab_sumTiers(AggLiab.tCD, AggLiab.tE, AggLiab.tF, AggLiab.tNE, AggLiab.tNF) 
+  
+  
+  if(paramlist$tier == "sumTiers"){  
+    PR.Tiers <- AggLiab.tCD$active %>% as.data.frame %>% select(year, PR_tCD = PR.sum)  %>% 
+      left_join(AggLiab.tE$active  %>% as.data.frame %>% select(year, PR_tE  = PR.sum)) %>% 
+      left_join(AggLiab.tF$active  %>% as.data.frame %>% select(year, PR_tF  = PR.sum)) %>% 
+      left_join(AggLiab.tNE$active  %>% as.data.frame %>% select(year, PR_tNE  = PR.sum)) %>% 
+      left_join(AggLiab.tNF$active  %>% as.data.frame %>% select(year, PR_tNF  = PR.sum)) %>% 
+      as.matrix
+  } else {
+    PR.Tiers <- NULL 
+  }
+  
+  
+  if(paramlist$tier == "sumTiers"){  
+    DC.Tiers <- AggLiab.tCD$active %>% as.data.frame %>% select(year, DC_EEC_tCD = DC_EEC.sum, DC_ERC_tCD = DC_ERC.sum)  %>% 
+      left_join(AggLiab.tE$active  %>% as.data.frame %>% select(year, DC_EEC_tE  = DC_EEC.sum, DC_ERC_tE  = DC_ERC.sum)) %>% 
+      left_join(AggLiab.tF$active  %>% as.data.frame %>% select(year, DC_EEC_tF  = DC_EEC.sum, DC_ERC_tF  = DC_ERC.sum)) %>% 
+      left_join(AggLiab.tNE$active  %>% as.data.frame %>% select(year, DC_EEC_tNE  = DC_EEC.sum, DC_ERC_tNE  = DC_ERC.sum)) %>% 
+      left_join(AggLiab.tNF$active  %>% as.data.frame %>% select(year, DC_EEC_tNF  = DC_EEC.sum, DC_ERC_tNF  = DC_ERC.sum)) %>% 
+      as.matrix
+  } else {
+    DC.Tiers <- NULL 
+  }
+  
 }
+
+
+
 
 
 #***************************************************************
@@ -382,10 +555,16 @@ AggLiab.sumTiers$la %<>%
 #*********************************************************************************************************
 # 6.  Simulation ####
 #*********************************************************************************************************
-source("PSERS_Model_Sim.R")
 
+if(!paramlist$DC_reform){
+  source("PSERS_Model_Sim.R")
+  penSim_results.sumTiers <- run_sim("sumTiers", AggLiab.sumTiers)
 
-penSim_results.sumTiers <- run_sim("sumTiers", AggLiab.sumTiers)
+  } else {
+    source("PSERS_Model_Sim_reform.R")
+    penSim_results.sumTiers <- run_sim("sumTiers", AggLiab.sumTiers)
+}
+
 
 
 outputs_list <- list(paramlist = paramlist, 
@@ -449,12 +628,19 @@ var_display.cali2 <- c("sim", "year",
 kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display.cali1)), digits = 2) %>% print 
 kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display.cali2)), digits = 2) %>% print 
 
+
 kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(year, i.r, i.r_geoReturn,PR, PR_tCD,PR_tE,PR_tF, EEC.totRate_tCD, EEC.totRate_tE, EEC.totRate_tF), digits = 5) %>% print 
 
 
 
 kable(penSim_results.sumTiers %>% filter(sim == -1) %>% select(one_of(var_display1)), digits = 2) %>% print 
 kable(penSim_results.sumTiers %>% filter(sim == 1) %>% select(one_of(var_display1)), digits = 2) %>% print 
+
+
+var_displayDC <- c("Tier", "sim", "year", "DC_ERC", "DC_EEC", "DC_EEC_tNE", "DC_EEC_tNF", "PR_tNE","DC_ERC_PR.tEF")
+kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_displayDC)), digits = 2) %>% print 
+
+
 
 
 #*********************************************************************************************************

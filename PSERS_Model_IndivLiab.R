@@ -50,7 +50,7 @@ get_indivLab <- function(Tier_select_,
   # paramlist_       =  paramlist
   # Global_paramlist_ =  Global_paramlist
    
-  # Tier_select_ = "tE"
+  # Tier_select_ = "tNE"
   # decrement.model_ = decrement.model.tE
   # salary_          = salary.tE
   # benefit_         = benefit.tE
@@ -78,9 +78,9 @@ cola     <- tier.param[Tier_select_, "cola"]
 bfactor  <- tier.param[Tier_select_, "bfactor"]
 
 
-EEC_DC.rate       <- tier.param[Tier_select_, "ScnDC_EEC_DC.rate"]
-bfactor.reduction <- ifelse(DC_reform, tier.param[Tier_select_, "ScnDC_bf.reduction"], 0)
-bfactor           <- bfactor * (1 - bfactor.reduction)
+EEC_DC.rate       <- tier.param[Tier_select_, "EEC_DC.rate"]
+#bfactor.reduction <- ifelse(DC_reform, tier.param[Tier_select_, "ScnDC_bf.reduction"], 0)
+#bfactor           <- bfactor * (1 - bfactor.reduction)
 
 
 init_terminated_ <-  get_tierData(init_terms_all_, Tier_select_)
@@ -122,7 +122,8 @@ liab.active <- expand.grid(start.year = min.year:(init.year + nyear - 1) ,
     yos= age - ea,
     
     # PSERS: DC contribution 
-    DC_rate.tot = ifelse(Tier_select_ == "tCD", 0, DC_rate.tot),
+    Tier = Tier_select_,
+    DC_rate.tot = ifelse(Tier %in% c("tNE", "tNF"), DC_rate.tot,0), # (Tier %in% c("tNE", "tNF")) * DC_rate.tot,
     DC_EEC      = sx * EEC_DC.rate,
     DC_ERC      = sx * max(0, (DC_rate.tot - EEC_DC.rate)),
     
@@ -161,7 +162,7 @@ liab.active <- expand.grid(start.year = min.year:(init.year + nyear - 1) ,
   )
 
 
-liab.active %>% select(ea, age, ax.disb.la, ax.vben)
+# liab.active %>% select(Tier, ea, age, DC_EEC, DC_ERC, DC_rate.tot) %>% filter(start.year == 2017, ea == 20)
 
 
 

@@ -21,7 +21,18 @@ get_Population_allTiers_PSERS <- function(
                            entrants_dist.tF_    = entrants_dist.tF ,
                            decrement.model.tF_   = list.decrements.tF$decrement.model ,
                            mortality.post.model.tF_ = mortality.post.model.tF,
-            
+                           
+                           init_pop.tNE_         = init_pop.tNE,
+                           entrants_dist.tNE_    = entrants_dist.tNE ,
+                           decrement.model.tNE_   = decrement.model.tNE,
+                           mortality.post.model.tNE_ = mortality.post.model.tNE,
+                           
+                           init_pop.tNF_         = init_pop.tNF,
+                           entrants_dist.tNF_    = entrants_dist.tNF ,
+                           decrement.model.tNF_   = decrement.model.tNF,
+                           mortality.post.model.tNF_ = mortality.post.model.tNF,
+                           
+
                            paramlist_        = paramlist,
                            Global_paramlist_ = Global_paramlist){
 
@@ -60,11 +71,20 @@ get_Population_allTiers_PSERS <- function(
   # decrement.model.tF_   = list.decrements.tF$decrement.model
   # mortality.post.model.tF_ = mortality.post.model.tF
   # 
+  # init_pop.tNE_         = init_pop.tNE
+  # entrants_dist.tNE_    = entrants_dist.tNE
+  # decrement.model.tNE_      = decrement.model.tNE
+  # mortality.post.model.tNE_ = mortality.post.model.tNE
+  # 
+  # init_pop.tNF_          = init_pop.tNF
+  # entrants_dist.tNF_     = entrants_dist.tNF
+  # decrement.model.tNF_   = decrement.model.tNF
+  # mortality.post.model.tNF_ = mortality.post.model.tNF
+  # 
   # paramlist_        = paramlist
   # Global_paramlist_ = Global_paramlist
 
-    
-
+  
  assign_parmsList(Global_paramlist_, envir = environment())
  assign_parmsList(paramlist_,        envir = environment())  
 
@@ -98,22 +118,22 @@ wf_dimnames.deathBen <- list(range_ea, range_age, init.year:(init.year + nyear -
 wf_dim.disb.la      <- c(length(range_ea), length(range_age), nyear, nyear)
 wf_dimnames.disb.la <- list(range_ea, range_age, init.year:(init.year + nyear - 1), init.year:(init.year + nyear - 1))
 
-wf_active.tCD <- wf_active.tE <- wf_active.tF  <- array(0, wf_dim, dimnames = wf_dimnames)
-wf_disb.tCD   <- wf_disb.tE   <- wf_disb.tF    <- array(0, wf_dim, dimnames = wf_dimnames) 
-wf_dead.tCD   <- wf_dead.tE   <- wf_dead.tF    <- array(0, wf_dim, dimnames = wf_dimnames)
-wf_term.tCD   <- wf_term.tE   <- wf_term.tF    <- array(0, wf_dim.term,    dimnames = wf_dimnames.term)
-wf_la.tCD     <- wf_la.tE     <- wf_la.tF      <- array(0, wf_dim.la, dimnames = wf_dimnames.la)
+wf_active.tCD <- wf_active.tE <- wf_active.tF <- wf_active.tNE <- wf_active.tNF <- array(0, wf_dim, dimnames = wf_dimnames)
+wf_disb.tCD   <- wf_disb.tE   <- wf_disb.tF   <- wf_disb.tNE   <- wf_disb.tNF   <- array(0, wf_dim, dimnames = wf_dimnames) 
+wf_dead.tCD   <- wf_dead.tE   <- wf_dead.tF   <- wf_dead.tNE   <- wf_dead.tNF   <- array(0, wf_dim, dimnames = wf_dimnames)
+wf_term.tCD   <- wf_term.tE   <- wf_term.tF   <- wf_term.tNE   <- wf_term.tNF   <- array(0, wf_dim.term,    dimnames = wf_dimnames.term)
+wf_la.tCD     <- wf_la.tE     <- wf_la.tF     <- wf_la.tNE     <- wf_la.tNF     <- array(0, wf_dim.la, dimnames = wf_dimnames.la)
 
 
-wf_deathBen.tCD  <- wf_deathBen.tE  <- wf_deathBen.tF  <- array(0, wf_dim.deathBen, dimnames = wf_dimnames.deathBen)
-wf_disb.la.tCD   <- wf_disb.la.tE   <- wf_disb.la.tF   <- array(0, wf_dim.disb.la,  dimnames = wf_dimnames.disb.la)
+wf_deathBen.tCD  <- wf_deathBen.tE  <- wf_deathBen.tF <- wf_deathBen.tNE  <- wf_deathBen.tNF <- array(0, wf_dim.deathBen, dimnames = wf_dimnames.deathBen)
+wf_disb.la.tCD   <- wf_disb.la.tE   <- wf_disb.la.tF  <- wf_disb.la.tNE   <- wf_disb.la.tNF  <- array(0, wf_dim.disb.la,  dimnames = wf_dimnames.disb.la)
 
 
-newDeath.act.tCD <-  newDeath.act.tE <-   newDeath.act.tF   <- numeric(nyear)
-newDeath.ret.tCD <-  newDeath.ret.tE <-   newDeath.ret.tF   <- numeric(nyear)
-newDeath.term.tCD <- newDeath.term.tE <-  newDeath.term.tF  <- numeric(nyear)
+newDeath.act.tCD <-  newDeath.act.tE <-   newDeath.act.tF  <- newDeath.act.tNE  <-  newDeath.act.tNF  <- numeric(nyear)
+newDeath.ret.tCD <-  newDeath.ret.tE <-   newDeath.ret.tF  <- newDeath.ret.tNE  <-  newDeath.ret.tNF  <- numeric(nyear)
+newDeath.term.tCD <- newDeath.term.tE <-  newDeath.term.tF <- newDeath.term.tNE <-  newDeath.term.tNF <- numeric(nyear)
 
-newDisb.act.tCD <- newDisb.act.tE <- newDisb.act.tF <- numeric(nyear)
+newDisb.act.tCD <- newDisb.act.tE <- newDisb.act.tF <- newDisb.act.tNE <- newDisb.act.tNF <-  numeric(nyear)
 
 
 #*************************************************************************************************************
@@ -142,6 +162,19 @@ wf_active.tF[, , 1]   <- init_pop.tF_$actives
 wf_la.tF[, , 1, 1]    <- init_pop.tF_$retirees
 wf_term.tF[, , 1, 1]  <- init_pop.tF_$terms   # note that the initial terms are assigned to year.term = init.year - 1
 wf_disb.la.tF[, , 1, 1]  <- init_pop.tF_$disb
+
+# Tier E1
+wf_active.tNE[, , 1]   <- init_pop.tNE_$actives 
+wf_la.tNE[, , 1, 1]    <- init_pop.tNE_$retirees
+wf_term.tNE[, , 1, 1]  <- init_pop.tNE_$terms   # note that the initial terms are assigned to year.term = init.year - 1
+wf_disb.la.tNE[, , 1, 1]  <- init_pop.tNE_$disb
+
+# Tier F1
+wf_active.tNF[, , 1]   <- init_pop.tNF_$actives 
+wf_la.tNF[, , 1, 1]    <- init_pop.tNF_$retirees
+wf_term.tNF[, , 1, 1]  <- init_pop.tNF_$terms   # note that the initial terms are assigned to year.term = init.year - 1
+wf_disb.la.tNF[, , 1, 1]  <- init_pop.tNF_$disb
+
 
 
 
@@ -173,13 +206,16 @@ make_dmat <- function(qx, df = decrement_wf) {
 decrement_wf.tCD <- decrement.model.tCD_ %>% mutate_each(funs(na2zero)) # just for safety 
 decrement_wf.tE <- decrement.model.tE_   %>% mutate_each(funs(na2zero)) # just for safety 
 decrement_wf.tF <- decrement.model.tF_   %>% mutate_each(funs(na2zero)) # just for safety 
+decrement_wf.tNE <- decrement.model.tNE_   %>% mutate_each(funs(na2zero)) # just for safety 
+decrement_wf.tNF <- decrement.model.tNF_   %>% mutate_each(funs(na2zero)) # just for safety 
+
 
 # The transition matrices are defined below. The probabilities (eg. qxr for retirement) of flowing
 # from the current status to the target status for a cell(age and ea combo) are given in the corresponding
 # cell in the transtition matrices. 
 
 
-## For Tier 1
+## For Tier CD
 
   # Where do the active go
   p_active2term.tCD    <- make_dmat("qxt",     decrement_wf.tCD)
@@ -201,7 +237,7 @@ decrement_wf.tF <- decrement.model.tF_   %>% mutate_each(funs(na2zero)) # just f
   p_disb.la2dead.tCD <- make_dmat("qxm.d", decrement_wf.tCD)
   
   
-## For Tier 2
+## For Tier E
   
   # Where do the active go
   p_active2term.tE    <- make_dmat("qxt",     decrement_wf.tE)
@@ -223,7 +259,7 @@ decrement_wf.tF <- decrement.model.tF_   %>% mutate_each(funs(na2zero)) # just f
   p_disb.la2dead.tE <- make_dmat("qxm.d", decrement_wf.tE)
   
   
-## For Tier 3
+## For Tier F
   
   # Where do the active go
   p_active2term.tF    <- make_dmat("qxt",     decrement_wf.tF)
@@ -244,7 +280,50 @@ decrement_wf.tF <- decrement.model.tF_   %>% mutate_each(funs(na2zero)) # just f
   # Where do the disability retirees go
   p_disb.la2dead.tF <- make_dmat("qxm.d", decrement_wf.tF)
   
-
+  
+  ## For Tier E1
+  
+  # Where do the active go
+  p_active2term.tNE    <- make_dmat("qxt",     decrement_wf.tNE)
+  p_active2disb.tNE    <- make_dmat("qxd",     decrement_wf.tNE)
+  p_active2disb.la.tNE <- make_dmat("qxd.la",  decrement_wf.tNE)
+  p_active2dead.tNE    <- make_dmat("qxm.pre", decrement_wf.tNE)
+  p_active2deathBen.tNE<- make_dmat("qxm.pre", decrement_wf.tNE) 
+  p_active2disb.tNE    <- make_dmat("qxd",     decrement_wf.tNE)
+  p_active2retired.tNE <- make_dmat("qxr",     decrement_wf.tNE)   # This include all three types of retirement: contingent annuity, and life annuity.
+  p_active2la.tNE      <- make_dmat("qxr.la",  decrement_wf.tNE)   # Prob of retiring as a life annuitant.
+  
+  # Where do the terminated go
+  p_term2dead.tNE    <- make_dmat("qxm.term", decrement_wf.tNE) # need to modify later
+  
+  # Where do the death beneficiaries go
+  p_deathBen2dead.tNE <- make_dmat("qxm.deathBen", decrement_wf.tNE)
+  
+  # Where do the disability retirees go
+  p_disb.la2dead.tNE <- make_dmat("qxm.d", decrement_wf.tNE)
+  
+  
+  ## For Tier F1
+  
+  # Where do the active go
+  p_active2term.tNF    <- make_dmat("qxt",     decrement_wf.tNF)
+  p_active2disb.tNF    <- make_dmat("qxd",     decrement_wf.tNF)
+  p_active2disb.la.tNF <- make_dmat("qxd.la",  decrement_wf.tNF)
+  p_active2dead.tNF    <- make_dmat("qxm.pre", decrement_wf.tNF)
+  p_active2deathBen.tNF<- make_dmat("qxm.pre", decrement_wf.tNF)
+  p_active2disb.tNF    <- make_dmat("qxd",     decrement_wf.tNF)
+  p_active2retired.tNF <- make_dmat("qxr",     decrement_wf.tNF)   # This include all three types of retirement: contingent annuity, and life annuity.
+  p_active2la.tNF      <- make_dmat("qxr.la",  decrement_wf.tNF)   # Prob of retiring as a life annuitant.
+  
+  # Where do the terminated go
+  p_term2dead.tNF    <- make_dmat("qxm.term", decrement_wf.tNF) # need to modify later
+  
+  # Where do the death beneficiaries go
+  p_deathBen2dead.tNF <- make_dmat("qxm.deathBen", decrement_wf.tNF)
+  
+  # Where do the disability retirees go
+  p_disb.la2dead.tNF <- make_dmat("qxm.d", decrement_wf.tNF)
+  
   
 # Where do the retirees go
   # Before we find better approach, the age.r dependent mortality for retirees are given in a data frame containing all combos 
@@ -274,6 +353,22 @@ decrement_wf.tF <- decrement.model.tF_   %>% mutate_each(funs(na2zero)) # just f
     mutate(qxm.post.W = na2zero(qxm.post.W)) %>%
     arrange(year, year.r, age, ea)
 
+  p_la2dead.tNE <-
+    expand.grid(ea = range_ea, age = range_age, year = init.year:(init.year + nyear - 1), year.r = init.year:(init.year + nyear - 1)) %>%
+    #filter(age >= ea) %>%
+    mutate(age.r = age - (year - year.r)) %>%
+    left_join(mortality.post.model.tNE_ %>% select(age.r, age, qxm.post.W)) %>%
+    mutate(qxm.post.W = na2zero(qxm.post.W)) %>%
+    arrange(year, year.r, age, ea)
+  
+  p_la2dead.tNF <-
+    expand.grid(ea = range_ea, age = range_age, year = init.year:(init.year + nyear - 1), year.r = init.year:(init.year + nyear - 1)) %>%
+    #filter(age >= ea) %>%
+    mutate(age.r = age - (year - year.r)) %>%
+    left_join(mortality.post.model.tNF_ %>% select(age.r, age, qxm.post.W)) %>%
+    mutate(qxm.post.W = na2zero(qxm.post.W)) %>%
+    arrange(year, year.r, age, ea)
+  
   
 #*************************************************************************************************************
 #                                     Creating a function to calculate new entrants ####
@@ -328,9 +423,9 @@ calc_entrants <- function(wf0, wf1, delta, dist, no.entrants = FALSE){
 #*************************************************************************************************************
 
 # define function for determining the number of new entrants 
-calc_entrants_allTiers <- function(wf0.tCD,  wf0.tE,  wf0.tF, 
-                                   wf1.tCD,  wf1.tE,  wf1.tF, 
-                                   dist.tCD, dist.tE, dist.tF,
+calc_entrants_allTiers <- function(wf0.tCD,  wf0.tE,  wf0.tF, wf0.tNE,  wf0.tNF,
+                                   wf1.tCD,  wf1.tE,  wf1.tF, wf1.tNE,  wf1.tNF,
+                                   dist.tCD, dist.tE, dist.tF, dist.tNE, dist.tNF,
                                    newEnt_byTier_,
                                    delta, 
                                    no.entrants = FALSE){
@@ -360,32 +455,45 @@ calc_entrants_allTiers <- function(wf0.tCD,  wf0.tE,  wf0.tF,
   size0.tF <- sum(wf0.tF[,as.character(working_age)], na.rm = TRUE)
   size1.tF <- sum(wf1.tF[,as.character(working_age)], na.rm = TRUE)
   
+  size0.tNE <- sum(wf0.tNE[,as.character(working_age)], na.rm = TRUE)
+  size1.tNE <- sum(wf1.tNE[,as.character(working_age)], na.rm = TRUE)
+  
+  size0.tNF <- sum(wf0.tNF[,as.character(working_age)], na.rm = TRUE)
+  size1.tNF <- sum(wf1.tNF[,as.character(working_age)], na.rm = TRUE)
+  
   
   
   # computing new entrants
-  size_target <- (size0.tCD + size0.tE + size0.tF) * (1 + delta)   # size of the workforce next year
-  size_hire   <- size_target - (size1.tCD + size1.tE + size1.tF)  # number of workers need to hire
+  size_target <- (size0.tCD + size0.tE + size0.tF + size0.tNE + size0.tNF) * (1 + delta)   # size of the workforce next year
+  size_hire   <- size_target - (size1.tCD + size1.tE + size1.tF + size1.tNE + size1.tNF)   # number of workers need to hire
   
   ne.tCD <- size_hire  * newEnt_byTier_["tCD"] * dist.tCD # vector, number of new entrants by age
   ne.tE  <- size_hire  * newEnt_byTier_["tE"]  * dist.tE 
   ne.tF  <- size_hire  * newEnt_byTier_["tF"]  * dist.tF 
-
+  ne.tNE  <- size_hire  * newEnt_byTier_["tNE"]  * dist.tNE 
+  ne.tNF  <- size_hire  * newEnt_byTier_["tNF"]  * dist.tNF 
+  
   
   
   # Create the new entrant matrix 
   NE.tCD <- wf0.tCD  ;  NE.tCD[ ,]  <- 0
   NE.tE <- wf0.tE  ;  NE.tE[ ,]  <- 0
   NE.tF <- wf0.tF  ;  NE.tF[ ,]  <- 0
+  NE.tNE <- wf0.tNE  ;  NE.tNE[ ,]  <- 0
+  NE.tNF <- wf0.tNF  ;  NE.tNF[ ,]  <- 0
 
   if (no.entrants){ 
-    return(NE = list(NE.tCD = NE.tCD, NE.tE = NE.tE, NE.tF = NE.tF)) 
+    return(NE = list(NE.tCD = NE.tCD, NE.tE = NE.tE, NE.tF = NE.tF, NE.tNE = NE.tNE, NE.tNF = NE.tNF)) 
   
   } else {
     NE.tCD[, rownames(NE.tCD)] <- diag(ne.tCD) # place ne on the matrix of new entrants
     NE.tE[,  rownames(NE.tE)]  <- diag(ne.tE)
     NE.tF[,  rownames(NE.tF)]  <- diag(ne.tF)
+    NE.tNE[,  rownames(NE.tNE)]  <- diag(ne.tNE)
+    NE.tNF[,  rownames(NE.tNF)]  <- diag(ne.tNF)
+    
 
-    return(NE = list(NE.tCD = NE.tCD, NE.tE = NE.tE, NE.tF = NE.tF)) 
+    return(NE = list(NE.tCD = NE.tCD, NE.tE = NE.tE, NE.tF = NE.tF,  NE.tNE = NE.tNE, NE.tNF = NE.tNF)) 
   } 
 }  
 
@@ -430,7 +538,7 @@ A <- diag(length(range_age) + 1)[-1, -(length(range_age) + 1)]
 # i runs from 2 to nyear. 
 
 for (j in 1:(nyear - 1)){
-  #    j <-  1  
+  #   j <-  1  
   
   #*******************************************
   # Stage 1 Seperations by type in each tier *
@@ -506,6 +614,52 @@ for (j in 1:(nyear - 1)){
     disb.la2dead.tF  <- wf_disb.la.tF[, , j, ] * as.vector(p_disb.la2dead.tF)
   
   
+    ## Tier E1
+    # compute the inflow to and outflow
+    active2term.tNE    <- wf_active.tNE[, , j] * p_active2term.tNE  # This will join wf_term[, , j + 1, j + 1], note that workers who terminate in year j won't join the terminated group until j+1. 
+    active2dead.tNE    <- wf_active.tNE[, , j] * p_active2dead.tNE
+    active2retired.tNE <- wf_active.tNE[, , j] * p_active2retired.tNE    # This will be used to calculate the number of actives leaving the workforce
+    active2la.tNE      <- wf_active.tNE[, , j] * p_active2la.tNE          # This will join wf_la[, , j + 1, j + 1].
+    active2deathBen.tNE<- wf_active.tNE[, , j] * p_active2deathBen.tNE
+    active2disb.tNE    <- wf_active.tNE[, , j] * p_active2disb.tNE
+    active2disb.la.tNE <- wf_active.tNE[, , j] * p_active2disb.la.tNE
+    
+    # Where do the terminated_vested go
+    term2dead.tNE  <- wf_term.tNE[, , j, ] * as.vector(p_term2dead.tNE)           # a 3D array, each slice(3rd dim) contains the # of death in a termination age group
+    
+    # Where do the retired go
+    la2dead.tNE   <- wf_la.tNE[, , j, ] * (p_la2dead.tNE %>% filter(year == j + init.year - 1))[["qxm.post.W"]]     # as.vector(p_retired2dead) # a 3D array, each slice(3rd dim) contains the # of death in a retirement age group    
+    
+    
+    # Where do the QSSs of death benefit go
+    deathBen2dead.tNE  <- wf_deathBen.tNE[, , j, ] * as.vector(p_deathBen2dead.tNE)
+    
+    # Where do the disability retirees go
+    disb.la2dead.tNE  <- wf_disb.la.tNE[, , j, ] * as.vector(p_disb.la2dead.tNE)
+    
+    ## Tier F1
+    # compute the inflow to and outflow
+    active2term.tNF    <- wf_active.tNF[, , j] * p_active2term.tNF  # This will join wf_term[, , j + 1, j + 1], note that workers who terminate in year j won't join the terminated group until j+1. 
+    active2dead.tNF    <- wf_active.tNF[, , j] * p_active2dead.tNF
+    active2retired.tNF <- wf_active.tNF[, , j] * p_active2retired.tNF    # This will be used to calculate the number of actives leaving the workforce
+    active2la.tNF      <- wf_active.tNF[, , j] * p_active2la.tNF          # This will join wf_la[, , j + 1, j + 1].
+    active2deathBen.tNF<- wf_active.tNF[, , j] * p_active2deathBen.tNF
+    active2disb.tNF    <- wf_active.tNF[, , j] * p_active2disb.tNF
+    active2disb.la.tNF <- wf_active.tNF[, , j] * p_active2disb.la.tNF
+    
+    # Where do the terminated_vested go
+    term2dead.tNF  <- wf_term.tNF[, , j, ] * as.vector(p_term2dead.tNF)           # a 3D array, each slice(3rd dim) contains the # of death in a termination age group
+    
+    # Where do the retired go
+    la2dead.tNF   <- wf_la.tNF[, , j, ] * (p_la2dead.tNF %>% filter(year == j + init.year - 1))[["qxm.post.W"]]     # as.vector(p_retired2dead) # a 3D array, each slice(3rd dim) contains the # of death in a retirement age group    
+    
+    # Where do the QSSs of death benefit go
+    deathBen2dead.tNF  <- wf_deathBen.tNF[, , j, ] * as.vector(p_deathBen2dead.tNF)
+    
+    # Where do the disability retirees go
+    disb.la2dead.tNF  <- wf_disb.la.tNF[, , j, ] * as.vector(p_disb.la2dead.tNF)
+    
+    
  
 
   #***********************************
@@ -518,23 +672,34 @@ for (j in 1:(nyear - 1)){
   out_active.tCD   <- active2term.tCD + active2disb.tCD + active2retired.tCD + active2dead.tCD 
   out_active.tE   <- active2term.tE + active2disb.tE + active2retired.tE + active2dead.tE
   out_active.tF   <- active2term.tF + active2disb.tF + active2retired.tF + active2dead.tF
+  out_active.tNE   <- active2term.tNE + active2disb.tNE + active2retired.tNE + active2dead.tNE
+  out_active.tNF   <- active2term.tNF + active2disb.tNF + active2retired.tNF + active2dead.tNF
+  
+  
+  if(j + init.year - 1 <  DC_reform_start.year) newEnt_byTier <- newEnt_byTier_preReform
+  if(j + init.year - 1 >= DC_reform_start.year) newEnt_byTier <- newEnt_byTier_postReform
+  
 
-  
-  
   new_entrants_allTiers <- 
   calc_entrants_allTiers(wf_active.tCD[, , j], 
                          wf_active.tE[, , j], 
                          wf_active.tF[, , j], 
+                         wf_active.tNE[, , j], 
+                         wf_active.tNF[, , j], 
                          
                          
                          wf_active.tCD[, , j]  - out_active.tCD, 
                          wf_active.tE[, , j]  - out_active.tE,
                          wf_active.tF[, , j]  - out_active.tF,
+                         wf_active.tNE[, , j]  - out_active.tNE,
+                         wf_active.tNF[, , j]  - out_active.tNF,
+                         
 
-                
                          entrants_dist.tCD_,
                          entrants_dist.tE_,
                          entrants_dist.tF_,
+                         entrants_dist.tNE_,
+                         entrants_dist.tNF_,
                          
                          newEnt_byTier,
                          
@@ -599,6 +764,41 @@ for (j in 1:(nyear - 1)){
     in_dead.tF <- active2dead.tF +                                        # In LAFPP model, since life annuitants are only part of the total retirees, in_dead does not reflect the total number of death. 
       apply(term2dead.tF, c(1,2), sum) + apply(la2dead.tF, c(1,2), sum) + # get a matirix of ea x age by summing over year.term/year.retiree
       apply(disb.la2dead.tF, c(1,2), sum)
+    
+    ## Tier E1
+    out_term.tNE <- term2dead.tNE    # This is a 3D array 
+    in_term.tNE  <- active2term.tNE  # This is a matrix
+    
+    out_la.tNE <- la2dead.tNE        # This is a 3D array (ea x age x year.retire)
+    in_la.tNE  <- active2la.tNE      # This is a matrix
+    
+    out_deathBen.tNE <- deathBen2dead.tNE        # This is a 3D array (ea x age x year.retire)
+    in_deathBen.tNE  <- active2deathBen.tNE    # This is a matrix
+    
+    out_disb.la.tNE <- disb.la2dead.tNE        # This is a 3D array (ea x age x year.retire)
+    in_disb.la.tNE  <- active2disb.la.tNE    # This is a matrix
+    
+    in_dead.tNE <- active2dead.tNE +                                        # In LAFPP model, since life annuitants are only part of the total retirees, in_dead does not reflect the total number of death. 
+      apply(term2dead.tNE, c(1,2), sum) + apply(la2dead.tNE, c(1,2), sum) + # get a matirix of ea x age by summing over year.term/year.retiree
+      apply(disb.la2dead.tNE, c(1,2), sum) 
+    
+    ## Tier F1
+    out_term.tNF <- term2dead.tNF    # This is a 3D array 
+    in_term.tNF  <- active2term.tNF  # This is a matrix
+    
+    out_la.tNF <- la2dead.tNF        # This is a 3D array (ea x age x year.retire)
+    in_la.tNF  <- active2la.tNF      # This is a matrix
+    
+    out_deathBen.tNF <- deathBen2dead.tNF        # This is a 3D array (ea x age x year.retire)
+    in_deathBen.tNF  <- active2deathBen.tNF    # This is a matrix
+    
+    out_disb.la.tNF <- disb.la2dead.tNF        # This is a 3D array (ea x age x year.retire)
+    in_disb.la.tNF  <- active2disb.la.tNF    # This is a matrix
+    
+    in_dead.tNF <- active2dead.tNF +                                        # In LAFPP model, since life annuitants are only part of the total retirees, in_dead does not reflect the total number of death. 
+      apply(term2dead.tNF, c(1,2), sum) + apply(la2dead.tNF, c(1,2), sum) + # get a matirix of ea x age by summing over year.term/year.retiree
+      apply(disb.la2dead.tNF, c(1,2), sum)
+    
     
     
   #*********************************************
@@ -676,6 +876,54 @@ for (j in 1:(nyear - 1)){
     # newDeath.term[j] <- sum()
     
     newDisb.act.tF[j] <- sum(active2disb.tF)
+    
+    
+    ## Tier E1
+    wf_active.tNE[, , j + 1]  <- (wf_active.tNE[, , j] - out_active.tNE) %*% A + new_entrants_allTiers$NE.tNE
+    
+    wf_term.tNE[, , j + 1, ]      <- apply((wf_term.tNE[, , j, ] - out_term.tNE), 3, function(x) x %*% A) %>% array(wf_dim.term[-3])
+    wf_term.tNE[, , j + 1, j + 1] <- in_term.tNE %*% A     # Note that termination year j = 1 correponds to init.year - 1
+    
+    wf_la.tNE[, ,j + 1, ]       <- apply((wf_la.tNE[, , j, ] - out_la.tNE), 3, function(x) x %*% A) %>% array(wf_dim.la[-3])
+    wf_la.tNE[, , j + 1, j + 1] <- in_la.tNE %*% A
+    
+    wf_dead.tNE[, ,   j + 1]    <- (wf_dead.tNE[, , j] + in_dead.tNE) %*% A
+    
+    wf_deathBen.tNE[, , j + 1, ]      <- apply((wf_deathBen.tNE[, , j, ] - out_deathBen.tNE), 3, function(x) x %*% A) %>% array(wf_dim.deathBen[-3])
+    wf_deathBen.tNE[, , j + 1, j + 1] <- in_deathBen.tNE %*% A
+    
+    wf_disb.la.tNE[, , j + 1, ]      <- apply((wf_disb.la.tNE[, , j, ] - out_disb.la.tNE), 3, function(x) x %*% A) %>% array(wf_dim.disb.la[-3])
+    wf_disb.la.tNE[, , j + 1, j + 1] <- in_disb.la.tNE %*% A
+    
+    newDeath.act.tNE[j]  <- sum(active2dead.tNE)
+    newDeath.ret.tNE[j]  <- sum(la2dead.tNE)
+    # newDeath.term[j] <- sum()
+    
+    newDisb.act.tNE[j] <- sum(active2disb.tNE)
+    
+    
+    ## Tier F1
+    wf_active.tNF[, , j + 1]  <- (wf_active.tNF[, , j] - out_active.tNF) %*% A + new_entrants_allTiers$NE.tNF
+    
+    wf_term.tNF[, , j + 1, ]      <- apply((wf_term.tNF[, , j, ] - out_term.tNF), 3, function(x) x %*% A) %>% array(wf_dim.term[-3])
+    wf_term.tNF[, , j + 1, j + 1] <- in_term.tNF %*% A     # Note that termination year j = 1 correponds to init.year - 1
+    
+    wf_la.tNF[, ,j + 1, ]       <- apply((wf_la.tNF[, , j, ] - out_la.tNF), 3, function(x) x %*% A) %>% array(wf_dim.la[-3])
+    wf_la.tNF[, , j + 1, j + 1] <- in_la.tNF %*% A
+    
+    wf_dead.tNF[, ,   j + 1]    <- (wf_dead.tNF[, , j] + in_dead.tNF) %*% A
+    
+    wf_deathBen.tNF[, , j + 1, ]      <- apply((wf_deathBen.tNF[, , j, ] - out_deathBen.tNF), 3, function(x) x %*% A) %>% array(wf_dim.deathBen[-3])
+    wf_deathBen.tNF[, , j + 1, j + 1] <- in_deathBen.tNF %*% A
+    
+    wf_disb.la.tNF[, , j + 1, ]      <- apply((wf_disb.la.tNF[, , j, ] - out_disb.la.tNF), 3, function(x) x %*% A) %>% array(wf_dim.disb.la[-3])
+    wf_disb.la.tNF[, , j + 1, j + 1] <- in_disb.la.tNF %*% A
+    
+    newDeath.act.tNF[j]  <- sum(active2dead.tNF)
+    newDeath.ret.tNF[j]  <- sum(la2dead.tNF)
+    # newDeath.term[j] <- sum()
+    
+    newDisb.act.tNF[j] <- sum(active2disb.tNF)
   
     
 }
@@ -698,7 +946,9 @@ get_df.wf_active <- function(df){
  wf_active.tCD <- get_df.wf_active(wf_active.tCD)
  wf_active.tE <- get_df.wf_active(wf_active.tE)
  wf_active.tF <- get_df.wf_active(wf_active.tF)
-
+ wf_active.tNE <- get_df.wf_active(wf_active.tNE)
+ wf_active.tNF <- get_df.wf_active(wf_active.tNF)
+ 
 
  
 get_df.wf_la <- function(df){
@@ -709,7 +959,9 @@ get_df.wf_la <- function(df){
  wf_la.tCD  <- get_df.wf_la(wf_la.tCD)
  wf_la.tE  <- get_df.wf_la(wf_la.tE)
  wf_la.tF  <- get_df.wf_la(wf_la.tF)
-
+ wf_la.tNE  <- get_df.wf_la(wf_la.tNE)
+ wf_la.tNF  <- get_df.wf_la(wf_la.tNF)
+ 
 
 
 get_df.wf_term <- function(df){
@@ -720,7 +972,9 @@ get_df.wf_term <- function(df){
  wf_term.tCD  <- get_df.wf_term(wf_term.tCD)
  wf_term.tE  <- get_df.wf_term(wf_term.tE)
  wf_term.tF  <- get_df.wf_term(wf_term.tF)
-
+ wf_term.tNE  <- get_df.wf_term(wf_term.tNE)
+ wf_term.tNF  <- get_df.wf_term(wf_term.tNF)
+ 
  
  
 get_df.wf_deathBen <- function(df){
@@ -729,9 +983,11 @@ get_df.wf_deathBen <- function(df){
      filter(age >= ea)
  }
  wf_deathBen.tCD  <- get_df.wf_deathBen(wf_deathBen.tCD)
- wf_deathBen.tE  <- get_df.wf_deathBen(wf_deathBen.tE)
- wf_deathBen.tF  <- get_df.wf_deathBen(wf_deathBen.tF)
-
+ wf_deathBen.tE   <- get_df.wf_deathBen(wf_deathBen.tE)
+ wf_deathBen.tF   <- get_df.wf_deathBen(wf_deathBen.tF)
+ wf_deathBen.tNE  <- get_df.wf_deathBen(wf_deathBen.tNE)
+ wf_deathBen.tNF  <- get_df.wf_deathBen(wf_deathBen.tNF)
+ 
  
 get_df.wf_disb.la <- function(df){
    df <- data.frame(expand.grid(ea = range_ea, age = range_age, year = init.year:(init.year + nyear - 1), year.disb = init.year:(init.year + nyear - 1)),
@@ -741,7 +997,9 @@ get_df.wf_disb.la <- function(df){
  wf_disb.la.tCD  <- get_df.wf_disb.la(wf_disb.la.tCD)
  wf_disb.la.tE  <- get_df.wf_disb.la(wf_disb.la.tE)
  wf_disb.la.tF  <- get_df.wf_disb.la(wf_disb.la.tF)
-
+ wf_disb.la.tNE  <- get_df.wf_disb.la(wf_disb.la.tNE)
+ wf_disb.la.tNF  <- get_df.wf_disb.la(wf_disb.la.tNF)
+ 
  
 
 
@@ -759,6 +1017,8 @@ get_wf_new.ca <- function(df_actives, decrement){
 wf_new.ca.tCD  <- get_wf_new.ca(wf_active.tCD, decrement_wf.tCD)
 wf_new.ca.tE  <- get_wf_new.ca(wf_active.tE, decrement_wf.tE)
 wf_new.ca.tF  <- get_wf_new.ca(wf_active.tF, decrement_wf.tF)
+wf_new.ca.tNE  <- get_wf_new.ca(wf_active.tNE, decrement_wf.tNE)
+wf_new.ca.tNF  <- get_wf_new.ca(wf_active.tNF, decrement_wf.tNF)
 
 
 
@@ -772,6 +1032,8 @@ get_wf_new.disb.ca <- function(df_actives, decrement){
 wf_new.disb.ca.tCD  <- get_wf_new.disb.ca(wf_active.tCD, decrement_wf.tCD)
 wf_new.disb.ca.tE  <- get_wf_new.disb.ca(wf_active.tE, decrement_wf.tE)
 wf_new.disb.ca.tF  <- get_wf_new.disb.ca(wf_active.tF, decrement_wf.tF)
+wf_new.disb.ca.tNE  <- get_wf_new.disb.ca(wf_active.tNE, decrement_wf.tNE)
+wf_new.disb.ca.tNF  <- get_wf_new.disb.ca(wf_active.tNF, decrement_wf.tNF)
 
 
 
@@ -780,8 +1042,10 @@ wf_new.disb.ca.tF  <- get_wf_new.disb.ca(wf_active.tF, decrement_wf.tF)
 pop <- list(   
      pop.tCD = list(active  = wf_active.tCD,  term = wf_term.tCD, disb.la = wf_disb.la.tCD, la = wf_la.tCD, deathBen = wf_deathBen.tCD, dead = wf_dead.tCD, new_ca = wf_new.ca.tCD, new_disb.ca = wf_new.disb.ca.tCD),
      pop.tE = list(active  = wf_active.tE,  term = wf_term.tE, disb.la = wf_disb.la.tE, la = wf_la.tE, deathBen = wf_deathBen.tE, dead = wf_dead.tE, new_ca = wf_new.ca.tE, new_disb.ca = wf_new.disb.ca.tE),
-     pop.tF = list(active  = wf_active.tF,  term = wf_term.tF, disb.la = wf_disb.la.tF, la = wf_la.tF, deathBen = wf_deathBen.tF, dead = wf_dead.tF, new_ca = wf_new.ca.tF, new_disb.ca = wf_new.disb.ca.tF)
-
+     pop.tF = list(active  = wf_active.tF,  term = wf_term.tF, disb.la = wf_disb.la.tF, la = wf_la.tF, deathBen = wf_deathBen.tF, dead = wf_dead.tF, new_ca = wf_new.ca.tF, new_disb.ca = wf_new.disb.ca.tF),
+     pop.tNE = list(active  = wf_active.tNE,  term = wf_term.tNE, disb.la = wf_disb.la.tNE, la = wf_la.tNE, deathBen = wf_deathBen.tNE, dead = wf_dead.tNE, new_ca = wf_new.ca.tNE, new_disb.ca = wf_new.disb.ca.tNE),
+     pop.tNF = list(active  = wf_active.tNF,  term = wf_term.tNF, disb.la = wf_disb.la.tNF, la = wf_la.tNF, deathBen = wf_deathBen.tNF, dead = wf_dead.tNF, new_ca = wf_new.ca.tNF, new_disb.ca = wf_new.disb.ca.tNF)
+     
 )
 
 return(pop)
