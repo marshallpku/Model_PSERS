@@ -171,7 +171,7 @@ for(runName in runList$runname ){
   paramlist$r.max  <- 74 
   #
   
-  paramlist$bfactor <- 0.025
+  # paramlist$bfactor <- 0.025
   
   # paramlist$r.full <- 50 # age at which vested terms are assumed to retire(Temp, should use r.vben)
   # paramlist$r.vben <- 50 # age at which vested terms are assumed to retire.
@@ -217,16 +217,16 @@ for(runName in runList$runname ){
   paramlist$v     = with(paramlist, 1/(1 + i))
   
   
-
-  if(paramlist$tier == "sumTiers"){
-    source("PSERS_0_Master_allTiers.R")
-    save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, "_", runName, ".RData"))
-
-  } else {
-    Tier_select <- paramlist$tier
-    source("PSERS_0_Master_singleTier.R")
-    save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, runName, ".RData"))
-  }
+# 
+#   if(paramlist$tier == "sumTiers"){
+#     source("PSERS_0_Master_allTiers.R")
+#     save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, "_", runName, ".RData"))
+# 
+#   } else {
+#     Tier_select <- paramlist$tier
+#     source("PSERS_0_Master_singleTier.R")
+#     save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, runName, ".RData"))
+#   }
 
 }
 

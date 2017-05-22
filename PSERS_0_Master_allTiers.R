@@ -12,7 +12,9 @@ source("PSERS_Data_MemberData_AV2016.R")
 
 load("Data_inputs/PSERS_PlanInfo_AV2016.RData")    # for all tiers
 load("Data_inputs/PSERS_MemberData_AV2016.RData")  # for all tiers
-load("Data_inputs/DC_rate.tot.RData")              
+
+if(paramlist$i == 0.0725) load("Data_inputs/DC_rate.tot.725.RData")
+if(paramlist$i == 0.0625) load("Data_inputs/DC_rate.tot.625.RData")              
 
 init_beneficiaries_all %<>% filter(age >= 25) 
 
@@ -325,8 +327,7 @@ if(paramlist$DC_reform){
   
   liab.disb.ca.tNE   <-  get_contingentAnnuity("tNE", tier.param["tNE", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tNE) %>% rename(age.disb = age.r)
   liab.disb.ca.tNF   <-  get_contingentAnnuity("tNF", tier.param["tNF", "factor.ca.disb"], range_age.disb.ca, FALSE, decrement.model_ = decrement.model.tNF) %>% rename(age.disb = age.r)
-  
-  
+
 }
 
 

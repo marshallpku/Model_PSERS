@@ -32,8 +32,12 @@ cola     <- tier.param[Tier_select_, "cola"]
 #EEC.rate <- tier.param[Tier_select_, "EEC.rate"]
 
 
+
 init_terminated_ <-  get_tierData(init_terms_all_, Tier_select_)
 
+#i <- 0.0725
+i <- 0.0625
+bfactor <- tier.param[Tier_select_, "bfactor"]
 
 
 
@@ -80,6 +84,7 @@ liab.active <- expand.grid(start.year = min.year:(init.year + nyear - 1) ,
     fas= ifelse(age == min(age), 0, fas),
     COLA.scale = (1 + cola)^(age - min(age)),     # later we can specify other kinds of COLA scale. Note that these are NOT COLA factors. They are used to derive COLA factors for different retirement ages.
     Bx    = na2zero(bfactor * yos * fas),                  # accrued benefits, note that only Bx for ages above r.min are necessary under EAN.
+    Bx2   = na2zero(0.5*bfactor * yos * fas),                  # accrued benefits, note that only Bx for ages above r.min are necessary under EAN.
     
     CumSalwInt = ifelse(age == ea, 0, lag(get_cumAsset(sx, i - 0.015, TRUE))),  # cumulated salary with intrests
     
@@ -127,20 +132,19 @@ liab.active %<>%
           TCx.ca   = lead(Bx.laca) * qxr.ca * lead(liab.ca.sum.1) * v,  # term cost of contingent annuity at the internal retirement age x (start to claim benefit at age x + 1)
           TCx.laca = TCx.la + TCx.ca,
           
+          DB.value_PVret.half.bf = 0.5 * lead(Bx.laca) * lead(ax.r.W), # PV of DB benefit with 1/2 benefit factor
+          
           # TCx.r = Bx.r * qxr.a * ax,
           PVFBx.laca  = c(get_PVFB(pxT[age <= r.max], v, TCx.laca[age <= r.max]), rep(0, max.age - r.max)),
           
           # Term cost for DC plan if the entier salary is contributed into the DC fund.
           gx.DC     = gx.laca, # for now, assume the same eligibility and retirement rates for DC benefit.
           TCx.DC    = lead(CumSalwInt * gx.DC) * qxr * v,
-          PVFBx.DC  = c(get_PVFB(pxT[age <= r.max], v, TCx.DC[age <= r.max]), rep(0, max.age - r.max))
+          PVFBx.DC  = c(get_PVFB(pxT[age <= r.max], v, TCx.DC[age <= r.max]), rep(0, max.age - r.max)),
         
+          DC.value_CumSal  = lead(CumSalwInt * gx.DC), # DC balance at each age if the entire salary is contributed each year.
+          DC.value_balance = lead(CumSalwInt * gx.DC), # DC balance at each age if a fraction of salary is contributed each year.
                     
-          
-          
-          
-          
-          
           ## NC and AL of UC
           # TCx.r1 = gx.r * qxe * ax,  # term cost of $1's benefit
           # NCx.UC = bx * c(get_NC.UC(pxT[age <= r.max], v, TCx.r1[age <= r.max]), rep(0, 45)),
@@ -156,26 +160,75 @@ liab.active %<>%
           # ALx.EAN.CD.laca = PVFBx.laca - NCx.EAN.CD.laca * axR,
           # 
           # # NC and AL of EAN.CP
-          # NCx.EAN.CP.laca   = ifelse(age < r.max, sx * PVFBx.laca[age == min(age)]/(sx[age == min(age)] * ayxs[age == r.max]), 0),
-          # PVFNC.EAN.CP.laca = NCx.EAN.CP.laca * axRs,
-          # ALx.EAN.CP.laca   = PVFBx.laca - PVFNC.EAN.CP.laca
+          NCx.EAN.CP.laca   = ifelse(age < r.max, sx * PVFBx.laca[age == min(age)]/(sx[age == min(age)] * ayxs[age == r.max]), 0),
+          PVFNC.EAN.CP.laca = NCx.EAN.CP.laca * axRs,
+          ALx.EAN.CP.laca   = PVFBx.laca - PVFNC.EAN.CP.laca
   ) 
 
 
-liab.active %>% filter(start.year == 2017, ea %in% 20:75, age == ea) %>% select(start.year, ea, age, sx, CumSalwInt, Bx, PVFBx.laca, PVFBx.DC) %>% 
-  mutate(DC_rate.tot = 0.5 * PVFBx.laca/PVFBx.DC )
+liab.active %<>%
+  #filter(start.year == 2017, ea == 30) %>% 
+  mutate(
+         # Total DC rate 1: 
+         # DC balance and 1/2 DB balance have the same PV at entry age
+     
+         DC_rate.tot = 0.5 * PVFBx.laca/PVFBx.DC,
+         DC.value_balance = DC.value_CumSal * DC_rate.tot[age == ea],
+         # TCx2.DC = TCx2.DC * DC_rate.tot[age == ea],
+         
+         # Total DC rate2:
+         # DC balance = accured liability at a certain age (the age first eligible for super annuity)
+         
+         DC_rate.tot2 =   DB.value_PVret.half.bf[age == age_superFirst] / DC.value_CumSal[age == age_superFirst],
+         
+         NC_PR = NCx.EAN.CP.laca/sx) %>% 
+  select(start.year, ea, age, age_superFirst, 
+         sx, Bx, 
+         NCx.EAN.CP.laca,
+         
+         PVFBx.laca, 
+         PVFBx.DC, 
+         DB.value_PVret.half.bf,
+         DC.value_balance,
+         DC.value_CumSal,
+         DC_rate.tot,
+         DC_rate.tot2,
+         NC_PR
+         #ax.r.W, liab.ca.sum.1, CumSalwInt
+         ) %>% 
+  mutate(Rate.1_2 = DC_rate.tot2/DC_rate.tot)
 
-liab.active %>% filter(start.year == 2017, ea %in% 30) %>% select(start.year, ea, age, sx, CumSalwInt, Bx, PVFBx.laca, PVFBx.DC, CumSalwInt, gx.DC, TCx.DC, qxr, TCx.ca) %>% 
-  mutate(DC_rate.tot = 0.5 * PVFBx.laca/PVFBx.DC )
+
+liab.active %>% filter(start.year == 2017, ea == 30) 
+liab.active %>% filter(start.year == 2017, ea == age) 
 
 
-DC_rate.tot <- 
-liab.active %>% filter(start.year == 2017, ea %in% range_ea, age == ea) %>% 
-  mutate(DC_rate.tot = 0.5 * PVFBx.laca/PVFBx.DC ) %>% 
-  ungroup %>% 
-  select(ea, DC_rate.tot)
+# liab.active %>% filter(start.year == 2017, ea %in% 30) %>% select(start.year, ea, age, sx, CumSalwInt, Bx, PVFBx.laca, PVFBx.DC, CumSalwInt, gx.DC, TCx.DC, qxr, TCx.ca) %>% 
+#   mutate(DC_rate.tot = 0.5 * PVFBx.laca/PVFBx.DC )
 
-save(DC_rate.tot, file = "Data_inputs/DC_rate.tot.RData")
+
+# DC_rate.tot <- 
+# liab.active %>% filter(start.year == 2017, ea %in% range_ea, age == ea) %>% 
+#  # mutate(DC_rate.tot = 0.5 * PVFBx.laca/PVFBx.DC ) %>% 
+#   ungroup %>% 
+#   select(ea, DC_rate.tot, DC_rate.tot2)
+# 
+# save(DC_rate.tot, file = "Data_inputs/DC_rate.tot725.RData")
+
+
+DC_rate.tot <-
+  liab.active %>% filter(start.year == 2017, ea %in% range_ea, age == ea) %>%
+  # mutate(DC_rate.tot = 0.5 * PVFBx.laca/PVFBx.DC ) %>%
+  ungroup %>%
+  select(ea, DC_rate.tot, DC_rate.tot2)
+
+save(DC_rate.tot, file = "Data_inputs/DC_rate.tot625.RData")
+
+
+
+
+
+
 
 
 

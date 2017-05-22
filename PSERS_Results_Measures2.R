@@ -130,6 +130,15 @@ runs_RS3 <- paste0("RS3_", rn_policy)
 runs_alt <- c("RS1_SR1EL1.open", "RS1_SR1EL1.PR")
 
 
+runs_reform <- c("RS1_SR1EL1.Reform725",   # DC reform with expected return = 7.25%, discount rate = 7.25% 
+                 "RS1_SR1EL1.Reform625.1", # DC reform with expected return = 6.25%, discount rate = 7.25% 
+                 "RS1_SR1EL1.Reform625.2", # DC reform with expected return = 6.25%, discount rate = 6.25% 
+                 "RS1_SR1EL1.625.1",       # No DC reform with expected return = 6.25%, discount rate = 7.25% 
+                 "RS1_SR1EL1.625.2")       # No DC reform with expected return = 6.25%, discount rate = 6.25%
+
+
+
+
 
 runs_RS1_labels <- c("Assumption Achieved: Baseline",
                      "Assumption Achieved: Current Policy",
@@ -152,7 +161,15 @@ runs_RS3_labels <- c("High Volatility: Baseline",
                      "High Volatility: Risk-sharing 5% max",
                      "High Volatility: No ERC floor")
 
-runs_alt_labels <- c("open amortization", "lower payroll growth assumption for amort")
+runs_alt_labels    <- c("open amortization", "lower payroll growth assumption for amort")
+
+runs_reform_labels <- c( "DC Reform; \nexpected return = 7.25%; \ndiscount rate = 7.25%", 
+                         "DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%", 
+                         "DC reform; \nexpected return = 6.25%, \ndiscount rate = 6.25%", 
+                         "No DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%",
+                         "No DC reform; \nexpected return = 6.25%, \ndiscount rate = 6.25%")
+
+
 
 
 # lab_s1 <- "Scenario 1 \nAssumption Achieved: \nClosed Plan"
@@ -163,12 +180,27 @@ runs_alt_labels <- c("open amortization", "lower payroll growth assumption for a
 # lab_s6 <- "Scenario 6 \nLower Return Assumption"
 
 
-runs_all <- c(runs_RS1, runs_RS2, runs_RS3, runs_alt)
-runs_all_labels <- c(runs_RS1_labels, runs_RS2_labels, runs_RS3_labels, runs_alt_labels)
+runs_all <- c(runs_RS1, runs_RS2, runs_RS3, runs_alt, runs_reform)
+runs_all_labels <- c(runs_RS1_labels, runs_RS2_labels, runs_RS3_labels, runs_alt_labels, runs_reform_labels)
+
+
+
+# Calculate total final ERC rate for runs with DC reform (include ERC to DC in ERC.final_PR)
+
+results_all %<>%
+  mutate(ERC.DB.final_PR = ERC.final_PR,
+         ERC.DB.final_GF = ERC.final_GF,
+         ERC.DB.final = ERC.final,
+         ERC.tot.final = ERC.final + DC_ERC,
+         
+         ERC.final_PR = 100 * ERC.tot.final/PR,
+         ERC.final_GF = 100 * ERC.tot.final/GenFund
+  )
 
 
 df_all.stch <- results_all  %>% 
   filter(runname %in% runs_all, sim > 0, year %in% 2016:2045)
+
 
 
 df_all.stch %<>%   
@@ -179,8 +211,8 @@ df_all.stch %<>%
          FR40less  = cumany(FR_MA <= 40),
          FR100more = FR_MA >= 100,
          ERC_high  = cumany(ERC.final_PR >= 50), 
-         ERC_hike     = cumany(na2zero(ERC.final_PR - lag(ifelse(year == 2015, NA, ERC.final_PR), 5) >= 10)),
-         ERC_GF_hike  = cumany(na2zero(ERC.final_GF - lag(ifelse(year == 2015, NA, ERC.final_GF), 5) >= 5)),
+         ERC_hike     = cumany(na2zero(ERC.final_PR - lag(ifelse(year == 2016, NA, ERC.final_PR), 5) >= 10)),  # NA for 2016 value: excludes impact of new amort payment in 2017 
+         ERC_GF_hike  = cumany(na2zero(ERC.final_GF - lag(ifelse(year == 2016, NA, ERC.final_GF), 5) >= 5)),
          EEC_PR       = 100 * EEC / PR
          ) %>% 
   group_by(runname, returnScn, policy.SR, policy.EL, year) %>% 
@@ -225,6 +257,10 @@ df_all.stch %<>%
 df_all.stch %>% filter(runname == "RS1_SR1EL1")
 df_all.stch %>% filter(runname == "RS1_SR1EL1.PR")
 df_all.stch %>% filter(runname == "RS1_SR1EL1.open")
+df_all.stch %>% filter(runname == "RS1_SR1EL1.Reform725")
+
+
+
 
 df_all.stch %>% filter(runname == "RS1_SR0EL1")
 df_all.stch %>% filter(runname == "RS1_SR1EL0")
@@ -261,6 +297,13 @@ results_all %>% filter(runname == "RS1_SR0EL0", sim == 1 ) %>% select(runname, y
 
 results_all %>% filter(runname == "RS2_SR1EL1", sim == 1 ) %>% select(runname, year, FR_MA, AL, PR, NC,B,SC, EEC_PR, ERC_PR, ERC.final_PR, i.r)
 results_all %>% filter(runname == "RS2_SR0EL0", sim == 1 ) %>% select(runname, year, FR_MA, AL, PR, NC,B,SC, EEC_PR, ERC_PR, ERC.final_PR, i.r)
+
+
+# Check the impact of DC reform 
+results_all %>% filter(runname == "RS1_SR1EL1", sim == 0)           %>% select(runname, year, FR_MA, AL, PR, NC,B,SC, EEC_PR, ERC_PR, ERC.final_PR, i.r, DC_ERC, ERC.DB.final)
+results_all %>% filter(runname == "RS1_SR1EL1.Reform725", sim == 0 ) %>% select(runname, year, FR_MA, AL, PR, NC,B,SC, EEC_PR, ERC_PR, ERC.final_PR, i.r, DC_ERC, ERC.DB.final)
+
+
 
 
 results_all %>% 
