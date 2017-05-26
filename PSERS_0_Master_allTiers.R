@@ -13,8 +13,46 @@ source("PSERS_Data_MemberData_AV2016.R")
 load("Data_inputs/PSERS_PlanInfo_AV2016.RData")    # for all tiers
 load("Data_inputs/PSERS_MemberData_AV2016.RData")  # for all tiers
 
-if(paramlist$i == 0.0725) load("Data_inputs/DC_rate.tot.725.RData")
-if(paramlist$i == 0.0625) load("Data_inputs/DC_rate.tot.625.RData")              
+# if(paramlist$i == 0.0725) load("Data_inputs/DC_rate.tot725.RData")
+# if(paramlist$i == 0.0625) load("Data_inputs/DC_rate.tot625.RData")              
+
+
+
+
+## DC contribution rate
+ # 0
+ # 1. 
+ # 2. 
+ # 3.
+ # 4. 
+
+if(paramlist$DC.rate == 0) {
+  load("Data_inputs/DC_rate.tot625.RData")
+  DC_rate.tot %<>% mutate(DC_rate.tot = 0) 
+} 
+
+if(paramlist$DC.rate == 1) load("Data_inputs/DC_rate.tot725.RData")
+
+
+
+if(paramlist$DC.rate == 2) load("Data_inputs/DC_rate.tot625.RData")              
+
+if(paramlist$DC.rate == 3) {
+  load("Data_inputs/DC_rate.tot625.RData")
+  DC_rate.tot %<>% mutate(DC_rate.tot = 0.05) 
+  
+  tier.param %<>%
+    mutate(EEC_DC.rate = ifelse(tier %in% c("tNE", "tNF"), 0.03, 0 ))
+  rownames(tier.param) <- tier.param$tier
+  
+}
+
+if(paramlist$DC.rate == 4) {
+  load("Data_inputs/DC_rate.tot625.RData")
+  DC_rate.tot %<>% mutate(DC_rate.tot = 0.09) 
+}
+
+
 
 init_beneficiaries_all %<>% filter(age >= 25) 
 
@@ -129,7 +167,6 @@ if(paramlist$DC_reform){
   decrement.model.tNF      <- decrement.model.tF
   mortality.post.model.tNF <- mortality.post.model.tF
 }
-
 
 
 
@@ -635,7 +672,7 @@ kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(year, i.r, i.r_geo
 
 
 kable(penSim_results.sumTiers %>% filter(sim == -1) %>% select(one_of(var_display1)), digits = 2) %>% print 
-kable(penSim_results.sumTiers %>% filter(sim == 1) %>% select(one_of(var_display1)), digits = 2) %>% print 
+kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display2)), digits = 2) %>% print 
 
 
 var_displayDC <- c("Tier", "sim", "year", "DC_ERC", "DC_EEC", "DC_EEC_tNE", "DC_EEC_tNF", "PR_tNE","DC_ERC_PR.tEF")

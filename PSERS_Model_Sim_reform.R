@@ -296,7 +296,7 @@ run_sim <- function(Tier_select_,
       # WARNING: Does not work with "method 2" for AA. 
    
    MA.year1 <- switch(init_MA, 
-                        MA = MA_0,                         # Use preset value
+                        MA0 = MA_0,                         # Use preset value
                         AL = penSim0$AL[1],                # Assume inital fund equals inital liability.
                         AL_pct = penSim0$AL[1] * MA_0_pct) # Inital MA is a proportion of inital AL
    
@@ -376,7 +376,7 @@ run_sim <- function(Tier_select_,
       # MA(j) and EAA(j) 
       if(j == 1) {penSim$MA[j]  <- ifelse(k == -1, penSim$AL[j],                   # k = -1 is for testing model consistency
                                           switch(init_MA, 
-                                                 MA = MA_0,                        # Use preset value
+                                                 MA0 = MA_0,                        # Use preset value
                                                  AL = penSim$AL[j],                # Assume inital fund equals inital liability.
                                                  AL_pct = penSim$AL[j] * MA_0_pct) # Inital MA is a proportion of inital AL
                                           ) 
@@ -644,7 +644,7 @@ run_sim <- function(Tier_select_,
            returnScn = returnScn,
            policy.SR = policy.SR,
            policy.EL = policy.EL,
-           policy.reform = DC_reform,
+           poli.rcyeform = DC_reform,
            Tier    = Tier_select_,
            FR      = 100 * AA / exp(log(AL)),
            FR_MA   = 100 * MA / exp(log(AL)),

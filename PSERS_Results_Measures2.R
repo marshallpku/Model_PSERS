@@ -130,11 +130,16 @@ runs_RS3 <- paste0("RS3_", rn_policy)
 runs_alt <- c("RS1_SR1EL1.open", "RS1_SR1EL1.PR")
 
 
-runs_reform <- c("RS1_SR1EL1.Reform725",   # DC reform with expected return = 7.25%, discount rate = 7.25% 
-                 "RS1_SR1EL1.Reform625.1", # DC reform with expected return = 6.25%, discount rate = 7.25% 
-                 "RS1_SR1EL1.Reform625.2", # DC reform with expected return = 6.25%, discount rate = 6.25% 
-                 "RS1_SR1EL1.625.1",       # No DC reform with expected return = 6.25%, discount rate = 7.25% 
-                 "RS1_SR1EL1.625.2")       # No DC reform with expected return = 6.25%, discount rate = 6.25%
+runs_reform <- c("SR1EL1.Reform_R725.d725.DC1",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
+                 "SR1EL1.Reform_R625.d725.DC1",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
+                 "SR1EL1.Reform_R625.d625.DC1",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: PVDC = PVDB  
+                
+                 "SR1EL1.Reform_R725.d725.DC3",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: 5% 
+                 "SR1EL1.Reform_R625.d725.DC3",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: 5% 
+                 "SR1EL1.Reform_R625.d625.DC3",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: 5% 
+                 
+                 "RS1_SR1EL1_R625.d725",       # No DC reform with expected return = 6.25%, discount rate = 7.25% 
+                 "RS1_SR1EL1_R625.d625")       # No DC reform with expected return = 6.25%, discount rate = 6.25%
 
 
 
@@ -163,9 +168,14 @@ runs_RS3_labels <- c("High Volatility: Baseline",
 
 runs_alt_labels    <- c("open amortization", "lower payroll growth assumption for amort")
 
-runs_reform_labels <- c( "DC Reform; \nexpected return = 7.25%; \ndiscount rate = 7.25%", 
-                         "DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%", 
-                         "DC reform; \nexpected return = 6.25%, \ndiscount rate = 6.25%", 
+runs_reform_labels <- c( "DC Reform; \nexpected return = 7.25%; \ndiscount rate = 7.25%, DC1", 
+                         "DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%, DC1", 
+                         "DC reform; \nexpected return = 6.25%, \ndiscount rate = 6.25%, DC1", 
+                         
+                         "DC Reform; \nexpected return = 7.25%; \ndiscount rate = 7.25%; DC3", 
+                         "DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%; DC3", 
+                         "DC reform; \nexpected return = 6.25%, \ndiscount rate = 6.25%; DC3", 
+                         
                          "No DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%",
                          "No DC reform; \nexpected return = 6.25%, \ndiscount rate = 6.25%")
 
@@ -186,12 +196,16 @@ runs_all_labels <- c(runs_RS1_labels, runs_RS2_labels, runs_RS3_labels, runs_alt
 
 
 # Calculate total final ERC rate for runs with DC reform (include ERC to DC in ERC.final_PR)
-
 results_all %<>%
   mutate(ERC.DB.final_PR = ERC.final_PR,
          ERC.DB.final_GF = ERC.final_GF,
          ERC.DB.final = ERC.final,
          ERC.tot.final = ERC.final + DC_ERC,
+         
+         DC_EEC_PR = 100 * DC_EEC / PR,
+         
+         DC_EEC_PR.tEF = DC_EEC/(PR_tNE + PR_tNF),
+         DC_PR.tEF = (DC_EEC + DC_ERC)/(PR_tNE + PR_tNF),
          
          ERC.final_PR = 100 * ERC.tot.final/PR,
          ERC.final_GF = 100 * ERC.tot.final/GenFund
@@ -257,7 +271,6 @@ df_all.stch %<>%
 df_all.stch %>% filter(runname == "RS1_SR1EL1")
 df_all.stch %>% filter(runname == "RS1_SR1EL1.PR")
 df_all.stch %>% filter(runname == "RS1_SR1EL1.open")
-df_all.stch %>% filter(runname == "RS1_SR1EL1.Reform725")
 
 
 
@@ -291,8 +304,8 @@ df_all.stch %>% filter(runname == "RS3_SR1EL1")
 df_all.stch %>% filter(runname == "RS3_SR1EL0")
 
 
-results_all %>% filter(runname == "RS1_SR1EL1", sim == 54 ) %>% select(runname, year, FR_MA, AL, PR, NC,B,SC, EEC_PR, ERC_PR, ERC.final_PR, i.r)
-results_all %>% filter(runname == "RS1_SR0EL0", sim == 1 ) %>% select(runname, year, FR_MA, AL, PR, NC,B,SC, EEC_PR, ERC_PR, ERC.final_PR, i.r)
+results_all %>% filter(runname == "RS1_SR1EL1", sim == 0 ) %>% select(runname, year, FR_MA, AL, PR, NC,B,SC, EEC_PR, ERC_PR, ERC.final_PR, i.r,i)
+results_all %>% filter(runname == "RS1_SR0EL0", sim == 0 )  %>% select(runname, year, FR_MA, AL, PR, NC,B,SC, EEC_PR, ERC_PR, ERC.final_PR, i.r,i)
 
 
 results_all %>% filter(runname == "RS2_SR1EL1", sim == 1 ) %>% select(runname, year, FR_MA, AL, PR, NC,B,SC, EEC_PR, ERC_PR, ERC.final_PR, i.r)
@@ -300,8 +313,10 @@ results_all %>% filter(runname == "RS2_SR0EL0", sim == 1 ) %>% select(runname, y
 
 
 # Check the impact of DC reform 
-results_all %>% filter(runname == "RS1_SR1EL1", sim == 0)           %>% select(runname, year, FR_MA, AL, PR, NC,B,SC, EEC_PR, ERC_PR, ERC.final_PR, i.r, DC_ERC, ERC.DB.final)
-results_all %>% filter(runname == "RS1_SR1EL1.Reform725", sim == 0 ) %>% select(runname, year, FR_MA, AL, PR, NC,B,SC, EEC_PR, ERC_PR, ERC.final_PR, i.r, DC_ERC, ERC.DB.final)
+results_all %>% filter(runname == "RS1_SR1EL1", sim == 0)            %>% select(runname, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.final_PR, DC_ERC_PR.tEF, DC_PR.tEF, DC_ERC, ERC.DB.final, ExF_MA)
+results_all %>% filter(runname == "RS1_SR1EL1_R625.d725", sim == 0)  %>% select(runname, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.final_PR, DC_ERC_PR.tEF, DC_PR.tEF, DC_ERC, ERC.DB.final, ExF_MA)
+results_all %>% filter(runname == "RS1_SR1EL1_R625.d625", sim == 0)  %>% select(runname, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.final_PR, DC_ERC_PR.tEF, DC_PR.tEF, DC_ERC, ERC.DB.final, ExF_MA)
+
 
 
 
@@ -348,9 +363,6 @@ results_all %>% select(runname, sim, year, ERC.final.0 = ERC.final) %>% filter(s
             diff.PV.ERC.q50   = quantile(diff.PV.ERC, 0.5, na.rm = T),
             diff.PV.ERC.q75   = quantile(diff.PV.ERC, 0.75, na.rm = T),
             diff.PV.ERC.q90   = quantile(diff.PV.ERC, 0.9, na.rm = T))
-
-
-
 
 
 
@@ -729,6 +741,355 @@ fig_fiscal.stch$data %>% filter(year == 2034)
 
 
 
+
+#*************************************************************************
+##                        4. DC reform                                ####
+#*************************************************************************
+
+# load("Data_inputs/DC_rate.tot725.RData")
+# load("Data_inputs/DC_rate.tot625.RData")              
+# 
+# DC_rate.tot
+
+
+runs_reform <- c("SR1EL1.Reform.R725.d725.DC1",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
+                 "SR1EL1.Reform.R625.d725.DC1",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
+                 "SR1EL1.Reform.R625.d625.DC1",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: PVDC = PVDB  
+                 
+                 "SR1EL1.Reform.R725.d725.DC3",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: 5% 
+                 "SR1EL1.Reform.R625.d725.DC3",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: 5% 
+                 "SR1EL1.Reform.R625.d625.DC3",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: 5% 
+                 
+                 "RS1_SR1EL1.R625.d725",       # No DC reform with expected return = 6.25%, discount rate = 7.25% 
+                 "RS1_SR1EL1.R625.d625")       # No DC reform with expected return = 6.25%, discount rate = 6.25%
+
+
+# 4.1 Deterministic run ####
+
+# Impact on AL of DB plan
+results_all %>% filter(runname %in% c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC1"), sim == 0) %>% 
+  select(runname, sim, year, AL) %>% 
+  spread(runname, AL) %>% 
+  mutate(AL_reduction = SR1EL1.Reform_R725.d725.DC1/RS1_SR1EL1)
+
+
+# Impact on ERC
+results_all %>% filter(runname %in% c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC1", "SR1EL1.Reform_R725.d725.DC3"), sim == 0) %>% 
+  select(runname, sim, year, ERC.final_PR) %>% 
+  spread(runname, ERC.final_PR)
+
+
+
+# Decomposition of ERC, NO DC reform
+results_all %>% filter(runname %in% c("RS1_SR1EL1"), sim == 0) %>% 
+  select(runname, sim, year, C_PR, NC_PR, SC_PR, EEC_PR, ERC.DB.final_PR, DC_EEC_PR, DC_ERC_PR, ERC.final_PR, DC_EEC_PR.tEF, DC_ERC_PR.tEF)   #  %>% 
+# spread(runname, ERC.final_PR)
+
+
+# Decomposition of ERC, with DC reform
+results_all %>% filter(runname %in% c("SR1EL1.Reform_R725.d725.DC1"), sim == 0) %>% 
+  select(runname, sim, year, C_PR, NC_PR, SC_PR, EEC_PR, ERC.DB.final_PR, DC_EEC_PR, DC_ERC_PR, ERC.final_PR, DC_EEC_PR.tEF, DC_ERC_PR.tEF, AL, AA)   #  %>% 
+  # spread(runname, ERC.final_PR)
+
+results_all %>% filter(runname %in% c("SR1EL1.Reform_R725.d725.DC3"), sim == 0) %>% 
+  select(runname, sim, year, C_PR, NC_PR, SC_PR, EEC_PR, ERC.DB.final_PR, DC_EEC_PR, DC_ERC_PR, ERC.final_PR, DC_EEC_PR.tEF, DC_ERC_PR.tEF, AL, AA)   #  %>% 
+# spread(runname, ERC.final_PR)
+
+results_all %>% filter(runname %in% c("SR1EL1.Reform_R625.d725.DC3"), sim == 0) %>% 
+  select(runname, sim, year, C_PR, NC_PR, SC_PR, EEC_PR, ERC.DB.final_PR, DC_EEC_PR, DC_ERC_PR, ERC.final_PR, DC_EEC_PR.tEF, DC_ERC_PR.tEF)   #  %>% 
+# spread(runname, ERC.final_PR)
+
+
+
+
+# Decomposition of ERC, with DC reform
+results_all %>% filter(runname %in% c("SR1EL1.Reform_R725.d725.DC1"), sim == 0, year <=2020) %>% 
+  select(runname, sim, year,  AL, AA, AL.act.laca)
+
+results_all %>% filter(runname %in% c("SR1EL1.Reform_R725.d725.DC3"), sim == 0, year <=2020) %>% 
+  select(runname, sim, year,  AL, AA, AL.act.laca)
+
+
+
+# 4.2 Distributions of FR and ERC ####
+
+
+# Distribution of funded ratio 
+fig.title <- "Distribution of funded ratios across simulations"
+fig.subtitle <- "Current PSERS funding policy and proposed pension reform"
+fig_reform.RS1.FRdist <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1", "RS1_SR1EL1.Reform725") ) %>% 
+  left_join(results_all  %>% 
+              filter(runname  %in% c("RS1_SR1EL1", "RS1_SR1EL1.Reform725"), sim == 0) %>% 
+              select(runname, year, FR_det = FR_MA)) %>%  
+  select(runname, year, FR.q25, FR.q50, FR.q75, FR_det) %>% 
+  gather(type, value, -runname, -year) %>% 
+  ggplot(aes(x = year, y = value,
+             color = factor(type, levels = c("FR.q75", "FR.q50", "FR.q25", "FR_det")),
+             shape = factor(type, levels = c("FR.q75", "FR.q50", "FR.q25", "FR_det"))
+  )) + theme_bw() + 
+  facet_grid(. ~ runname) + 
+  geom_line() + 
+  geom_point(size = 2) + 
+  geom_hline(yintercept = 100, linetype = 2, size = 1) +
+  coord_cartesian(ylim = c(0,180)) + 
+  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_y_continuous(breaks = seq(0, 500, 20)) + 
+  scale_color_manual(values = c(RIG.green, RIG.blue, RIG.red, "black"),  name = NULL, 
+                     label  = c("75th percentile", "50th percentile", "25th percentile", "Deterministic")) + 
+  scale_shape_manual(values = c(15, 16, 17, 18),  name = NULL, 
+                     label  = c("75th percentile", "50th percentile", "25th percentile", "Deterministic")) +
+  labs(title = fig.title,
+       subtitle = fig.subtitle,
+       x = NULL, y = "Percent") + 
+  theme(axis.text.x = element_text(size = 8)) + 
+  RIG.theme()
+fig_reform.RS1.FRdist
+
+
+
+# Distribution of total ERC as % Payroll
+fig.title    <- "Distribution of employer contribution as a percentage of payroll across simulations"
+fig.subtitle <- "Current PSERS funding policy and proposed pension reform"
+fig_reform.RS1.ERCdist <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1", "RS1_SR1EL1.Reform725")) %>% 
+  left_join(results_all  %>%
+              filter(runname  %in% c("RS1_SR1EL1", "RS1_SR1EL1.Reform725"), sim == 0) %>%
+              select(runname, year, ERC_det = ERC.final_PR)) %>%
+  select(runname, year, ERC_PR.q25, ERC_PR.q50, ERC_PR.q75, ERC_det) %>% 
+  gather(type, value, -runname, -year) %>% 
+  # mutate(runname = factor(runname, labels = c(lab_s1, lab_s2))) %>%  
+  ggplot(aes(x = year, y = value,
+             color = factor(type, levels = c("ERC_PR.q75", "ERC_PR.q50", "ERC_PR.q25", "ERC_det")),
+             shape = factor(type, levels = c("ERC_PR.q75", "ERC_PR.q50", "ERC_PR.q25", "ERC_det")))) + 
+  theme_bw() + 
+  facet_grid(.~runname) + 
+  geom_line() + 
+  geom_point(size = 2) + 
+  geom_hline(yintercept = 100, linetype = 2, size = 1) +
+  coord_cartesian(ylim = c(0,50)) + 
+  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_y_continuous(breaks = seq(0, 500, 5)) + 
+  scale_color_manual(values = c(RIG.red, RIG.blue, RIG.green, "black"),  name = NULL, 
+                     label  = c("75th percentile", "50th percentile", "25th percentile", "Deterministic")) + 
+  scale_shape_manual(values = c(17, 16, 15, 18),  name = NULL, 
+                     label  = c("75th percentile", "50th percentile", "25th percentile", "Deterministic")) +
+  labs(title = fig.title,
+       subtitle = fig.subtitle,
+       x = NULL, y = "Percent of payroll") + 
+  theme(axis.text.x = element_text(size = 8)) + 
+  RIG.theme()
+fig_reform.RS1.ERCdist
+
+
+
+# 4.3 risk measures ####
+
+# Risk of low funded ratio
+fig.title <- "Probability of funded ratio below 40% in any year up to the given year"
+fig.subtitle <- "Current PSERS funding policy and proposed pension reform"
+fig_reform.RS1.FR40less <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1", "RS1_SR1EL1.Reform725")) %>%
+  # mutate(runname = factor(runname, labels = c(lab.RS1, lab.RS2, lab.RS3))) %>%
+  select(runname, year, FR40less) %>%
+  #mutate(FR40less.det = 0) %>%
+  #gather(variable, value, -year, -runname) %>%
+  ggplot(aes(x = year, y = FR40less, color = runname, shape = runname)) +
+  theme_bw() +
+  geom_point(size = 2) +
+  geom_line() +
+  coord_cartesian(ylim = c(0,50)) +
+  scale_y_continuous(breaks = seq(0,200, 5)) +
+  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) +
+  scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red),  name = "") +
+  scale_shape_manual(values = c(17,16, 15),  name = "") +
+  labs(title = fig.title,
+       subtitle = fig.subtitle,
+       x = NULL, y = "Probability (%)") +
+  guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
+  RIG.theme()
+fig_reform.RS1.FR40less
+fig_reform.RS1.FR40less %>% filter(year == 2045)
+
+
+
+# Risk of sharp increase in ERC/PR
+fig.title <- "Probability of employer contribution rising more than 10% of payroll \nin a 5-year period at any time prior to and including the given year"
+fig.subtitle <- "Current PSERS funding policy and proposed pension reform"
+fig_reform.RS1.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1", "RS1_SR1EL1.Reform725")) %>% 
+  # mutate(policy.SR = factor(policy.SR, levels = c(1, 0), labels = c("Current policy", "No risk-sharing")),
+  #        returnScn = factor(returnScn, levels = c("RS1", "RS2", "RS3"), labels = c(lab.RS1, lab.RS2, lab.RS3))) %>%  
+  select(runname, year, ERC_hike) %>% 
+  #mutate(ERChike.det = 0) %>% 
+  # gather(variable, value, -year, -returnScn) %>% 
+  ggplot(aes(x = year, y = ERC_hike, color = runname, shape = runname)) + theme_bw() + 
+  geom_point(size = 2) + geom_line() + 
+  coord_cartesian(ylim = c(0,15)) + 
+  scale_y_continuous(breaks = seq(0,200, 2)) +
+  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
+  scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
+  labs(title = fig.title,
+       subtitle = fig.subtitle,
+       x = NULL, y = "Probability (%)") + 
+  guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
+  RIG.theme()
+fig_reform.RS1.ERChike
+fig_reform.RS1.ERChike$data
+
+
+
+# 4.4.1 risk transfer ####
+
+# deterministic IFO method
+riskTransfer.IFO <-  results_all %>% filter(runname %in% c("RS1_SR1EL1",
+                                                           "RS1_SR1EL1_R625.d625",
+                                                           "SR1EL1.Reform_R725.d725.DC1",
+                                                           "SR1EL1.Reform_R625.d625.DC1"), 
+                                            sim == 0,
+                                            year <= 2048) %>% 
+  group_by(runname) %>% 
+  summarize(ERC.tot = sum(ERC.tot.final, na.rm = TRUE)/1e9) %>% 
+  ungroup() %>% 
+  spread(runname, ERC.tot) %>% 
+  mutate(
+         #Diff.CL1 = (RS1_SR1EL1_R625.d725 - RS1_SR1EL1)/1,
+         Diff.CL2 = (RS1_SR1EL1_R625.d625 - RS1_SR1EL1)/1,
+         
+         #Diff.PL1 = (SR1EL1.Reform_R625.d725.DC1 - SR1EL1.Reform_R725.d725.DC1 )/1,
+         Diff.PL2 = (SR1EL1.Reform_R625.d625.DC1 - SR1EL1.Reform_R725.d725.DC1 )/1,
+        
+         
+         #riskTansfer1 = (Diff.CL1 - Diff.PL1),
+         riskTansfer2 = (Diff.CL2 - Diff.PL2),
+         #riskTransfer1 = (RS1_SR1EL1.625.1 - RS1_SR1EL1) - (RS1_SR1EL1.Reform725 - RS1_SR1EL1.Reform625.1),
+         #riskTransfer2 = (RS1_SR1EL1.625.2 - RS1_SR1EL1) - (RS1_SR1EL1.Reform725 - RS1_SR1EL1.Reform625.2),
+         
+         #riskTransfer1.pct = 100 * riskTansfer1 / Diff.CL1,
+         riskTransfer2.pct = 100 * riskTansfer2 / Diff.CL2
+         
+         )
+
+riskTransfer.IFO %>% t %>% as.data.frame %>% kable(digit = 2)
+
+
+
+# deterministic Pew method
+riskTransfer.Pew <-  results_all %>% filter(runname %in% c("RS1_SR1EL1",
+                                                           "RS1_SR1EL1_R625.d725",
+                                                           "SR1EL1.Reform_R725.d725.DC1",
+                                                           "SR1EL1.Reform_R625.d725.DC1"
+                                                           ), 
+                                            sim == 0,
+                                            year <= 2048) %>% 
+  group_by(runname) %>% 
+  summarize(ERC.tot = sum(ERC.tot.final, na.rm = TRUE)/1e9,
+            UAAL    = UAAL[year == max(year)]/1e9,
+            cost.tot = ERC.tot + UAAL) %>% 
+  select(-ERC.tot, -UAAL) %>% 
+  ungroup() %>% 
+  spread(runname, cost.tot) %>% 
+  mutate(
+    Diff.CL1 = (RS1_SR1EL1_R625.d725 - RS1_SR1EL1)/1,
+    #Diff.CL2 = (RS1_SR1EL1_R625.d625 - RS1_SR1EL1)/1,
+    
+    Diff.PL1 = (SR1EL1.Reform_R625.d725.DC1 - SR1EL1.Reform_R725.d725.DC1 )/1,
+    #Diff.PL2 = (SR1EL1.Reform_R625.d625.DC1 - SR1EL1.Reform_R725.d725.DC1 )/1,
+    
+    
+    riskTansfer1 = (Diff.CL1 - Diff.PL1),
+    #riskTansfer2 = (Diff.CL2 - Diff.PL2),
+    #riskTransfer1 = (RS1_SR1EL1.625.1 - RS1_SR1EL1) - (RS1_SR1EL1.Reform725 - RS1_SR1EL1.Reform625.1),
+    #riskTransfer2 = (RS1_SR1EL1.625.2 - RS1_SR1EL1) - (RS1_SR1EL1.Reform725 - RS1_SR1EL1.Reform625.2),
+    
+    riskTransfer1.pct = 100 * riskTansfer1 / Diff.CL1
+    #riskTransfer2.pct = 100 * riskTansfer2 / Diff.CL2
+    
+  )
+
+riskTransfer.Pew
+riskTransfer.Pew %>% t %>% as.data.frame %>% kable(digit = 2)
+
+
+
+
+# 4.4.2 risk transfer, 5% DC rate ####
+
+# deterministic IFO method
+riskTransfer.IFO <-  results_all %>% filter(runname %in% c("RS1_SR1EL1",
+                                                           "RS1_SR1EL1_R625.d625",
+                                                           "SR1EL1.Reform_R725.d725.DC3",
+                                                           "SR1EL1.Reform_R625.d625.DC3"), sim == 0,
+                                            year <=2048) %>% 
+  group_by(runname) %>% 
+  summarize(ERC.tot = sum(ERC.tot.final, na.rm = TRUE)/1e9) %>% 
+  ungroup() %>% 
+  spread(runname, ERC.tot) %>% 
+  mutate(
+    #Diff.CL1 = (RS1_SR1EL1_R625.d725 - RS1_SR1EL1)/1,
+    Diff.CL2 = (RS1_SR1EL1_R625.d625 - RS1_SR1EL1)/1,
+    
+    #Diff.PL1 = (SR1EL1.Reform_R625.d725.DC1 - SR1EL1.Reform_R725.d725.DC1 )/1,
+    Diff.PL2 = (SR1EL1.Reform_R625.d625.DC3 - SR1EL1.Reform_R725.d725.DC3 )/1,
+    
+    
+    #riskTansfer1 = (Diff.CL1 - Diff.PL1),
+    riskTansfer2 = (Diff.CL2 - Diff.PL2),
+    #riskTransfer1 = (RS1_SR1EL1.625.1 - RS1_SR1EL1) - (RS1_SR1EL1.Reform725 - RS1_SR1EL1.Reform625.1),
+    #riskTransfer2 = (RS1_SR1EL1.625.2 - RS1_SR1EL1) - (RS1_SR1EL1.Reform725 - RS1_SR1EL1.Reform625.2),
+    
+    #riskTransfer1.pct = 100 * riskTansfer1 / Diff.CL1,
+    riskTransfer2.pct = 100 * riskTansfer2 / Diff.CL2
+    
+  )
+
+riskTransfer.IFO %>% t %>% as.data.frame %>% kable(digit = 2)
+
+
+
+# deterministic Pew method
+riskTransfer.Pew <-  results_all %>% filter(runname %in% c("RS1_SR1EL1",
+                                                           "RS1_SR1EL1_R625.d725",
+                                                           "SR1EL1.Reform_R725.d725.DC3",
+                                                           "SR1EL1.Reform_R625.d725.DC3"), 
+                                            sim == 0,
+                                            year <= 2048) %>% 
+  group_by(runname) %>% 
+  summarize(ERC.tot = sum(ERC.tot.final, na.rm = TRUE)/1e9,
+            UAAL    = UAAL[year == max(year)]/1e9,
+            cost.tot = ERC.tot + UAAL) %>% 
+  select(-ERC.tot, -UAAL) %>% 
+  ungroup() %>% 
+  spread(runname, cost.tot) %>% 
+  mutate(
+    Diff.CL1 = (RS1_SR1EL1_R625.d725 - RS1_SR1EL1)/1,
+    #Diff.CL2 = (RS1_SR1EL1_R625.d625 - RS1_SR1EL1)/1,
+    
+    Diff.PL1 = (SR1EL1.Reform_R625.d725.DC3 - SR1EL1.Reform_R725.d725.DC3 )/1,
+    #Diff.PL2 = (SR1EL1.Reform_R625.d625.DC1 - SR1EL1.Reform_R725.d725.DC1 )/1,
+    
+    
+    riskTansfer1 = (Diff.CL1 - Diff.PL1),
+    #riskTansfer2 = (Diff.CL2 - Diff.PL2),
+    #riskTransfer1 = (RS1_SR1EL1.625.1 - RS1_SR1EL1) - (RS1_SR1EL1.Reform725 - RS1_SR1EL1.Reform625.1),
+    #riskTransfer2 = (RS1_SR1EL1.625.2 - RS1_SR1EL1) - (RS1_SR1EL1.Reform725 - RS1_SR1EL1.Reform625.2),
+    
+    riskTransfer1.pct = 100 * riskTansfer1 / Diff.CL1
+    #riskTransfer2.pct = 100 * riskTansfer2 / Diff.CL2
+    
+  )
+
+riskTransfer.Pew
+riskTransfer.Pew %>% t %>% as.data.frame %>% kable(digit = 2)
+
+
+
+
+
+
+
+
+
+
+results_all %>% filter(runname %in% c("RS1_SR1EL1.Reform725"), sim == 0) %>% select(runname, sim, year, ERC.tot.final, ERC.final)
+  
 
 #*************************************************************************
 ##                        Summary table                              ####

@@ -35,8 +35,8 @@ cola     <- tier.param[Tier_select_, "cola"]
 
 init_terminated_ <-  get_tierData(init_terms_all_, Tier_select_)
 
-#i <- 0.0725
-i <- 0.0625
+i <- 0.0725
+#i <- 0.0625
 bfactor <- tier.param[Tier_select_, "bfactor"]
 
 
@@ -181,6 +181,8 @@ liab.active %<>%
          
          DC_rate.tot2 =   DB.value_PVret.half.bf[age == age_superFirst] / DC.value_CumSal[age == age_superFirst],
          
+         DC_rate.tot3 =   DB.value_PVret.half.bf / DC.value_CumSal,
+         
          NC_PR = NCx.EAN.CP.laca/sx) %>% 
   select(start.year, ea, age, age_superFirst, 
          sx, Bx, 
@@ -193,6 +195,7 @@ liab.active %<>%
          DC.value_CumSal,
          DC_rate.tot,
          DC_rate.tot2,
+         DC_rate.tot3,
          NC_PR
          #ax.r.W, liab.ca.sum.1, CumSalwInt
          ) %>% 
@@ -201,6 +204,20 @@ liab.active %<>%
 
 liab.active %>% filter(start.year == 2017, ea == 30) 
 liab.active %>% filter(start.year == 2017, ea == age) 
+
+
+# DB-hybrid equivalence 
+ # 1. Weighted PV approach
+ # 2. Simple approach
+ #  9% rate: 
+   # ea = 20, age.r = 61  (9.23)
+   # ea = 25, age.r = 61  (8.98)
+   # ea = 30, age.r = 61  (8.88)
+   # ea = 35, age.r = 61  (8.94)
+
+
+
+
 
 
 # liab.active %>% filter(start.year == 2017, ea %in% 30) %>% select(start.year, ea, age, sx, CumSalwInt, Bx, PVFBx.laca, PVFBx.DC, CumSalwInt, gx.DC, TCx.DC, qxr, TCx.ca) %>% 
@@ -216,7 +233,7 @@ liab.active %>% filter(start.year == 2017, ea == age)
 # save(DC_rate.tot, file = "Data_inputs/DC_rate.tot725.RData")
 
 
-DC_rate.tot <-
+DC_rate.tot <- 
   liab.active %>% filter(start.year == 2017, ea %in% range_ea, age == ea) %>%
   # mutate(DC_rate.tot = 0.5 * PVFBx.laca/PVFBx.DC ) %>%
   ungroup %>%
