@@ -123,7 +123,8 @@ liab.active <- expand.grid(start.year = min.year:(init.year + nyear - 1) ,
     
     # PSERS: DC contribution 
     Tier = Tier_select_,
-    DC_rate.tot = ifelse(Tier %in% c("tNE", "tNF"), DC_rate.tot,0), # (Tier %in% c("tNE", "tNF")) * DC_rate.tot,
+    reform_all = DC_reform_all,  # if DC reform is applied to all current and future members
+    DC_rate.tot = ifelse((Tier %in% c("tNE", "tNF")) | reform_all, DC_rate.tot,0), # (Tier %in% c("tNE", "tNF")) * DC_rate.tot,
     DC_EEC      = sx * EEC_DC.rate,
     DC_ERC      = sx * max(0, (DC_rate.tot - EEC_DC.rate)),
     

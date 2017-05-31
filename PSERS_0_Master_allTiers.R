@@ -20,18 +20,45 @@ load("Data_inputs/PSERS_MemberData_AV2016.RData")  # for all tiers
 
 
 ## DC contribution rate
- # 0
- # 1. 
- # 2. 
- # 3.
- # 4. 
+ # 0. No DC reform
+ # 1. Entry age specific total DC contribution rates obtained using PV approach with 7.25% discount rate
+ # 2. Entry age specific total DC contribution rates obtained using PV approach with 6.25% discount rate
+ # 3. Uniform 5% total DC contribution rate, with 3% employee DC contribution rate for new employees
+ # 4. Uniform 5% total DC contribution rate, with employee DC contribution rate for new employees equal to ERC rate for the DB plan after reform
+
+## parameter "DC_reform_all"
+ # If true, DC reform is applied to all current and future members from year 1:
+ # For current and future active members in all tiers:
+   # - benefit factor is cut by half
+   # - active members make EEC to the DC plan. (contribution rate specified by EEC_DC.rate)
+   # - employer makes ERC to the DC plan. (contribution rate is equal to the total DC rate in DC_rate.tot minus the EEC rate for DC)
+ # For current retirees and beneficiaries:
+   # - Benefits for initial retirees and beneficiaries are cut by half
+   # - Benefits for initial disabled remain the same. 
+
 
 if(paramlist$DC.rate == 0) {
   load("Data_inputs/DC_rate.tot625.RData")
   DC_rate.tot %<>% mutate(DC_rate.tot = 0) 
 } 
 
-if(paramlist$DC.rate == 1) load("Data_inputs/DC_rate.tot725.RData")
+if(paramlist$DC.rate == 1){ 
+  
+  load("Data_inputs/DC_rate.tot725.RData")
+  
+  if(paramlist$DC_reform_all){
+    tier.param %<>%
+      mutate(bfactor     = c(0.0125, 0.01, 0.01, 0.01, 0.01),
+             EEC_DC.rate = c(0.0375, 0.0375, 0.0515, 0.0375, 0.0515),
+             EEC_rate    = c(0.0375, 0.0375, 0.0515, 0.0375, 0.0515)
+      )
+    rownames(tier.param) <- tier.param$tier
+  
+    init_beneficiaries_all %<>% mutate(benefit = 0.5 * benefit)
+    init_retirees_all      %<>% mutate(benefit = 0.5 * benefit)
+    
+    }
+  }
 
 
 
@@ -44,13 +71,43 @@ if(paramlist$DC.rate == 3) {
   tier.param %<>%
     mutate(EEC_DC.rate = ifelse(tier %in% c("tNE", "tNF"), 0.03, 0 ))
   rownames(tier.param) <- tier.param$tier
+ 
+  
+  if(paramlist$DC_reform_all){
+    tier.param %<>%
+      mutate(bfactor     = c(0.0125, 0.01, 0.01, 0.01, 0.01),
+             EEC_DC.rate = 0.03,
+             EEC_rate    = c(0.0375, 0.0375, 0.0515, 0.0375, 0.0515)
+             )
+    rownames(tier.param) <- tier.param$tier
+    
+    init_beneficiaries_all %<>% mutate(benefit = 0.5 * benefit)
+    init_retirees_all      %<>% mutate(benefit = 0.5 * benefit)
+  }
   
 }
 
 if(paramlist$DC.rate == 4) {
   load("Data_inputs/DC_rate.tot625.RData")
   DC_rate.tot %<>% mutate(DC_rate.tot = 0.09) 
+  
+  if(paramlist$DC_reform_all){
+    tier.param %<>%
+      mutate(bfactor     = c(0.0125, 0.01, 0.01, 0.01, 0.01),
+             EEC_DC.rate = c(0.0375, 0.0375, 0.0515, 0.0375, 0.0515),
+             EEC_rate    = c(0.0375, 0.0375, 0.0515, 0.0375, 0.0515)
+      )
+    rownames(tier.param) <- tier.param$tier
+    
+    init_beneficiaries_all %<>% mutate(benefit = 0.5 * benefit)
+    init_retirees_all      %<>% mutate(benefit = 0.5 * benefit)
+  }
+
 }
+
+
+
+
 
 
 

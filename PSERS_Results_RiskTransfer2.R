@@ -673,40 +673,48 @@ riskTransfer.pct.pew.DC1.CL
 riskTransfer.pct.IFO.DC1.CL
 
 
-# 4.4.1 risk transfer: total DC rate determined by weighted PV approach ####
+# 4.4.1 risk transfer: 9% total DC rate ####
 
 # deterministic IFO method
-riskTransfer.IFO <- 
+riskTransfer.IFO.DC4 <- 
 get_riskTransfer.IFO(results_all, c("RS1_SR1EL1",
                                 "RS1_SR1EL1_R625.d625",
-                                "SR1EL1.Reform_R725.d725.DC1",
-                                "SR1EL1.Reform_R625.d625.DC1"))
+                                "SR1EL1.Reform_R725.d725.DC4",
+                                "SR1EL1.Reform_R625.d625.DC4"))
 
-riskTransfer.IFO %>% filter(str_detect(var, "CF"))
-riskTransfer.IFO %>% filter(str_detect(var, "PV37"))
-riskTransfer.IFO %>% filter(str_detect(var, "PV725"))
+riskTransfer.IFO.DC4 %>% filter(str_detect(var, "CF"))
+riskTransfer.IFO.DC4 %>% filter(str_detect(var, "PV37"))
+riskTransfer.IFO.DC4 %>% filter(str_detect(var, "PV725"))
 
 
 # deterministic Pew method
-riskTransfer.pew <- 
+riskTransfer.pew.DC4 <- 
   get_riskTransfer.pew(results_all, c("RS1_SR1EL1",
                                   "RS1_SR1EL1_R625.d725",
-                                  "SR1EL1.Reform_R725.d725.DC",
-                                  "SR1EL1.Reform_R625.d725.DC1")
+                                  "SR1EL1.Reform_R725.d725.DC4",
+                                  "SR1EL1.Reform_R625.d725.DC4")
                        )
 
-riskTransfer.pew %>% filter(str_detect(var, "CF"))
-riskTransfer.pew %>% filter(str_detect(var, "PV37"))
-riskTransfer.pew %>% filter(str_detect(var, "PV725"))
+riskTransfer.pew.DC4 %>% filter(str_detect(var, "CF"))
+riskTransfer.pew.DC4 %>% filter(str_detect(var, "PV37"))
+riskTransfer.pew.DC4 %>% filter(str_detect(var, "PV725"))
 
 
 # deterministic Pew method, reform applied to all
-riskTransfer.pew2 <- 
+riskTransfer.pew2.DC4 <- 
   get_riskTransfer.pew(results_all, c("RS1_SR1EL1",
                                       "RS1_SR1EL1_R625.d725",
-                                      "SR1EL1.Reform_R725.d725.DC1",
-                                      "SR1EL1.Reform_R625.d725.DC1")
+                                      "SR1EL1.Reform_R725.d725.DC4a",
+                                      "SR1EL1.Reform_R625.d725.DC4a")
   )
+
+
+
+
+riskTransfer.pew2.DC4 %>% filter(str_detect(var, "CF"))
+riskTransfer.pew2.DC4 %>% filter(str_detect(var, "PV37"))
+riskTransfer.pew2.DC4 %>% filter(str_detect(var, "PV725"))
+
 
 
 # 4.4.2 risk transfer, 5% DC rate ####
@@ -737,11 +745,55 @@ riskTransfer.pew.DC3 %>% filter(str_detect(var, "PV37"))
 riskTransfer.pew.DC3 %>% filter(str_detect(var, "PV725"))
 
 
+# deterministic pew method, reform for all members
+riskTransfer.pew2.DC3 <- 
+  get_riskTransfer.pew(results_all, c("RS1_SR1EL1",
+                                      "RS1_SR1EL1_R625.d725",
+                                      "SR1EL1.Reform_R725.d725.DC3a",
+                                      "SR1EL1.Reform_R625.d725.DC3a")
+  )
+
+riskTransfer.pew2.DC3 %>% filter(str_detect(var, "CF"))
+riskTransfer.pew2.DC3 %>% filter(str_detect(var, "PV37"))
+riskTransfer.pew2.DC3 %>% filter(str_detect(var, "PV725"))
+
+
+# Display desterministic results:
+# Approach 1: IFO
+ riskTransfer.IFO.DC4 %>% filter(str_detect(var, "CF"))
+ riskTransfer.IFO.DC3 %>% filter(str_detect(var, "CF"))
+
+# Approach 2: Pew, but DC reform only on new hires
+ riskTransfer.pew.DC4 %>% filter(str_detect(var, "CF"))
+ riskTransfer.pew.DC3 %>% filter(str_detect(var, "CF"))
+
+ # Approach 3: Pew, DC reform on all current and future members
+ riskTransfer.pew2.DC4 %>% filter(str_detect(var, "CF"))
+ riskTransfer.pew2.DC3 %>% filter(str_detect(var, "CF"))
+ 
+
+ # Approach 4: IFO; PV
+ riskTransfer.IFO.DC4 %>% filter(str_detect(var, "PV37"))
+ riskTransfer.IFO.DC4 %>% filter(str_detect(var, "PV725"))
+ 
+ # Approach 5: Pew, but DC reform only on new hires, PV
+ riskTransfer.pew.DC4 %>% filter(str_detect(var, "PV37"))
+ riskTransfer.pew.DC4 %>% filter(str_detect(var, "PV725"))
+ 
+ # Approach 6: Pew, DC reform on all current and future members; PV
+ riskTransfer.pew2.DC4 %>% filter(str_detect(var, "PV37"))
+ riskTransfer.pew2.DC4 %>% filter(str_detect(var, "PV725"))
+ 
+ 
+
+ 
+ 
+ 
 
 # 4.5 Risk transfer under stochastic runs ####
 
 # No discount
-riskTransfer.pct.IFO.DC1.CL <-  
+riskTransfer.pct.IFO.DC4 <-  
   get_riskTransfer.pctile(results_all,c("RS1_SR1EL1",
                                         "RS1_SR1EL1_R625.d625",
                                         "SR1EL1.Reform_R725.d725.DC4",
@@ -750,61 +802,128 @@ riskTransfer.pct.IFO.DC1.CL <-
                           method = "IFO")
 
 
-riskTransfer.pct.pew.DC1.CL <-  
+riskTransfer.pct.pew.DC4 <-  
   get_riskTransfer.pctile(results_all,c("RS1_SR1EL1",
-                                        "RS1_SR1EL1_R625.d625",
+                                        "RS1_SR1EL1_R625.d725",
                                         "SR1EL1.Reform_R725.d725.DC4",
-                                        "SR1EL1.Reform_R625.d625.DC4"),
+                                        "SR1EL1.Reform_R625.d725.DC4"),
                           discount = 0,
                           method = "pew")
 
-riskTransfer.pct.IFO.DC1.CL
-riskTransfer.pct.pew.DC1.CL
+
+riskTransfer.pct.pew2.DC4 <-  
+  get_riskTransfer.pctile(results_all,c("RS1_SR1EL1",
+                                        "RS1_SR1EL1_R625.d725",
+                                        "SR1EL1.Reform_R725.d725.DC4a",
+                                        "SR1EL1.Reform_R625.d725.DC4a"),
+                          discount = 0,
+                          method = "pew")
+
+
+riskTransfer.pct.IFO.DC4
+riskTransfer.pct.pew.DC4
+riskTransfer.pct.pew2.DC4
 
 
 
 # 3.7% discount
-riskTransfer.pct.IFO.DC1.disc37.CL <-  
+riskTransfer.pct.IFO.DC4.disc37 <-  
   get_riskTransfer.pctile(results_all,c("RS1_SR1EL1",
                                         "RS1_SR1EL1_R625.d625",
-                                        "SR1EL1.Reform_R725.d725.DC1",
-                                        "SR1EL1.Reform_R625.d625.DC1"),
+                                        "SR1EL1.Reform_R725.d725.DC4",
+                                        "SR1EL1.Reform_R625.d625.DC4"),
                           discount = 0.037,
                           method = "IFO")
 
 
-riskTransfer.pct.pew.DC1.disc37.CL <-  
+riskTransfer.pct.pew.DC4.disc37 <-  
   get_riskTransfer.pctile(results_all,c("RS1_SR1EL1",
-                                        "RS1_SR1EL1_R625.d625",
-                                        "SR1EL1.Reform_R725.d725.DC1",
-                                        "SR1EL1.Reform_R625.d625.DC1"),
+                                        "RS1_SR1EL1_R625.d725",
+                                        "SR1EL1.Reform_R725.d725.DC4",
+                                        "SR1EL1.Reform_R625.d725.DC4"),
                           discount = 0.037,
                           method = "pew")
 
-riskTransfer.pct.pew.DC1.disc37.CL
-riskTransfer.pct.IFO.DC1.disc37.CL
+
+riskTransfer.pct.pew2.DC4.disc37 <-  
+  get_riskTransfer.pctile(results_all,c("RS1_SR1EL1",
+                                        "RS1_SR1EL1_R625.d725",
+                                        "SR1EL1.Reform_R725.d725.DC4a",
+                                        "SR1EL1.Reform_R625.d725.DC4a"),
+                          discount = 0.037,
+                          method = "pew")
+
+
+riskTransfer.pct.pew.DC4.disc37
+riskTransfer.pct.IFO.DC4.disc37
+riskTransfer.pct.pew2.DC4.disc37
+
 
 
 # 7.25% discount
-riskTransfer.pct.IFO.DC1.disc725.CL <-  
+riskTransfer.pct.IFO.DC4.disc725 <-  
   get_riskTransfer.pctile(results_all,c("RS1_SR1EL1",
                                         "RS1_SR1EL1_R625.d625",
-                                        "SR1EL1.Reform_R725.d725.DC1",
-                                        "SR1EL1.Reform_R625.d625.DC1"),
+                                        "SR1EL1.Reform_R725.d725.DC4",
+                                        "SR1EL1.Reform_R625.d625.DC4"),
                           discount = 0.0725,
                           method = "IFO")
 
 
-riskTransfer.pct.pew.DC1.disc725.CL <-  
+riskTransfer.pct.pew.DC4.disc725 <-  
   get_riskTransfer.pctile(results_all,c("RS1_SR1EL1",
-                                        "RS1_SR1EL1_R625.d625",
-                                        "SR1EL1.Reform_R725.d725.DC1",
-                                        "SR1EL1.Reform_R625.d625.DC1"),
+                                        "RS1_SR1EL1_R625.d725",
+                                        "SR1EL1.Reform_R725.d725.DC4",
+                                        "SR1EL1.Reform_R625.d725.DC4"),
                           discount = 0.0725,
                           method = "pew")
 
-riskTransfer.pct.pew.DC1.disc725.CL
-riskTransfer.pct.IFO.DC1.disc725.CL 
+
+riskTransfer.pct.pew2.DC4.disc725 <-  
+  get_riskTransfer.pctile(results_all,c("RS1_SR1EL1",
+                                        "RS1_SR1EL1_R625.d725",
+                                        "SR1EL1.Reform_R725.d725.DC4a",
+                                        "SR1EL1.Reform_R625.d725.DC4a"),
+                          discount = 0.0725,
+                          method = "pew")
+
+
+riskTransfer.pct.IFO.DC4.disc725
+riskTransfer.pct.pew.DC4.disc725
+riskTransfer.pct.pew2.DC4.disc725
+
+
+
+# Display stochastic results
+
+
+riskTransfer.pct.IFO.DC4
+riskTransfer.pct.IFO.DC4.disc37
+riskTransfer.pct.IFO.DC4.disc725
+
+
+riskTransfer.pct.pew.DC4
+riskTransfer.pct.pew.DC4.disc37
+riskTransfer.pct.pew.DC4.disc725
+
+
+riskTransfer.pct.pew2.DC4
+riskTransfer.pct.pew2.DC4.disc37
+riskTransfer.pct.pew2.DC4.disc725
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
