@@ -668,6 +668,102 @@ riskTransfer %<>%
 
 
 
+get_riskTransfer.pctile2 <- function(df, rn, discount, method, year_range = 2016:2048){
+  
+  # rn <- c("RS1_SR1EL1",
+  #         "RS1_SR1EL1_R625.d625",
+  #         "SR1EL1.Reform_R725.d725.DC1",
+  #         "SR1EL1.Reform_R625.d625.DC1")
+  # 
+  # year_range <- 2016:2048
+  # 
+  # discount <- 0.0
+  # 
+  # method <- "IFO"
+  
+  df <- results_all
+  
+  x <- 
+  df %>%
+    filter(sim > 0, runname %in% rn[1:2]) %>% 
+    group_by(runname, sim) %>% 
+    summarize(geoReturn = get_geoReturn(i.r)) %>% 
+    arrange(runname, geoReturn) %>% 
+    group_by(runname) %>% 
+    mutate(order.n = 1:n()) %>% 
+    filter(order.n %in% c( round(n()*0.25), round(n() * 0.5), round(n() * 0.75) ))
+
+  pctile.sim.high <- x[x$runname == rn[1], "sim"] %>% 
+    mutate(pctile = c("pct25", "pct50", "pct75") )
+  
+  pctile.sim.low <- x[x$runname == rn[2], "sim"] %>% 
+    mutate(pctile = c("pct25", "pct50", "pct75") )
+  
+  
+
+  add.UAAL <- switch(method, IFO = 0, pew = 1)
+  
+  df.high <- 
+    df %>% filter(runname %in% rn[c(1,3)], 
+                  year %in% year_range,
+                  sim %in% pctile.sim.high$sim) %>% 
+    group_by(runname, sim) %>% 
+    summarize(cost = sum(ERC.tot.final / (1 + discount)^(row_number() - 1), na.rm = TRUE)/1e9 + UAAL[year == max(year)]/1e9 * add.UAAL
+    ) %>% 
+    left_join(pctile.sim.high)
+
+    
+  df.low <- 
+    df %>% filter(runname %in% rn[c(2,4)], 
+                  year %in% year_range,
+                  sim %in% pctile.sim.low$sim) %>% 
+    group_by(runname, sim) %>% 
+    summarize(cost = sum(ERC.tot.final / (1 + discount)^(row_number() - 1), na.rm = TRUE)/1e9 + UAAL[year == max(year)]/1e9 * add.UAAL
+    ) %>% 
+    left_join(pctile.sim.low)
+
+  
+  
+
+  riskTransfer <-  
+    bind_rows(df.high, df.low) %>% 
+    ungroup() %>% 
+    mutate(runname = factor(runname, levels = rn),
+           pctile = factor(pctile, levels = c("pct25", "pct50", "pct75"))) %>% 
+    arrange(runname, pctile) %>% 
+    mutate(runname = rep(c("DB_high","DB_low", "hybrid_high", "hybrid_low"), each = 3)) %>% 
+    mutate(runname = paste(runname, pctile, sep = "_")) %>% 
+    select(-pctile, -sim) %>% 
+    spread(runname, cost) %>% 
+    mutate(
+      Diff.CL_pct75 = (DB_low_pct75 - DB_high_pct75),
+      Diff.PL_pct75 = (hybrid_low_pct75 - hybrid_high_pct75),
+      riskTansfer_pct75 = (Diff.CL_pct75 - Diff.PL_pct75),
+      riskTransfer.pct_pct75 = 100 * riskTansfer_pct75 / Diff.CL_pct75,
+      
+      Diff.CL_pct50 = (DB_low_pct50 - DB_high_pct50),
+      Diff.PL_pct50 = (hybrid_low_pct50 - hybrid_high_pct50),
+      riskTansfer_pct50 = (Diff.CL_pct50 - Diff.PL_pct50),
+      riskTransfer.pct_pct50 = 100 * riskTansfer_pct50 / Diff.CL_pct50,
+      
+      Diff.CL_pct25 = (DB_low_pct25 - DB_high_pct25),
+      Diff.PL_pct25 = (hybrid_low_pct25 - hybrid_high_pct25),
+      riskTansfer_pct25 = (Diff.CL_pct25 - Diff.PL_pct25),
+      riskTransfer.pct_pct25 = 100 * riskTansfer_pct25 / Diff.CL_pct25
+    )%>% 
+    t  
+
+  
+  riskTransfer %<>%
+    as.data.frame %>% 
+    mutate(var = rownames(riskTransfer)) %>% 
+    as.data.frame %>% 
+    select(var, value = V1) %>% 
+    separate(var, c("var","percentile"), "_pct") %>% 
+    spread(percentile, value)
+}
+
+
 
 riskTransfer.pct.pew.DC1.CL
 riskTransfer.pct.IFO.DC1.CL
@@ -790,7 +886,7 @@ riskTransfer.pew2.DC3 %>% filter(str_detect(var, "PV725"))
 
 # No discount
 riskTransfer.pct.IFO.DC4 <-  
-  get_riskTransfer.pctile(results_all,c("RS1_SR1EL1",
+  get_riskTransfer.pctile2(results_all,c("RS1_SR1EL1",
                                         "RS1_SR1EL1_R625.d625",
                                         "SR1EL1.Reform_R725.d725.DC4",
                                         "SR1EL1.Reform_R625.d625.DC4"),
@@ -799,7 +895,7 @@ riskTransfer.pct.IFO.DC4 <-
 
 
 riskTransfer.pct.pew.DC4 <-  
-  get_riskTransfer.pctile(results_all,c("RS1_SR1EL1",
+  get_riskTransfer.pctile2(results_all,c("RS1_SR1EL1",
                                         "RS1_SR1EL1_R625.d725",
                                         "SR1EL1.Reform_R725.d725.DC4",
                                         "SR1EL1.Reform_R625.d725.DC4"),
@@ -808,7 +904,7 @@ riskTransfer.pct.pew.DC4 <-
 
 
 riskTransfer.pct.pew2.DC4 <-  
-  get_riskTransfer.pctile(results_all,c("RS1_SR1EL1",
+  get_riskTransfer.pctile2(results_all,c("RS1_SR1EL1",
                                         "RS1_SR1EL1_R625.d725",
                                         "SR1EL1.Reform_R725.d725.DC4a",
                                         "SR1EL1.Reform_R625.d725.DC4a"),

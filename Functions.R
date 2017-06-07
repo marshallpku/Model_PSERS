@@ -833,29 +833,11 @@ get_cumAsset <- function(cf, i, year_end = FALSE){
 
 #
 
+(get_cumAsset(rep( 278 * 6.9, 68), 0.03/12))
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+60000/12
 
 
 
