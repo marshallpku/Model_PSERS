@@ -1319,7 +1319,7 @@ ggsave(file = "Results/RiskTransfer/EEcost.3fig.UAAL.png", EEcost.3fig.UAAL, wid
 x <- 1.27
 
   data.frame(lnGSPcoefficient = seq(1, 2, 0.1)) %>% 
-    mutate(formula2 = 1 + 0. 03 * lnGSPcoefficient, 
+    mutate(formula2 = 1 + 0.03 * lnGSPcoefficient, 
            formula3 = (1.03)^lnGSPcoefficient )
   
   

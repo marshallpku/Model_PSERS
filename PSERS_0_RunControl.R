@@ -182,8 +182,8 @@ for(runName in runList$runname ){
   #paramlist$salgrowth_amort <- 0.035   #   0.035 #0.213 # paryoll growth 5.5%, 3.5%, 2.13%
   #paramlist$amort_type <- "open"
   
-  paramlist$s.lower <- -Inf # No corridor for AA
-  paramlist$s.upper <- Inf
+  paramlist$s.lower <- -1e16 #-Inf # No corridor for AA
+  paramlist$s.upper <-  1e16 #Inf
  
   paramlist$actuarial_method <- "EAN.CP" 
   

@@ -566,7 +566,7 @@ if(!paramlist$DC_reform){
   }
 }
 
-if(paramlist$DC_reform){
+if(paramlist$DC_reform & !paramlist$SepNewHires){
   
   AggLiab.sumTiers <- 
     get_AggLiab_sumTiers(AggLiab.tCD, AggLiab.tE, AggLiab.tF, AggLiab.tNE, AggLiab.tNF) 
@@ -598,6 +598,35 @@ if(paramlist$DC_reform){
 }
 
 
+if(paramlist$DC_reform & paramlist$SepNewHires){
+  
+  AggLiab.sumTiers.xNew <- 
+    get_AggLiab_sumTiers(AggLiab.tCD, AggLiab.tE, AggLiab.tF) 
+  
+  AggLiab.sumTiers.New <- 
+    get_AggLiab_sumTiers(AggLiab.tNE, AggLiab.tNF) 
+  
+  
+  PR.Tiers <- AggLiab.tCD$active %>% as.data.frame %>% select(year, PR_tCD = PR.sum)  %>% 
+    left_join(AggLiab.tE$active  %>% as.data.frame %>% select(year, PR_tE  = PR.sum)) %>% 
+    left_join(AggLiab.tF$active  %>% as.data.frame %>% select(year, PR_tF  = PR.sum)) %>% 
+    left_join(AggLiab.tNE$active  %>% as.data.frame %>% select(year, PR_tNE  = PR.sum)) %>% 
+    left_join(AggLiab.tNF$active  %>% as.data.frame %>% select(year, PR_tNF  = PR.sum)) %>% 
+    as.matrix
+    
+  DC.Tiers <- AggLiab.tCD$active %>% as.data.frame %>% select(year, DC_EEC_tCD = DC_EEC.sum, DC_ERC_tCD = DC_ERC.sum)  %>% 
+    left_join(AggLiab.tE$active  %>% as.data.frame %>% select(year, DC_EEC_tE  = DC_EEC.sum, DC_ERC_tE  = DC_ERC.sum)) %>% 
+    left_join(AggLiab.tF$active  %>% as.data.frame %>% select(year, DC_EEC_tF  = DC_EEC.sum, DC_ERC_tF  = DC_ERC.sum)) %>% 
+    left_join(AggLiab.tNE$active  %>% as.data.frame %>% select(year, DC_EEC_tNE  = DC_EEC.sum, DC_ERC_tNE  = DC_ERC.sum)) %>% 
+    left_join(AggLiab.tNF$active  %>% as.data.frame %>% select(year, DC_EEC_tNF  = DC_EEC.sum, DC_ERC_tNF  = DC_ERC.sum)) %>% 
+    as.matrix
+  
+}
+
+
+
+
+
 
 
 
@@ -620,6 +649,9 @@ for(i_v in 2:nrow(df_init.vested)){
     with(df_init.vested, (ALx.init.v.sum[i_v - 1] - B.init.v.sum[i_v - 1]) * (1 + paramlist$i))
 }
 
+
+if(!paramlist$SepNewHires){
+  
 AggLiab.sumTiers$term %<>% 
   as.data.frame() %>% 
   left_join(df_init.vested) %>% 
@@ -627,6 +659,17 @@ AggLiab.sumTiers$term %<>%
   mutate(ALx.v.sum = ALx.v.sum + ALx.init.v.sum,
          B.v.sum   = B.v.sum + B.init.v.sum) %>% 
   as.matrix
+
+  } else {
+    
+  AggLiab.sumTiers.xNew$term %<>% 
+    as.data.frame() %>% 
+    left_join(df_init.vested) %>% 
+    mutate_each(funs(na2zero)) %>% 
+    mutate(ALx.v.sum = ALx.v.sum + ALx.init.v.sum,
+           B.v.sum   = B.v.sum + B.init.v.sum) %>% 
+    as.matrix
+  } 
 
 
 
@@ -636,11 +679,22 @@ AggLiab.sumTiers$term %<>%
 
 B.lumpSumY1 <- 686988000
 
+if(!paramlist$SepNewHires){
+  
 AggLiab.sumTiers$la %<>%
   data.frame %>% 
   mutate(B.la.sum = ifelse(year == 2016, B.la.sum + B.lumpSumY1, B.la.sum),
          ALx.la.sum = ifelse(year == 2016, ALx.la.sum + B.lumpSumY1, ALx.la.sum)) %>% 
-  as.matrix
+  as.matrix 
+  
+} else {
+  
+  AggLiab.sumTiers.xNew$la %<>%
+    data.frame %>% 
+    mutate(B.la.sum = ifelse(year == 2016, B.la.sum + B.lumpSumY1, B.la.sum),
+           ALx.la.sum = ifelse(year == 2016, ALx.la.sum + B.lumpSumY1, ALx.la.sum)) %>% 
+    as.matrix 
+}
 
 # AggLiab.tCD$active
 # AggLiab.tE$active
@@ -651,14 +705,90 @@ AggLiab.sumTiers$la %<>%
 # 6.  Simulation ####
 #*********************************************************************************************************
 
+# No hybrid plan reform
 if(!paramlist$DC_reform){
   source("PSERS_Model_Sim.R")
   penSim_results.sumTiers <- run_sim("sumTiers", AggLiab.sumTiers)
 
-  } else {
+  } 
+
+
+# Hybrid plan reform. Finances of new hires ARE NOT modeld independently
+if(paramlist$DC_reform & !paramlist$SepNewHires){
     source("PSERS_Model_Sim_reform.R")
     penSim_results.sumTiers <- run_sim("sumTiers", AggLiab.sumTiers)
 }
+
+
+# Hybrid plan reform. Finances of new hires ARE modeld independently
+if(paramlist$DC_reform & paramlist$SepNewHires){
+  source("PSERS_Model_Sim_reform.R")
+
+ penSim_results.sumTiers.xNew <- run_sim("sumTiers.xNew", AggLiab.sumTiers.xNew)
+ penSim_results.sumTiers.New  <- run_sim("sumTiers.New",  AggLiab.sumTiers.New)
+ 
+ 
+ # returnScn = returnScn,
+ # policy.SR = policy.SR,
+ # policy.EL = policy.EL,
+ # policy.reform = DC_reform,
+ # Tier    = Tier_select_,
+ 
+ penSim_results.sumTiers <- 
+   bind_rows(penSim_results.sumTiers.New,
+             penSim_results.sumTiers.xNew) 
+ 
+ penSim_results.sumTiers %<>% 
+   select(runname, returnScn, policy.SR, policy.EL, sim, year, Tier, everything())   %>% 
+   group_by(runname, sim, year) %>% 
+   summarise_at(c(8:(ncol(penSim_results.sumTiers))),  funs(sum(., na.rm = TRUE))) %>% 
+   mutate(Tier    = "sumTiers",
+          # returnScn = paramlist$returnScn),
+          # policy.SR = paramlist$policy.SR,
+          # policy.LE = paramlist$policy.EL,
+          # policy.reform = paramlist$DC_reform,
+          FR      = 100 * AA / exp(log(AL)),
+          FR_MA   = 100 * MA / exp(log(AL)),
+          UAAL_PR = 100 * UAAL / PR,
+          MA_PR   = 100 * MA / PR,
+          AA_PR   = 100 * AA / PR,
+          AL_PR   = 100 * AL / PR,
+          AL.act_PR    = 100 * AL.act / PR,
+          AL.la_PR    = 100 * AL.la / PR, 
+          AL.ca_PR    = 100 * AL.ca / PR, 
+          AL.term_PR   = 100 * AL.term / PR, 
+          ADC_PR  = 100 * ADC / PR,
+          
+          NC_PR   = 100 * NC / PR,
+          NC.laca_PR    = 100 * NC.laca / PR,
+          NC.v_PR   = 100 * NC.v / PR,
+          
+          SC_PR   = 100 * SC / PR, 
+          ERC_PR  = 100 * ERC / PR,
+          ERC.final_PR = 100 * ERC.final / PR,
+          EEC_PR  = 100 * EEC / PR, 
+          
+          C_PR    = 100 * C / PR,
+          B_PR    = 100 * B / PR,
+          
+          ExF     = C - B,
+          ExF_PR  = 100 * ExF / PR,
+          ExF_MA  = 100 * ExF / MA,
+          PR.growth = ifelse(year > 1, 100 * (PR / lag(PR) - 1), NA)) %>% 
+   select(runname, sim, year, Tier, everything()) 
+   #select(runname, returnScn, policy.SR, policy.EL, policy.reform, sim, year, Tier, everything()) 
+}
+
+
+penSim_results.sumTiers.New %>% filter(sim == 1) %>% select(one_of(var_display.cali1)) %>% print 
+
+
+
+penSim_results.sumTiers %>% filter(sim == 0, year <= 2048) %>% select(one_of(var_display.cali1)) %>% print 
+
+load("Results/results_sumTiers_SR1EL1.Reform_R725.d725.DC4.RData")
+load("Results/results_sumTiers_SR1EL1.Reform_R725.d725.DC4.RData")
+outputs_list$results %>%  filter(sim == 0, year <= 2048) %>% select(one_of(var_display.cali1)) %>% print 
 
 
 

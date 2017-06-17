@@ -24,11 +24,11 @@ run_sim <- function(Tier_select_,
       # paramlist_      = paramlist
       # Global_paramlist_ = Global_paramlist
   
-     # Tier_select_ =  "sumTiers.New" #  Tier_select
+     # Tier_select_ =  "sumTiers" #  Tier_select
      # i.r_ = i.r
      # PR.Tiers_ = PR.Tiers
      # DC.Tiers_ = DC.Tiers
-     # AggLiab_        = AggLiab.sumTiers.New
+     # AggLiab_        = AggLiab.sumTiers
      # i.r_geoReturn_ = i.r_geoReturn
      # init_amort_raw_ = init_amort_raw
      # init_unrecReturns.unadj_ = init_unrecReturns.unadj
@@ -36,7 +36,6 @@ run_sim <- function(Tier_select_,
      # Global_paramlist_ = Global_paramlist
   
 
-  
   assign_parmsList(Global_paramlist_, envir = environment())
   assign_parmsList(paramlist_,        envir = environment())
   
@@ -49,15 +48,15 @@ run_sim <- function(Tier_select_,
   
   # if(Tier_select_ != "sumTiers") EEC_rate <- tier.param[Tier_select_, "EEC_rate"]
   
-  # if(Tier_select_ == "sumTiers"){
-  # 
-  #   EEC_baseRate_tCD <- tier.param["tCD", "EEC_rate"]
-  #   EEC_baseRate_tE  <- tier.param["tE", "EEC_rate"]
-  #   EEC_baseRate_tF  <- tier.param["tF", "EEC_rate"]
-  #   EEC_baseRate_tNE  <- tier.param["tNE", "EEC_rate"]
-  #   EEC_baseRate_tNF  <- tier.param["tNF", "EEC_rate"]
-  #   
-  # } 
+  if(Tier_select_ == "sumTiers"){
+
+    EEC_baseRate_tCD <- tier.param["tCD", "EEC_rate"]
+    EEC_baseRate_tE  <- tier.param["tE", "EEC_rate"]
+    EEC_baseRate_tF  <- tier.param["tF", "EEC_rate"]
+    EEC_baseRate_tNE  <- tier.param["tNE", "EEC_rate"]
+    EEC_baseRate_tNF  <- tier.param["tNF", "EEC_rate"]
+    
+  } 
   
   #*************************************************************************************************************
   #                                     Defining variables in simulation ####
@@ -166,57 +165,20 @@ run_sim <- function(Tier_select_,
   #                                 Defining variables in simulation  ####
   #*************************************************************************************************************
   
-   if(Tier_select_ == "sumTiers.New"){
-     init_amort_raw_$balance <- 0
-     MA_0 <- 0
-     AA_0 <- 0
-   }
-
   # For PSERS
-  # if(Tier_select_ == "sumTiers"){
+  if(Tier_select_ == "sumTiers"){
+    penSim0$PR_tCD <- PR.Tiers_[, "PR_tCD"]
+    penSim0$PR_tE <-  PR.Tiers_[, "PR_tE"]
+    penSim0$PR_tF <-  PR.Tiers_[, "PR_tF"]
+    penSim0$PR_tNE <-  PR.Tiers_[, "PR_tNE"]
+    penSim0$PR_tNF <-  PR.Tiers_[, "PR_tNF"]
     
-    include.old <- Tier_select_ %in% c("sumTiers", "sumTiers.xNew") 
-    include.new <- Tier_select_ %in% c("sumTiers", "sumTiers.New") 
-  
-  
-    # Base employee contribution rates
-    EEC_baseRate_tCD <- tier.param["tCD", "EEC_rate"]  * include.old
-    EEC_baseRate_tE  <- tier.param["tE", "EEC_rate"]   * include.old
-    EEC_baseRate_tF  <- tier.param["tF", "EEC_rate"]   * include.old
-    EEC_baseRate_tNE  <- tier.param["tNE", "EEC_rate"] * include.new
-    EEC_baseRate_tNF  <- tier.param["tNF", "EEC_rate"] * include.new
+    penSim0$EEC.totRate_tCD <- tier.param["tCD", "EEC_rate"]
+    penSim0$EEC.totRate_tE  <- tier.param["tE",  "EEC_rate"]
+    penSim0$EEC.totRate_tF  <- tier.param["tF",  "EEC_rate"]
+    penSim0$EEC.totRate_tNE  <- tier.param["tNE",  "EEC_rate"]
+    penSim0$EEC.totRate_tNF  <- tier.param["tNF",  "EEC_rate"]
     
-    
-    penSim0$PR_tCD <- PR.Tiers_[, "PR_tCD"]  * include.old
-    penSim0$PR_tE  <- PR.Tiers_[, "PR_tE"]   * include.old
-    penSim0$PR_tF  <- PR.Tiers_[, "PR_tF"]   * include.old
-    penSim0$PR_tNE <- PR.Tiers_[, "PR_tNE"]  * include.new
-    penSim0$PR_tNF <- PR.Tiers_[, "PR_tNF"]  * include.new
-    
-
-    penSim0$EEC.totRate_tCD <- tier.param["tCD", "EEC_rate"]  * include.old
-    penSim0$EEC.totRate_tE  <- tier.param["tE",  "EEC_rate"]  * include.old
-    penSim0$EEC.totRate_tF  <- tier.param["tF",  "EEC_rate"]  * include.old
-    penSim0$EEC.totRate_tNE <- tier.param["tNE",  "EEC_rate"] * include.new
-    penSim0$EEC.totRate_tNF <- tier.param["tNF",  "EEC_rate"] * include.new
-    
-   
-    
-    
-    penSim0$DC_EEC_tCD <-  DC.Tiers_[, "DC_EEC_tCD"] * include.old
-    penSim0$DC_EEC_tE  <-  DC.Tiers_[, "DC_EEC_tE"]  * include.old
-    penSim0$DC_EEC_tF  <-  DC.Tiers_[, "DC_EEC_tF"]  * include.old
-    penSim0$DC_EEC_tNE <-  DC.Tiers_[, "DC_EEC_tNE"] * include.new
-    penSim0$DC_EEC_tNF <-  DC.Tiers_[, "DC_EEC_tNF"] * include.new
-    
-    penSim0$DC_ERC_tCD <-  DC.Tiers_[, "DC_ERC_tCD"] * include.old
-    penSim0$DC_ERC_tE  <-  DC.Tiers_[, "DC_ERC_tE"]  * include.old
-    penSim0$DC_ERC_tF  <-  DC.Tiers_[, "DC_ERC_tF"]  * include.old
-    penSim0$DC_ERC_tNE <-  DC.Tiers_[, "DC_ERC_tNE"] * include.new
-    penSim0$DC_ERC_tNF <-  DC.Tiers_[, "DC_ERC_tNF"] * include.new
-    
-    
-    # Place holders
     penSim0$EEC_tCD <- rep(0, nyear)
     penSim0$EEC_tE  <- rep(0, nyear)
     penSim0$EEC_tF  <- rep(0, nyear)
@@ -225,14 +187,27 @@ run_sim <- function(Tier_select_,
     
     penSim0$sharedRisk.rate <- rep(0, nyear)
     
+    penSim0$SharedRiskEval <- ((seq_len(nyear) + init.year - 1) - 2016) %% 3 == 0  # TRUE in the year to determine if the EEC rate should be changed
+
     penSim0$i.r_geoReturn <- rep(0, nyear) # placeholder 
     
     penSim0$ERC.final <- rep(0, nyear)
     
-    penSim0$SharedRiskEval <- ((seq_len(nyear) + init.year - 1) - 2016) %% 3 == 0  # TRUE in the year to determine if the EEC rate should be changed
     
+    
+    penSim0$DC_EEC_tCD <-  DC.Tiers_[, "DC_EEC_tCD"]
+    penSim0$DC_EEC_tE  <-  DC.Tiers_[, "DC_EEC_tE"]
+    penSim0$DC_EEC_tF  <-  DC.Tiers_[, "DC_EEC_tF"]
+    penSim0$DC_EEC_tNE  <-  DC.Tiers_[, "DC_EEC_tNE"]
+    penSim0$DC_EEC_tNF  <-  DC.Tiers_[, "DC_EEC_tNF"]
+    
+    penSim0$DC_ERC_tCD <-  DC.Tiers_[, "DC_ERC_tCD"]
+    penSim0$DC_ERC_tE  <-  DC.Tiers_[, "DC_ERC_tE"]
+    penSim0$DC_ERC_tF  <-  DC.Tiers_[, "DC_ERC_tF"]
+    penSim0$DC_ERC_tNE <-  DC.Tiers_[, "DC_ERC_tNE"]
+    penSim0$DC_ERC_tNF <-  DC.Tiers_[, "DC_ERC_tNF"]
         
- # }
+  }
   
   
   
@@ -368,9 +343,6 @@ run_sim <- function(Tier_select_,
   # # The amortization basis of year j should be placed in row nrow.initAmort + j - 1. 
   # # save(SC_amort0, file = "SC_amort0.RData")  
   
-  if(Tier_select_ == "sumTiers.New") SC_amort0[,] <- 0
-  
-  
   #*************************************************************************************************************
   #                                       Simuation  ####
   #*************************************************************************************************************
@@ -379,7 +351,7 @@ run_sim <- function(Tier_select_,
   registerDoParallel(cl)
   
   
-  penSim_results <- foreach(k = -1:nsim, .packages = c("dplyr", "tidyr", "stringr")) %dopar% {
+  penSim_results <- foreach(k = -1:nsim, .packages = c("dplyr", "tidyr")) %dopar% {
     # k <- 1
     # initialize
     penSim   <- penSim0
@@ -427,12 +399,10 @@ run_sim <- function(Tier_select_,
                                 method2 = with(penSim, (1 - w) * EAA[j] + w * MA[j]) 
         )
       }
-
       
-
       
       ## Initial unrecognized returns
-      if((init_AA %in% c("AL_pct", "AA0")) & useAVunrecReturn & k != -1 & Tier_select_ %in% c("sumTiers", "sumTiers.xNew")){
+      if((init_AA %in% c("AL_pct", "AA0")) & useAVunrecReturn & k != -1 & Tier_select_ == "sumTiers"){
 
         # Adjusting initila unrecognized returns
         init_unrecReturns.adj <-  mutate(init_unrecReturns.unadj_, DeferredReturn = DeferredReturn * (penSim$MA[1] - penSim$AA[1])/sum(DeferredReturn),
@@ -453,7 +423,7 @@ run_sim <- function(Tier_select_,
       penSim$AA[j] <- with(penSim, ifelse(AA[j] > s.upper * MA[j], MA[j], AA[j])) 
       penSim$AA[j] <- with(penSim, ifelse(AA[j] < s.lower * MA[j], MA[j], AA[j]))
     
-      
+
       # UAAL(j)
       penSim$UAAL[j]    <- with(penSim, AL[j] - AA[j])
       # penSim$UAAL.MA[j] <- with(penSim, AL[j] - MA[j])
@@ -501,7 +471,7 @@ run_sim <- function(Tier_select_,
       #                                        PSERS: shared-risk EEC rate 
       #**************************************************************************************************************
       
-      if(str_detect(Tier_select_, "sumTiers")){
+      if(Tier_select_ == "sumTiers"){
         if(j > 1){
           
           # in the re-evaluation year
@@ -517,9 +487,8 @@ run_sim <- function(Tier_select_,
                                                 )
             
             
-            penSim$sharedRisk.rate[j] <- ifelse(penSim$AL[j - 1] == 0, 0,
-              ifelse( (penSim$MA[j - 1] / penSim$AL[j - 1]) > 1, 0, penSim$sharedRisk.rate[j])
-            )
+            penSim$sharedRisk.rate[j] <- ifelse( (penSim$MA[j - 1] / penSim$AL[j - 1]) > 1, 0, penSim$sharedRisk.rate[j])
+            
             
           } else {
             # Not in the re-evaluation year  
@@ -529,16 +498,16 @@ run_sim <- function(Tier_select_,
         } 
         
         if(useSharedRisk){ 
-         penSim$EEC.totRate_tE[j] <-  (EEC_baseRate_tE + penSim$sharedRisk.rate[j]) * include.old
-         penSim$EEC.totRate_tF[j] <-  (EEC_baseRate_tF + penSim$sharedRisk.rate[j]) * include.old
-         penSim$EEC.totRate_tNE[j] <- (EEC_baseRate_tNE + penSim$sharedRisk.rate[j])* include.new
-         penSim$EEC.totRate_tNF[j] <- (EEC_baseRate_tNF + penSim$sharedRisk.rate[j])* include.new
+         penSim$EEC.totRate_tE[j] <- EEC_baseRate_tE + penSim$sharedRisk.rate[j]
+         penSim$EEC.totRate_tF[j] <- EEC_baseRate_tF + penSim$sharedRisk.rate[j]
+         penSim$EEC.totRate_tNE[j] <- EEC_baseRate_tNE + penSim$sharedRisk.rate[j]
+         penSim$EEC.totRate_tNF[j] <- EEC_baseRate_tNF + penSim$sharedRisk.rate[j]
         }
           
-        penSim$EEC_tCD[j] <- with(penSim, PR_tCD[j] * EEC.totRate_tCD[j]) 
-        penSim$EEC_tE[j]  <- with(penSim, PR_tE[j]  * EEC.totRate_tE[j])  
-        penSim$EEC_tF[j]  <- with(penSim, PR_tF[j]  * EEC.totRate_tF[j])  
-        penSim$EEC_tNE[j]  <- with(penSim, PR_tNE[j]  * EEC.totRate_tNE[j]) 
+        penSim$EEC_tCD[j] <- with(penSim, PR_tCD[j] * EEC.totRate_tCD[j])
+        penSim$EEC_tE[j]  <- with(penSim, PR_tE[j]  * EEC.totRate_tE[j])
+        penSim$EEC_tF[j]  <- with(penSim, PR_tF[j]  * EEC.totRate_tF[j])
+        penSim$EEC_tNE[j]  <- with(penSim, PR_tNE[j]  * EEC.totRate_tNE[j])
         penSim$EEC_tNF[j]  <- with(penSim, PR_tNF[j]  * EEC.totRate_tNF[j])
         
         penSim$EEC[j] <- penSim$EEC_tCD[j] + penSim$EEC_tE[j] + penSim$EEC_tF[j] + penSim$EEC_tNE[j] + penSim$EEC_tNF[j]    
@@ -549,6 +518,8 @@ run_sim <- function(Tier_select_,
         # Employee contribution, based on payroll. May be adjusted later. 
         penSim$EEC[j] <- with(penSim, PR[j] * EEC_rate)
       }
+      
+      
       
        
       
@@ -602,36 +573,31 @@ run_sim <- function(Tier_select_,
       # greater than the prior year's final contribution rate. 
       # 
       
-      if(useERC_cap & k!= -1){
+      if(useERC_cap & k!= -1 ){
         
         if(j == 1){
           #PSERS: Limit ERC rate at model year 2016 (FY 2016-2017) to 29.5%
           
-          if(penSim$PR[j] > 0){
           penSim$ERC.final[j] <- ifelse(penSim$ERC[j]/penSim$PR[j] >= 0.295,
                                         0.295 * penSim$PR[j],
                                         penSim$ERC[j])
-          } else {penSim$ERC.final[j] <- penSim$ERC[j]} 
           
         } else {
           # Constraint 1: ERC.final as a % of payroll year in j+1 cannot be greater than the rate + 4.5% in year j
-          
-          if(penSim$PR[j] > 0 & penSim$PR[j - 1] > 0 ){
           penSim$ERC.final[j] <- ifelse(penSim$ERC[j]/penSim$PR[j] >= (penSim$ERC.final[j - 1]/penSim$PR[j - 1] + 0.045),
                                         (penSim$ERC.final[j - 1]/penSim$PR[j - 1] + 0.045) * penSim$PR[j],
-                                        penSim$ERC[j]) 
-          } else {penSim$ERC.final[j] <- penSim$ERC[j]} 
-          
-          # Constraint 2: If contraint 1 is not triggered, then ERC.final should be at least as much as the employer NC rate (total NC - EEC).
+                                        penSim$ERC[j])
+          # Constraint 2: If contraint 1 is not triggered, then ERC.final should be at least as much as the employee NC rate (total NC - ERC).
           if(useERC_floor) penSim$ERC.final[j] <- ifelse(penSim$ERC.final[j] == penSim$ERC[j],    
                                                          max(penSim$ERC.final[j], penSim$NC[j] - penSim$EEC[j]),
-                                                         penSim$ERC.final[j]) 
+                                                         penSim$ERC.final[j])
           }
         
       } else penSim$ERC.final[j] <- penSim$ERC[j]
       
-      # if(useERC_floor & k!= -1) penSim$ERC.final[j] <- max(penSim$ERC.final[j], penSim$NC[j] - penSim$EEC[j]  )
+      if(useERC_floor & k!= -1) penSim$ERC.final[j] <- max(penSim$ERC.final[j], penSim$NC[j] - penSim$EEC[j]  )
   
+    
       
       # C(j)
       penSim$C[j] <- with(penSim, EEC[j] + ERC.final[j])
@@ -677,7 +643,7 @@ run_sim <- function(Tier_select_,
            returnScn = returnScn,
            policy.SR = policy.SR,
            policy.EL = policy.EL,
-           policy.reform = DC_reform,
+           poli.rcyeform = DC_reform,
            Tier    = Tier_select_,
            FR      = 100 * AA / exp(log(AL)),
            FR_MA   = 100 * MA / exp(log(AL)),
