@@ -107,6 +107,12 @@ RIG.theme <- function(){
 }
 
 
+centeringTitles <- function(){
+  theme(
+    plot.title=element_text(hjust=0.5),
+    plot.subtitle=element_text(hjust=0.5),
+    plot.caption=element_text(hjust=0, size = 9))
+}
 
 
 
@@ -1122,13 +1128,204 @@ riskTransfer.pew2.DC4.p3 %>% filter(str_detect(var, "PV725"))
 
 
 
+## 5. Alternative measures of risk transfer ####
+
+# This section explores alternative measures of risk transfer under stochastic simulation approaches. 
+
+# 5.1 Risk transfer as the reduction in uncertainty of employer pension costs  
+# Starting from the same set of stochastic investment return series (2000 sims), comparing the 
+# resulting distributions of 30-year employer pension costs under CL and PL. Possible measures of cost uncertainty:
+#   = Standard deviation of total costs
+#   = Difference between high and low percentiles (eg. 75th percentile minus 25th percentile)
+#   = Difference between the median cost and a higher cost, eg. 
+#      - 75th percentile; 
+#      - cost from a simulation in which the 30-year compound return is 1 percentage point lower than the 30-year compound return in the simulation that generates the median cost.
+# 
+# Risk transfer can be defined as the difference between CL and PL in these measures of cost uncertainty. 
+
+# Below we compare the distribution of employer pension costs in the following runs:
+  # a. "RS1_SR1EL1": Pure DB plan; 7.25% expected return, 7.25% discount
+  # b. "SR1EL1.Reform_R725.d725.DC4": DC contribution rate 9%, DC for new hires only, 7.25% expected return, 7.25% discount rate. 
+
+
+get_riskTransfer.stch <- function(df, rn, method, year_range = 2017:2048 ){
+  # riskTransfer_simPeriod <- 2017:2048
+  # rn <- c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC4"
+  
+  add.UAAL <- switch(method, IFO = 0, pew = 1)
+
+  dist_cost <- 
+    df %>% filter(runname %in% rn, 
+                           sim > 0,
+                           year %in% year_range) %>% 
+    mutate(runname = factor(runname, levels = rn)) %>% 
+    group_by(runname, sim) %>% 
+    summarize(cost_0 = sum(ERC.tot.final, na.rm = TRUE)/1e9 + UAAL[year == max(year)]/1e9 * add.UAAL) %>% 
+    group_by(runname) 
+  
+  dist_cost %<>% 
+    summarise(pct90 = quantile(cost_0, 0.90),
+              pct75 = quantile(cost_0, 0.75),
+              pct50 = quantile(cost_0, 0.50),
+              pct25 = quantile(cost_0, 0.25),
+              avg   = mean(cost_0),
+              SD    = sd(cost_0)
+    ) %>% 
+    mutate(
+      diff_75.25 = pct75 - pct25,
+      diff_90.50 = pct90 - pct50,
+      diff_75.50 = pct75 - pct50,
+      
+      diff2_90.50 = pct90/pct50 - 1,
+      diff2_75.50 = pct75/pct50 - 1)
+  
+}
+
+
+dist_cost.newHires.noUAAL <- 
+  get_riskTransfer.stch(results_all, 
+                        c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC4"), "IFO")
+
+dist_cost.newHires.UAAL <- 
+  get_riskTransfer.stch(results_all, 
+                        c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC4"), "pew")
+
+dist_cost.allTiers.noUAAL <- 
+  get_riskTransfer.stch(results_all, 
+                        c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC4a"), "IFO")
+
+dist_cost.allTiers.UAAL <- 
+  get_riskTransfer.stch(results_all, 
+                        c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC4a"), "pew")
+
+
+dist_cost.newHires.noUAAL
+dist_cost.newHires.UAAL
+dist_cost.allTiers.noUAAL 
+dist_cost.allTiers.UAAL
+
+write.xlsx2(dist_cost.newHires.noUAAL, file = "Results/RiskTransfer/RiskTransfer_stch.xlsx", sheetName = "newHires.noUAAL")
+write.xlsx2(dist_cost.newHires.UAAL,   file = "Results/RiskTransfer/RiskTransfer_stch.xlsx", sheetName = "newHires.UAAL",    append = T)
+write.xlsx2(dist_cost.allTiers.noUAAL, file = "Results/RiskTransfer/RiskTransfer_stch.xlsx", sheetName = "allTiers.noUAAL",  append = T)
+write.xlsx2(dist_cost.allTiers.UAAL,   file = "Results/RiskTransfer/RiskTransfer_stch.xlsx", sheetName = "allTiers.UAAL",    append = T)
 
 
 
 
+# Plot the distributions of employer pension costs
+
+
+fig.lab <- c("Pure DB plan",
+             "DB/DC hybrid for new hires only")
+fig.title <- "Distributions of 30-year employer pension costs (including UAAL in year 30)"
+
+  
+rn <- c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC4")
+year_range <- 2017:2048
+EEcost.newHires.UAAL <- 
+  results_all %>% filter(runname %in% rn, 
+                sim > 0,
+                year %in% year_range) %>% 
+  mutate(runname = factor(runname, levels = rn, labels = fig.lab)) %>% 
+  group_by(runname, sim) %>% 
+  summarize(cost_0 = sum(ERC.tot.final, na.rm = TRUE)/1e9 + UAAL[year == max(year)]/1e9) %>% 
+  group_by(runname) %>% 
+  ggplot(aes(cost_0)) + theme_bw() + 
+  facet_wrap(~runname, nrow = 2) + 
+  geom_histogram(color = "black", fill = RIG.blue, binwidth = 25, boundary = 0) + 
+  coord_cartesian(xlim = c(-400, 400)) + 
+  scale_x_continuous(breaks = seq(-2000,2000,100)) +  
+  labs(title = fig.title,
+       x = "Employer pension cost",
+       y = "Count of simulations") + 
+  centeringTitles()
+
+
+EEcost.newHires.UAAL
+
+
+# Plot the distributions of employer pension costs
+
+fig.lab <- c("Pure DB plan",
+             "DB/DC hybrid for all current and future employees")
+fig.title <- "Distributions of 30-year employer pension costs (including UAAL in year 30)"
+
+
+rn <- c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC4a")
+year_range <- 2017:2048
+EEcost.allTiers.UAAL <- 
+  results_all %>% filter(runname %in% rn, 
+                         sim > 0,
+                         year %in% year_range) %>% 
+  mutate(runname = factor(runname, levels = rn, labels = fig.lab)) %>% 
+  group_by(runname, sim) %>% 
+  summarize(cost_0 = sum(ERC.tot.final, na.rm = TRUE)/1e9 + UAAL[year == max(year)]/1e9) %>% 
+  group_by(runname) %>% 
+  ggplot(aes(cost_0)) + theme_bw() + 
+  facet_wrap(~runname, nrow = 2) + 
+  geom_histogram(color = "black", fill = RIG.blue, binwidth = 25, boundary = 0) + 
+  coord_cartesian(xlim = c(-400, 400)) + 
+  scale_x_continuous(breaks = seq(-2000,2000,100)) + 
+  labs(title = fig.title,
+       x = "Employer pension cost",
+       y = "Count of simulations") + 
+  centeringTitles()
 
 
 
+EEcost.allTiers.UAAL
+
+ggsave(file = "Results/RiskTransfer/EEcost.newHires.UAAL.png", EEcost.newHires.UAAL, width = 10, height = 10)
+ggsave(file = "Results/RiskTransfer/EEcost.allTiers.UAAL.png", EEcost.allTiers.UAAL, width = 10, height = 10)
+
+
+
+# Plot the distributions of employer pension costs
+
+fig.lab <- c("Pure DB plan",
+             "DB/DC hybrid for new hires only",
+             "DB/DC hybrid for all current and future employees")
+fig.title <- "Distributions of 30-year employer pension costs (including UAAL in year 30)"
+
+rn <- c("RS1_SR1EL1", 
+        "SR1EL1.Reform_R725.d725.DC4",
+        "SR1EL1.Reform_R725.d725.DC4a")
+year_range <- 2017:2048
+
+EEcost.3fig.UAAL <- 
+  results_all %>% filter(runname %in% rn, 
+                         sim > 0,
+                         year %in% year_range) %>% 
+  mutate(runname = factor(runname, levels = rn, labels = fig.lab)) %>% 
+  group_by(runname, sim) %>% 
+  summarize(cost_0 = sum(ERC.tot.final, na.rm = TRUE)/1e9 + UAAL[year == max(year)]/1e9) %>% 
+  group_by(runname) %>% 
+  ggplot(aes(cost_0)) + theme_bw() + 
+  facet_wrap(~runname, nrow = 3) + 
+  geom_histogram(color = "black", fill = RIG.blue, binwidth = 25, boundary = 0) + 
+  coord_cartesian(xlim = c(-400, 400)) + 
+  scale_x_continuous(breaks = seq(-2000,2000,100)) + 
+  labs(title = fig.title,
+       x = "Employer pension cost",
+       y = "Count of simulations") + 
+  centeringTitles()
+
+EEcost.3fig.UAAL 
+
+
+ggsave(file = "Results/RiskTransfer/EEcost.3fig.UAAL.png", EEcost.3fig.UAAL, width = 8*0.9, height = 14*0.9)
+
+
+x <- 1.27
+
+  data.frame(lnGSPcoefficient = seq(1, 2, 0.1)) %>% 
+    mutate(formula2 = 1 + 0. 03 * lnGSPcoefficient, 
+           formula3 = (1.03)^lnGSPcoefficient )
+  
+  
+  
+  
+  
 
 
 
