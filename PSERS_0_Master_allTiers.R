@@ -40,6 +40,14 @@ load("Data_inputs/PSERS_MemberData_AV2016.RData")  # for all tiers
 if(paramlist$DC.rate == 0) {
   load("Data_inputs/DC_rate.tot625.RData")
   DC_rate.tot %<>% mutate(DC_rate.tot = 0) 
+  
+  tier.param %<>%
+    mutate(bfactor     = c(0.025, 0.02, 0.02, 0.02, 0.02),
+           EEC_rate    = c(0.075, 0.075, 0.103, 0.075, 0.103),
+           EEC_DC.rate = 0
+    )
+  rownames(tier.param) <- tier.param$tier
+  
 } 
 
 if(paramlist$DC.rate == 1){ 
@@ -55,6 +63,7 @@ if(paramlist$DC.rate == 1){
     rownames(tier.param) <- tier.param$tier
   
     init_beneficiaries_all %<>% mutate(benefit = 0.5 * benefit)
+    
     init_retirees_all      %<>% mutate(benefit = 0.5 * benefit)
     
     }
@@ -780,15 +789,21 @@ if(paramlist$DC_reform & paramlist$SepNewHires){
 }
 
 
-penSim_results.sumTiers.New %>% filter(sim == 1) %>% select(one_of(var_display.cali1)) %>% print 
+penSim_results.sumTiers <- 
+  bind_rows(penSim_results.sumTiers,
+            penSim_results.sumTiers.xNew,
+            penSim_results.sumTiers.New) 
 
 
-
-penSim_results.sumTiers %>% filter(sim == 0, year <= 2048) %>% select(one_of(var_display.cali1)) %>% print 
-
-load("Results/results_sumTiers_SR1EL1.Reform_R725.d725.DC4.RData")
-load("Results/results_sumTiers_SR1EL1.Reform_R725.d725.DC4.RData")
-outputs_list$results %>%  filter(sim == 0, year <= 2048) %>% select(one_of(var_display.cali1)) %>% print 
+# penSim_results.sumTiers.New  %>% filter(sim == 0, year <= 2048) %>% select(one_of(var_display.cali1)) %>% print
+# penSim_results.sumTiers.xNew %>% filter(sim == 0, year <= 2048) %>% select(one_of(var_display.cali1)) %>% print
+# 
+# 
+# penSim_results.sumTiers %>% filter(sim == 0, year <= 2048) %>% select(one_of(var_display.cali1)) %>% print 
+# 
+# load("Results/results_sumTiers_SR1EL1.Reform_R725.d725.DC4.RData")
+# load("Results/results_sumTiers_RS1_SR1EL1.RData")
+# outputs_list$results %>%  filter(sim == 0, year <= 2048) %>% select(one_of(var_display.cali1)) %>% print 
 
 
 
@@ -801,6 +816,7 @@ outputs_list <- list(paramlist = paramlist,
 #*********************************************************************************************************
 # 7.1  Showing results: Joint simulation of all tiers ####
 #*********************************************************************************************************
+
 # Use full outputs include:
   # penSim_results.sumTiers
   # AggLiab.t76; AggLiab.tCD3; AggLiab.tm13
@@ -833,10 +849,11 @@ var_display.cali1 <- c("sim", "year",
                        "FR_MA", 
                        "MA", "AA", "AL","UAAL", 
                        "PVFB", "AL.act",
+                       "ERC.final_PR",
                       "NC","SC", "ERC", "ERC.final", "EEC",
                       #"PR",
                       #"NC","SC",
-                      "ERC.final_PR",
+                      
                       #"DC_ERC_PR",
                       "NC_PR", 
                       "SC_PR", 
@@ -867,56 +884,50 @@ kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display
 
 
 
-
-#*********************************************************************************************************
-#   8. Showing risk measures ####
-#*********************************************************************************************************
-
-df_all.stch <- penSim_results.sumTiers  %>% 
-  filter(sim >= 0, year <= 2045)
-
-
-df_all.stch %<>%   
-  select(runname, sim, year, AL, MA, EEC, PR, ERC.final_PR) %>% 
-  group_by(runname, sim) %>% 
-  mutate(FR_MA     = 100 * MA / AL,
-         FR40less  = cumany(FR_MA <= 40),
-         FR100more  = cumany(FR_MA >= 100),
-         FR100more2 = FR_MA >= 100,
-         ERC_high  = cumany(ERC.final_PR >= 40), 
-         ERC_hike  = cumany(na2zero(ERC.final_PR - lag(ERC.final_PR, 5) >= 10))) %>% 
-  group_by(runname, year) %>% 
-  summarize(FR40less = 100 * sum(FR40less, na.rm = T)/n(),
-            FR100more = 100 * sum(FR100more, na.rm = T)/n(),
-            FR100more2= 100 * sum(FR100more2, na.rm = T)/n(),
-            ERC_high = 100 * sum(ERC_high, na.rm = T)/n(),
-            ERC_hike = 100 * sum(ERC_hike, na.rm = T)/n(),
-            
-            FR.q10   = quantile(FR_MA, 0.1,na.rm = T),
-            FR.q25   = quantile(FR_MA, 0.25, na.rm = T),
-            FR.q50   = quantile(FR_MA, 0.5, na.rm = T),
-            FR.q75   = quantile(FR_MA, 0.75, na.rm = T),
-            FR.q90   = quantile(FR_MA, 0.9, na.rm = T),
-            
-            ERC_PR.q10 = quantile(ERC.final_PR, 0.1, na.rm = T),
-            ERC_PR.q25 = quantile(ERC.final_PR, 0.25, na.rm = T),
-            ERC_PR.q50 = quantile(ERC.final_PR, 0.5, na.rm = T),
-            ERC_PR.q75 = quantile(ERC.final_PR, 0.75, na.rm = T),
-            ERC_PR.q90 = quantile(ERC.final_PR, 0.9, na.rm = T)
-            
-            
-  ) %>% 
-  ungroup()
-
-df_all.stch
-
-
-
-
-paramlist$salgrowth_amort
-
-
-liab.tE$active %>% filter(year == 2017, ea == age) %>%  select(year, age, ea, sx, starts_with("NCx"))
+# 
+# #*********************************************************************************************************
+# #   8. Showing risk measures ####
+# #*********************************************************************************************************
+# 
+# df_all.stch <- penSim_results.sumTiers  %>% 
+#   filter(sim >= 0, year <= 2045)
+# 
+# 
+# df_all.stch %<>%   
+#   select(runname, sim, year, AL, MA, EEC, PR, ERC.final_PR) %>% 
+#   group_by(runname, sim) %>% 
+#   mutate(FR_MA     = 100 * MA / AL,
+#          FR40less  = cumany(FR_MA <= 40),
+#          FR100more  = cumany(FR_MA >= 100),
+#          FR100more2 = FR_MA >= 100,
+#          ERC_high  = cumany(ERC.final_PR >= 40), 
+#          ERC_hike  = cumany(na2zero(ERC.final_PR - lag(ERC.final_PR, 5) >= 10))) %>% 
+#   group_by(runname, year) %>% 
+#   summarize(FR40less = 100 * sum(FR40less, na.rm = T)/n(),
+#             FR100more = 100 * sum(FR100more, na.rm = T)/n(),
+#             FR100more2= 100 * sum(FR100more2, na.rm = T)/n(),
+#             ERC_high = 100 * sum(ERC_high, na.rm = T)/n(),
+#             ERC_hike = 100 * sum(ERC_hike, na.rm = T)/n(),
+#             
+#             FR.q10   = quantile(FR_MA, 0.1,na.rm = T),
+#             FR.q25   = quantile(FR_MA, 0.25, na.rm = T),
+#             FR.q50   = quantile(FR_MA, 0.5, na.rm = T),
+#             FR.q75   = quantile(FR_MA, 0.75, na.rm = T),
+#             FR.q90   = quantile(FR_MA, 0.9, na.rm = T),
+#             
+#             ERC_PR.q10 = quantile(ERC.final_PR, 0.1, na.rm = T),
+#             ERC_PR.q25 = quantile(ERC.final_PR, 0.25, na.rm = T),
+#             ERC_PR.q50 = quantile(ERC.final_PR, 0.5, na.rm = T),
+#             ERC_PR.q75 = quantile(ERC.final_PR, 0.75, na.rm = T),
+#             ERC_PR.q90 = quantile(ERC.final_PR, 0.9, na.rm = T)
+#             
+#             
+#   ) %>% 
+#   ungroup()
+# 
+# df_all.stch
+# 
+# 
 
 
 

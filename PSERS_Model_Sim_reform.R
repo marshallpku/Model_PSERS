@@ -114,7 +114,6 @@ run_sim <- function(Tier_select_,
   # which will make I(t) != Ia(t) + Ic(t) - Ib(t)
   
   
-  
   # Set up data frame
   penSim0 <- data.frame(year = init.year:(init.year + nyear - 1)) %>%
     mutate(AL   = 0, #
@@ -398,7 +397,7 @@ run_sim <- function(Tier_select_,
     for (j in 1:nyear){
         
         # j <- 1
-        # j <- 2
+        # j <- 3
 
       # MA(j) and EAA(j) 
       if(j == 1) {penSim$MA[j]  <- ifelse(k == -1, penSim$AL[j],                   # k = -1 is for testing model consistency
@@ -549,8 +548,6 @@ run_sim <- function(Tier_select_,
         # Employee contribution, based on payroll. May be adjusted later. 
         penSim$EEC[j] <- with(penSim, PR[j] * EEC_rate)
       }
-      
-       
       
       #**************************************************************************************************************
       
