@@ -1,4 +1,4 @@
-# Risk measures for MISERS
+# Risk measures for PSERS
 
 library(knitr)
 library(data.table)
@@ -1165,8 +1165,8 @@ df_all.stch %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
     RIG.theme()
   fig.ERC_PR.new
   
-  ggsave(file = "Results/RiskTransfer/ERC_PR.tot.png", fig.ERC_PR.tot, width = 8*0.9, height = 14*0.9)
-  ggsave(file = "Results/RiskTransfer/ERC_PR.new.png", fig.ERC_PR.new, width = 8*0.9, height = 10*0.9)
+  ggsave(file = "Results/RiskTransfer/ERC_PR.tot.png", fig.ERC_PR.tot, width = 14*0.9, height = 8*0.9)
+  ggsave(file = "Results/RiskTransfer/ERC_PR.new.png", fig.ERC_PR.new, width = 14*0.9, height = 8*0.9)
   
   
   
