@@ -297,7 +297,7 @@ results_all.xNew <- results_all %>% filter(Tier == "sumTiers.xNew")
 results_all.New  <- results_all %>% filter(Tier == "sumTiers.New")
 
 
-df_all.stch <- results_all.sumTiers  %>% 
+df_all.stch <- results_all  %>% 
   filter(runname %in% runs_all, 
          sim > 0, 
          year %in% 2016:2045)
@@ -641,6 +641,13 @@ riskTransfer.pew.DC4.SR0 <-
 
 riskTransfer.pew.DC4.SR0 %>% filter(str_detect(var, "CF"))
 
+x <- results_all.sumTiers %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, year %in% 2017:2048) %>% select(year, FR_MA, ERC.DB.final,ERC.tot.final, ERC, EEC_PR,  ADC, SC, NC, sharedRisk.rate)
+x
+x$ERC.final %>% sum
+
+
+x <- results_all.xNew %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, year %in% 2017:2048) %>% select(year, FR_MA, ERC.DB.final,ERC.tot.final, ERC, EEC_PR,  ADC, SC, NC, sharedRisk.rate)
+x
 
 
 # deterministic Pew method; sumTiers
@@ -811,7 +818,7 @@ riskTransfer.pew.DC4.new.SR0.p3 %>% filter(str_detect(var, "CF"))
 
 
 
-# hybrid for all current members and new hires, all members, SR on
+# hybrid for all current members and new hires, all members
 
 riskTransfer.pew2.DC4 %>% filter(str_detect(var, "CF"))
 riskTransfer.pew2.DC4.SR0 %>% filter(str_detect(var, "CF"))
@@ -872,7 +879,7 @@ RT.new.DC4.SR1.p1 <-riskTransfer.pew.DC4.new.p1 %>% filter(str_detect(var, "CF")
 RT.new.DC4.SR1.p2 <-riskTransfer.pew.DC4.new.p2 %>% filter(str_detect(var, "CF")) %>% reformat.riskTransfer("RT.new.DC4.SR1.p2") %>% print,
 RT.new.DC4.SR1.p3 <-riskTransfer.pew.DC4.new.p3 %>% filter(str_detect(var, "CF")) %>% reformat.riskTransfer("RT.new.DC4.SR1.p3") %>% print,
 
-RT.allTiers.DC4.SR0 <-    riskTransfer.pew.DC4.SR0 %>% filter(str_detect(var, "CF"))    %>% reformat.riskTransfer("RT.allTiers.DC4.SR0") %>% print,
+RT.allTiers.DC4.SR0    <- riskTransfer.pew.DC4.SR0 %>% filter(str_detect(var, "CF"))    %>% reformat.riskTransfer("RT.allTiers.DC4.SR0") %>% print,
 RT.allTiers.DC4.SR0.p1 <- riskTransfer.pew.DC4.SR0.p1 %>% filter(str_detect(var, "CF")) %>% reformat.riskTransfer("RT.allTiers.DC4.SR0.p1") %>% print,
 RT.allTiers.DC4.SR0.p2 <- riskTransfer.pew.DC4.SR0.p2 %>% filter(str_detect(var, "CF")) %>% reformat.riskTransfer("RT.allTiers.DC4.SR0.p2") %>% print,
 RT.allTiers.DC4.SR0.p3 <- riskTransfer.pew.DC4.SR0.p3 %>% filter(str_detect(var, "CF")) %>% reformat.riskTransfer("RT.allTiers.DC4.SR0.p3") %>% print,
@@ -1158,35 +1165,35 @@ df_all.stch %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
     RIG.theme()
   fig.ERC_PR.new
   
-
+  ggsave(file = "Results/RiskTransfer/ERC_PR.tot.png", fig.ERC_PR.tot, width = 8*0.9, height = 14*0.9)
+  ggsave(file = "Results/RiskTransfer/ERC_PR.new.png", fig.ERC_PR.new, width = 8*0.9, height = 10*0.9)
+  
+  
+  
+## detective work ####
+  
+  df_all.stch %>% filter(runname %in% c("RS1_SR1EL1"), 
+                         Tier == "sumTiers" ) %>% select(-ERC_GF_hike, -FR100more, -ERC_high, -Tier)
   df_all.stch %>% filter(runname %in% c("RS1_SR1EL1_sep_R725.d725"), 
-                         Tier == "sumTiers" ) %>% select(-ERC_GF_hike, -FR100more, -ERC_high)
-  df_all.stch %>% filter(runname %in% c("RS1_SR1EL1"), 
-                         Tier == "sumTiers" ) %>% select(-ERC_GF_hike, -FR100more, -ERC_high)
-
-
-  df_all.stch %>% filter(runname %in% c("RS1_SR1EL1", 
-                                        "SR0EL1.Reform_sep_R725.d725.DC4"), 
-                         Tier == "sumTiers",
-                         year %in% c( 2045)) %>% 
-    select(runname, year,FR40less, ERC_hike)
+                         Tier == "sumTiers" ) %>% select(-ERC_GF_hike, -FR100more, -ERC_high, -Tier)
+  
+  d.year <- 2040:2045# seq(2015, 2045, 5)
+  d.sim  <- 10
+  
+  results_all.sumTiers %>% filter(runname == "RS1_SR1EL1", sim == d.sim, year %in% d.year)               %>% select(year, FR_MA, ERC.DB.final, ERC, EEC_PR,  ADC, SC, NC, sharedRisk.rate)
+  results_all.sumTiers %>% filter(runname == "RS1_SR1EL1_sep_R725.d725", sim == d.sim, year %in% d.year) %>% select(year, FR_MA, ERC.DB.final, ERC, EEC_PR,  ADC, SC, NC, sharedRisk.rate)
+  
+  results_all.xNew %>% filter(runname == "RS1_SR1EL1_sep_R725.d725", sim == d.sim, year %in% d.year)   %>% select(year, FR_MA, ERC.DB.final,  ERC, EEC_PR,  ADC, SC, NC, sharedRisk.rate)
+  results_all.New %>% filter(runname  == "RS1_SR1EL1_sep_R725.d725",  sim == d.sim, year %in% d.year)  %>% select(year, FR_MA, ERC.DB.final, ERC, EEC_PR,  ADC, SC, NC, sharedRisk.rate)
   
   
-  
-  df_all.stch %>% filter(runname %in% c("RS1_SR1EL1"), 
-                         Tier == "sumTiers") %>% 
-    select(runname, year,FR40less, ERC_hike)
-  
-  df_all.stch %>% filter(runname %in% c("RS1_SR0EL1"), 
-                         Tier == "sumTiers") %>% 
-    select(runname, year,FR40less, ERC_hike)
-  
-  df_all.stch %>% filter(runname %in% c("RS1_SR1EL0"), 
-                         Tier == "sumTiers") %>% 
-    select(runname, year,FR40less, ERC_hike)
+  # 1. lower bound of final.ERC
+  # 2. upper bound of final.ERC
+  # 3. reset shared risk rate to 0 when FR>100 for: easier to reach for new hires. 
+  # Conclusion, need model ERC and EEC of old and new members jointly. 
   
   
-  
+  results_all.sumTiers %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == d.sim, year %in% d.year) %>% select(year, FR_MA, ERC.DB.final, ERC, EEC_PR,  ADC, SC, NC, sharedRisk.rate, ERC.)
   
   
   
