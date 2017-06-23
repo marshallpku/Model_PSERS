@@ -1,4 +1,4 @@
-# This script calculates individdual liabilities and normal costs for LAFPP members. 
+# This script calculates individdual liabilities and normal costs for PSERS members. 
 
 # Road map
 
@@ -24,7 +24,7 @@
  # 2. Benefits for vested terms are currently modeled as life annuity. Later we may want to model it as contingent annuity. 
 
 
-get_indivLab <- function(Tier_select_,
+get_indivLiab <- function(Tier_select_,
                          decrement.model_ = decrement.model,
                          salary_          = salary,
                          benefit_         = benefit,
@@ -180,6 +180,10 @@ liab.active %<>%
   TCx.la   = lead(Bx.laca) * qxr.la * lead(ax.r.W) * v,         # term cost of life annuity at the internal retirement age x (start to claim benefit at age x + 1)
   TCx.ca   = lead(Bx.laca) * qxr.ca * lead(liab.ca.sum.1) * v,  # term cost of contingent annuity at the internal retirement age x (start to claim benefit at age x + 1)
   TCx.laca = TCx.la + TCx.ca,
+  
+  # For PERSE: PV of DB benefit
+  DB.PVBx  = Bx * ax.r.W,
+  DB.value = Bx.laca * ax.r.W,
   
   # TCx.r = Bx.r * qxr.a * ax,
   PVFBx.laca  = c(get_PVFB(pxT[age <= r.max], v, TCx.laca[age <= r.max]), rep(0, max.age - r.max)),
@@ -723,7 +727,7 @@ var.names <- c("sx", ALx.laca.method, NCx.laca.method,
                      ALx.v.method, NCx.v.method, 
                      ALx.death.method, NCx.death.method,
                      ALx.disb.method, NCx.disb.method,
-                     "PVFBx.laca", "PVFBx.v", "PVFBx.death", "PVFBx.disb", "Bx.laca", "Bx.disb", "DC_EEC", "DC_ERC")
+                     "PVFBx.laca", "PVFBx.v", "PVFBx.death", "PVFBx.disb", "Bx.laca", "Bx.disb", "DC_EEC", "DC_ERC", "DB.value", "DB.PVBx")
 liab.active %<>% 
   filter(year %in% seq(init.year, len = nyear)) %>%
   select(year, ea, age, one_of(var.names)) %>%

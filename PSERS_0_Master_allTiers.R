@@ -242,9 +242,11 @@ if(paramlist$DC_reform){
 
 # 1. PVFB and AL of actives
 # paramlist$bfactor <- paramlist$bfactor * 1.1
+
+if(paramlist$Calib.bf){
 tier.param %<>% mutate(bfactor = bfactor * 1.11) 
 row.names(tier.param) <- tier.param$tier  # using "mutate" removes row names, need to add row names back
-
+}
 
 # 2. AL and PVFB for actives and NC 
 # Issue: PVFB too high, AL too low => PVFNC too high
@@ -441,7 +443,7 @@ if(paramlist$DC_reform){
 source("PSERS_Model_IndivLiab.R")
 gc()
 
-liab.tCD <- get_indivLab("tCD",
+liab.tCD <- get_indivLiab("tCD",
                          decrement.model.tCD,
                          salary.tCD,
                          benefit.tCD,
@@ -451,7 +453,7 @@ liab.tCD <- get_indivLab("tCD",
                          liab.disb.ca.tCD)
 
 
-liab.tE <- get_indivLab("tE",
+liab.tE <- get_indivLiab("tE",
                         decrement.model.tE,
                         salary.tE,
                         benefit.tE,
@@ -461,7 +463,7 @@ liab.tE <- get_indivLab("tE",
                         liab.disb.ca.tE)
 
 
-liab.tF <- get_indivLab("tF",
+liab.tF <- get_indivLiab("tF",
                         decrement.model.tF,
                         salary.tF,
                         benefit.tF,
@@ -474,7 +476,7 @@ liab.tF <- get_indivLab("tF",
 
 if(paramlist$DC_reform){
   
-   liab.tNE <- get_indivLab("tNE",
+   liab.tNE <- get_indivLiab("tNE",
                            decrement.model.tNE,
                            salary.tNE,
                            benefit.tNE,
@@ -484,7 +486,7 @@ if(paramlist$DC_reform){
                            liab.disb.ca.tNE)
    
    
-   liab.tNF <- get_indivLab("tNF",
+   liab.tNF <- get_indivLiab("tNF",
                            decrement.model.tNF,
                            salary.tNF,
                            benefit.tNF,
@@ -495,8 +497,15 @@ if(paramlist$DC_reform){
 }
 
 
+list.benRisk.R725 <- list(i.r = i.r,
+                          liab.tNE = liab.tNE,
+                          liab.tNF = liab.tNF)
 
+save(list.benRisk.R725, file = "Results/BenefitRisk/list.benRisk.R725.RData")
+ 
+# liab.tNE$active$DB.value
 # liab.tE$active %>% filter(year == 2017, ea == 30) %>% select(year, ea, age, DC_EEC)
+
 
 
 #*********************************************************************************************************

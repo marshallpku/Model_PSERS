@@ -138,11 +138,11 @@ liab.active %<>%
           PVFBx.laca  = c(get_PVFB(pxT[age <= r.max], v, TCx.laca[age <= r.max]), rep(0, max.age - r.max)),
           
           # Term cost for DC plan if the entier salary is contributed into the DC fund.
-          gx.DC     = gx.laca, # for now, assume the same eligibility and retirement rates for DC benefit.
+          gx.DC     = gx.laca > 0, # for now, assume the same eligibility and retirement rates for DC benefit.
           TCx.DC    = lead(CumSalwInt * gx.DC) * qxr * v,
           PVFBx.DC  = c(get_PVFB(pxT[age <= r.max], v, TCx.DC[age <= r.max]), rep(0, max.age - r.max)),
         
-          DC.value_CumSal  = lead(CumSalwInt * gx.DC), # DC balance at each age if the entire salary is contributed each year.
+          DC.value_CumSal  = lead(CumSalwInt), # DC balance at each age if the entire salary is contributed each year.
           DC.value_balance = lead(CumSalwInt * gx.DC), # DC balance at each age if a fraction of salary is contributed each year.
                     
           ## NC and AL of UC
@@ -202,7 +202,7 @@ liab.active %<>%
   mutate(Rate.1_2 = DC_rate.tot2/DC_rate.tot)
 
 
-liab.active %>% filter(start.year == 2017, ea == 30) 
+liab.active %>% filter(start.year == 2017, ea == 35) %>% select(start.year, ea, age,sx, DB.value_PVret.half.bf, DC.value_CumSal, DC_rate.tot, DC_rate.tot3)
 liab.active %>% filter(start.year == 2017, ea == age) 
 
 

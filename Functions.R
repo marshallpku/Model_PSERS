@@ -801,7 +801,7 @@ roll_maxChg <- function(x, fun, width,  ... ){
 
 
 
-get_cumAsset <- function(cf, i, year_end = FALSE){
+get_cumAsset <- function(cf, i, year_end = FALSE, constant_i = TRUE){
   # Given a cash flow and a interest rate, calculates the accumulated asset value each year
   # cf: cash flow
   # i : interest rate
@@ -811,7 +811,10 @@ get_cumAsset <- function(cf, i, year_end = FALSE){
 
   n <- length(cf)
   
-  i.vector <- (1 + i)^(seq_len(n) - ifelse(year_end, 0, 1))
+  if(constant_i) i.vector <- (1 + i)^(seq_len(n) - ifelse(year_end, 0, 1)) else {
+    if(year_end) i.vector <- cumprod(1 + i)   else i.vector <- c(1, cumprod(1 + i)[1:(n-1)])
+  }
+    
 
   df <- t(matrix(i.vector, n, n, byrow = T) * cf) %>% as.data.frame()
   names(df) <- seq_len(n)
@@ -827,7 +830,7 @@ get_cumAsset <- function(cf, i, year_end = FALSE){
   # cumAsset
 }
 
-(get_cumAsset(c(10, 15, 30, 55), 0.076))
+(get_cumAsset(c(10, 15, 30, 55), 0.076, TRUE))
 
 
 
