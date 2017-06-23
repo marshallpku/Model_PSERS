@@ -98,7 +98,7 @@ if(paramlist$DC.rate == 3) {
 
 if(paramlist$DC.rate == 4) {
   load("Data_inputs/DC_rate.tot625.RData")
-  DC_rate.tot %<>% mutate(DC_rate.tot = 0.09) 
+  DC_rate.tot %<>% mutate(DC_rate.tot = 0.072) 
   
   if(paramlist$DC_reform_all){
     tier.param %<>%
@@ -497,12 +497,12 @@ if(paramlist$DC_reform){
 }
 
 
-list.benRisk.R725 <- list(i.r = i.r,
-                          liab.tNE = liab.tNE,
-                          liab.tNF = liab.tNF)
-
-save(list.benRisk.R725, file = "Results/BenefitRisk/list.benRisk.R725.RData")
- 
+# list.benRisk.R725 <- list(i.r = i.r,
+#                           liab.tNE = liab.tNE,
+#                           liab.tNF = liab.tNF)
+# 
+# save(list.benRisk.R725, file = "Results/BenefitRisk/list.benRisk.R725.RData")
+#  
 # liab.tNE$active$DB.value
 # liab.tE$active %>% filter(year == 2017, ea == 30) %>% select(year, ea, age, DC_EEC)
 
@@ -750,7 +750,7 @@ if(paramlist$DC_reform & paramlist$SepNewHires){
   init_amort_raw.New = init_amort_raw %>% mutate(balance = 0)
   init_unrecReturns.unadj.New = init_unrecReturns.unadj %>% mutate(DeferredReturn = 0)
   
-  penSim_results.sumTiers <- run_sim("sumTiers.xNew", AggLiab.sumTiers.xNew, AggLiab.sumTiers.New)
+  penSim_results.sumTiers <- run_sim("sumTiers", AggLiab.sumTiers.xNew, AggLiab.sumTiers.New)
   
   
   

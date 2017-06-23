@@ -479,7 +479,6 @@ get_riskTransfer.IFO <- function(df, rn, year_range = 2017:2048){
     
 }
 
-
 get_riskTransfer.pew <- function(df, rn, year_range = 2017:2048){
   
   riskTransfer <-  df %>% filter(runname %in% rn, 
@@ -1177,7 +1176,7 @@ df_all.stch %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
   df_all.stch %>% filter(runname %in% c("RS1_SR1EL1_sep_R725.d725"), 
                          Tier == "sumTiers" ) %>% select(-ERC_GF_hike, -FR100more, -ERC_high, -Tier)
   
-  d.year <- 2040:2045# seq(2015, 2045, 5)
+  d.year <- 2017:2045# seq(2015, 2045, 5)
   d.sim  <- 10
   
   results_all.sumTiers %>% filter(runname == "RS1_SR1EL1", sim == d.sim, year %in% d.year)               %>% select(year, FR_MA, ERC.DB.final, ERC, EEC_PR,  ADC, SC, NC, sharedRisk.rate)
@@ -1193,7 +1192,15 @@ df_all.stch %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
   # Conclusion, need model ERC and EEC of old and new members jointly. 
   
   
-  results_all.sumTiers %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == d.sim, year %in% d.year) %>% select(year, FR_MA, ERC.DB.final, ERC, EEC_PR,  ADC, SC, NC, sharedRisk.rate, ERC.)
+  results_all.New %>% filter(runname == "RS1_SR0EL1_sep_R725.d725", sim == 0, year %in% d.year) %>% select(year, FR_MA, ERC.DB.final, ERC, EEC_PR,  ADC, SC, NC_PR, sharedRisk.rate, DC_EEC_PR)
+  results_all.New %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, year %in% d.year) %>% select(year, FR_MA, ERC.DB.final, ERC, EEC_PR,  ADC, SC, NC_PR, sharedRisk.rate, DC_EEC_PR)
+  
+  
+  
+  
+  
+  
+  
   
   
   

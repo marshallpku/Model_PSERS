@@ -26,7 +26,7 @@ run_sim <- function(Tier_select_,
 
   # Run the section below when developing new features.
 
-     # Tier_select_ =  "sumTiers.New" #  Tier_select
+     # Tier_select_ =  "sumTiers" #  Tier_select
      # i.r_ = i.r
      # PR.Tiers_ = PR.Tiers
      # DC.Tiers_ = DC.Tiers
@@ -35,11 +35,11 @@ run_sim <- function(Tier_select_,
      # i.r_geoReturn_ = i.r_geoReturn
      # init_amort_raw.xNew_ = init_amort_raw.xNew
      # init_unrecReturns.unadj.xNew_ = init_unrecReturns.unadj.xNew
-     # init_amort_raw.xNew_ = init_amort_raw.New
+     # init_amort_raw.New_ = init_amort_raw.New
      # init_unrecReturns.unadj.New_ = init_unrecReturns.unadj.New
      # paramlist_      = paramlist
      # Global_paramlist_ = Global_paramlist
-  
+     # 
 
   
   assign_parmsList(Global_paramlist_, envir = environment())
@@ -499,8 +499,8 @@ run_sim <- function(Tier_select_,
   SC_amort0.New[,] <- 0
   
   
-  
-  
+  SC_amort0.xNew
+  penSim0.xNew
   
   #*************************************************************************************************************
   #                                       Simuation  ####
@@ -511,7 +511,8 @@ run_sim <- function(Tier_select_,
   
   
   penSim_results <- foreach(k = -1:nsim, .packages = c("dplyr", "tidyr", "stringr")) %dopar% {
-    # k <- 1
+    
+    # k <- 0
     # initialize
     penSim.xNew   <- penSim0.xNew
     SC_amort.xNew  <- SC_amort0.xNew
@@ -538,8 +539,8 @@ run_sim <- function(Tier_select_,
     
     for (j in 1:nyear){
         
-        # j <- 1
-        # j <- 3
+        # j <- 2
+        # j <- 8
 
       
       #*************************************************************************************************************
@@ -921,10 +922,12 @@ run_sim <- function(Tier_select_,
             penSim.xNew$ERC.final[j] <- ifelse(penSim.xNew$ERC.tot[j]/penSim.xNew$PR.tot[j] >= (penSim.xNew$ERC.final.tot[j - 1]/penSim.xNew$PR.tot[j - 1] + 0.045),
                                               (penSim.xNew$ERC.final[j - 1]/penSim.xNew$PR[j - 1] + 0.045) * penSim.xNew$PR[j],
                                                penSim.xNew$ERC[j]) 
-          
-            penSim.New$ERC.final[j] <- ifelse(penSim.xNew$ERC.tot[j]/penSim.xNew$PR.tot[j] >= (penSim.xNew$ERC.final.tot[j - 1]/penSim.xNew$PR.tot[j - 1] + 0.045),
-                                             (penSim.New$ERC.final[j - 1]/penSim.New$PR[j - 1] + 0.045) * penSim.New$PR[j],
-                                              penSim.New$ERC[j]) 
+            
+             if(penSim.New$PR[j] > 0 & penSim.New$PR[j - 1] > 0 ){
+              penSim.New$ERC.final[j] <- ifelse(penSim.xNew$ERC.tot[j]/penSim.xNew$PR.tot[j] >= (penSim.xNew$ERC.final.tot[j - 1]/penSim.xNew$PR.tot[j - 1] + 0.045),
+                                               (penSim.New$ERC.final[j - 1]/penSim.New$PR[j - 1] + 0.045) * penSim.New$PR[j],
+                                                penSim.New$ERC[j])
+             } else {penSim.New$ERC.final[j]  <- penSim.New$ERC[j]} 
           
           
           } else {
@@ -1031,7 +1034,7 @@ run_sim <- function(Tier_select_,
   #*************************************************************************************************************
   #                                  Combining results into a data frame.   ####
   #*************************************************************************************************************
-  penSim_results %>% head
+  #penSim_results %>% head
 
   penSim_results <- bind_rows(penSim_results) %>% 
     mutate_all(funs(na2zero(.))) %>% 
