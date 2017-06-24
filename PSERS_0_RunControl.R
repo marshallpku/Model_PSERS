@@ -30,7 +30,6 @@ library("XLConnect") # slow but convenient because it reads ranges; NOTE: I had 
 library("btools")
 options(dplyr.print_min = 60) # default is 10
 
-
 source("Functions.R")
 
 
@@ -99,7 +98,6 @@ source("Functions.R")
  #  -  The DC balance/benefit upon retirement can be calculated separately using results from Model_IndivLiab.R
 
  # 4. Only retirement benefits is reduced.
-
 
 
 

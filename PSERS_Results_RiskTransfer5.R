@@ -532,7 +532,8 @@ riskTransfer.pew.DC4 <-
   get_riskTransfer.pew(results_all.sumTiers, c("RS1_SR1EL1_sep_R725.d725",
                                                "RS1_SR1EL1_sep_R625.d725",
                                                "SR1EL1.Reform_sep_R725.d725.DC4",
-                                               "SR1EL1.Reform_sep_R625.d725.DC4")
+                                               "SR1EL1.Reform_sep_R625.d725.DC4"),
+                       riskTransfer_simPeriod
                        )
 
 # deterministic Pew method; sumTiers

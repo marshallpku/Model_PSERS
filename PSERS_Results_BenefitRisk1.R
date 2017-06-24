@@ -62,7 +62,7 @@ list.benRisk.R725$liab.tNE$active %>%
          DC_balance.5 = CumSalwInt * 0.05
          ) 
 
-df_BenRisk %>% select(ea, age, year,DB.value, DC_balance.72)
+df_BenRisk %>% select(ea, age, year,DB.value, DC_balance.72, Bx.laca, sx)
 
 DB.value <- with(df_BenRisk, df_BenRisk[age==65, "DB.value"]) %>% as.numeric
 DB.value
@@ -78,7 +78,7 @@ DC_cont.x <- df_BenRisk$DC_cont.x
 DC_sx <- df_BenRisk$sx
 
 
-list.return.R725 <- data.frame(i.r[-1,-(1:2)] - i.reduction) %>% unclass()
+list.return.R725 <- data.frame(list.benRisk.R725$i.r[-1,-(1:2)] - i.reduction) %>% unclass()
 
 set.seed(1234)
 list.return.R625 <- data.frame(matrix(rnorm(39*2000, 0.0697, 0.12), 39, 2000) - i.reduction) %>% unclass()
@@ -124,10 +124,11 @@ df_benDist %>% summarise(
       t %>% data.frame
 
 df_benDist.pctiles %<>% rename_("qtiles" = ".") %>% 
-  mutate(DB.pct = 100 * qtiles/DB.value)
+  mutate(DB.pct = 100 * (qtiles + DB.value)/ (2 * DB.value) )
   
 df_benDist.pctiles
 
+write.xlsx2(df_benDist.pctiles, file = "Results/BenefitRisk/benDist.pctile.xlsx")
 
 # Find a total DC rate that can ensure the 25th/10th percentile of hybrid benefit is approx. equal to the pure DB benefit.  
 
