@@ -524,6 +524,52 @@ get_riskTransfer.pew <- function(df, rn, year_range = 2017:2048){
   
 }
 
+get_riskTransfer.pew1 <- function(df, rn, year_range = 2017:2048){
+  
+  riskTransfer <-  df %>% filter(runname %in% rn, 
+                                 sim == 0) %>%
+                          mutate(UAAL = lead(UAAL)) %>% 
+                          filter(year %in% year_range) %>% 
+    mutate(runname = factor(runname, levels = rn)) %>% 
+    group_by(runname) %>% 
+    summarize(CF      = sum(ERC.tot.final, na.rm = TRUE)/1e9 + UAAL[year == max(year)]/1e9,
+              PV725 = sum(ERC.tot.final / (1 + 0.0725)^(row_number() - 1), na.rm = TRUE)/1e9 + UAAL[year == max(year)]/1e9,
+              PV37  = sum(ERC.tot.final / (1 + 0.037)^(row_number() - 1), na.rm = TRUE)/1e9 + UAAL[year == max(year)]/1e9
+    ) %>% 
+    mutate(runname = c("DB_high", "DB_low", "hybrid_high", "hybrid_low")) %>% 
+    gather(var, value, -runname) %>% 
+    mutate(runname = paste(runname, var, sep = "_")) %>% 
+    select(-var) %>% 
+    spread(runname, value) %>% 
+    mutate(
+      Diff.CL_CF = (DB_low_CF - DB_high_CF),
+      Diff.PL_CF = (hybrid_low_CF - hybrid_high_CF),
+      riskTansfer.dlr_CF = (Diff.CL_CF - Diff.PL_CF),
+      riskTransfer.pct_CF = 100 * riskTansfer.dlr_CF / Diff.CL_CF,
+      
+      Diff.CL_PV725 = (DB_low_PV725 - DB_high_PV725),
+      Diff.PL_PV725 = (hybrid_low_PV725 - hybrid_high_PV725),
+      riskTansfer.dlr_PV725 = (Diff.CL_PV725 - Diff.PL_PV725),
+      riskTransfer.pct_PV725 = 100 * riskTansfer.dlr_PV725 / Diff.CL_PV725,
+      
+      Diff.CL_PV37 = (DB_low_PV37 - DB_high_PV37),
+      Diff.PL_PV37 = (hybrid_low_PV37 - hybrid_high_PV37),
+      riskTansfer.dlr_PV37 = (Diff.CL_PV37 - Diff.PL_PV37),
+      riskTransfer.pct_PV37 = 100 * riskTansfer.dlr_PV37 / Diff.CL_PV37
+    ) %>% 
+    t
+  
+  riskTransfer %<>%
+    as.data.frame %>% 
+    mutate(var = rownames(riskTransfer)) %>% 
+    as.data.frame %>% 
+    select(var, value = V1)
+  
+}
+
+
+
+
 # 4.4.1 risk transfer: 9% total DC rate; SumTiers, hybrid for new hires ####
 
 
@@ -926,7 +972,20 @@ riskTransfer.pew.DC5.new %>% filter(str_detect(var, "CF"))
 
 
 
+riskTransfer.pew.DC4.1 <- 
+  get_riskTransfer.pew1(results_all.sumTiers, c("RS1_SR0EL1_sep_R725.d725",
+                                                "RS1_SR0EL1_sep_R625.d725",
+                                                "SR0EL1.Reform_sep_R725.d725.DC4",
+                                                "SR0EL1.Reform_sep_R625.d725.DC4"),
+                        riskTransfer_simPeriod
+  )
+
+riskTransfer.pew.DC4.1 %>% filter(str_detect(var, "CF"))
  
+
+
+
+
 # Method with 9% total DC rate; hybrid reform affects new hires as well as current members
 riskTransfer.pew2.DC4 %>% filter(str_detect(var, "CF"))
 
@@ -1050,7 +1109,7 @@ write.xlsx2(dist_cost.hybAll.tot.SR0, file = "Results/RiskTransfer/RiskTransfer_
 fig.lab <- c("Pure DB plan",
              "DB/DC hybrid for new hires only",
              "DB/DC hybrid for all current and future employees")
-fig.title <- "Distributions of 30-year employer pension costs (including UAAL in year 30)"
+fig.title <- "Distributions of 30-year employer pension costs (including UAAL in 2048)"
 
 rn <- c("RS1_SR0EL1_sep_R725.d725", 
         "SR0EL1.Reform_sep_R725.d725.DC4",
@@ -1078,11 +1137,42 @@ dist.cost.tot <-
 dist.cost.tot
 
 
+fig.lab <- c("Pure DB plan",
+             "DB/DC hybrid for new hires only")
+fig.title <- "Distributions of 30-year employer pension costs (including UAAL in 2048)"
+fig.subtitle <- "All current and future members"
+
+rn <- c("RS1_SR0EL1_sep_R725.d725", 
+        "SR0EL1.Reform_sep_R725.d725.DC4")
+year_range <- 2017:2048
+
+dist.cost.tot2 <- 
+  results_all.sumTiers %>% filter(runname %in% rn, 
+                                  sim > 0,
+                                  year %in% year_range) %>% 
+  mutate(runname = factor(runname, levels = rn, labels = fig.lab)) %>% 
+  group_by(runname, sim) %>% 
+  summarize(cost_0 = sum(ERC.tot.final, na.rm = TRUE)/1e9 + UAAL[year == max(year)]/1e9) %>% 
+  group_by(runname) %>% 
+  ggplot(aes(cost_0)) + theme_bw() + 
+  facet_wrap(~runname, nrow = 3) + 
+  geom_histogram(color = "black", fill = RIG.blue, binwidth = 20, boundary = 0) + 
+  coord_cartesian(xlim = c(-400, 400)) + 
+  scale_x_continuous(breaks = seq(-2000,2000,100)) + 
+  labs(title = fig.title,
+       subtitle = fig.subtitle,
+       x = "Employer pension cost",
+       y = "Count of simulations") + 
+  centeringTitles()
+
+dist.cost.tot2
+
 
 
 fig.lab <- c("Pure DB plan",
              "DB/DC hybrid")
-fig.title <- "Distributions of 30-year employer pension costs \nfor new employees after 2017 (including UAAL in year 30)"
+fig.title <- "Distributions of 30-year employer pension costs (including UAAL in year 30)"
+fig.subtitle <- "Future members only"
 
 rn <- c("RS1_SR0EL1_sep_R725.d725", 
         "SR0EL1.Reform_sep_R725.d725.DC4")
@@ -1102,6 +1192,7 @@ dist.cost.new <-
   coord_cartesian(xlim = c(-100, 100)) + 
   scale_x_continuous(breaks = seq(-2000,2000,20)) + 
   labs(title = fig.title,
+       subtitle = fig.subtitle,
        x = "Employer pension cost",
        y = "Count of simulations") + 
   centeringTitles()
@@ -1110,7 +1201,7 @@ dist.cost.new
 
 ggsave(file = "Results/RiskTransfer/disb.cost.tot.png", dist.cost.tot, width = 8*0.9, height = 14*0.9)
 ggsave(file = "Results/RiskTransfer/disb.cost.new.png", dist.cost.new, width = 8*0.9, height = 10*0.9)
-
+ggsave(file = "Results/RiskTransfer/disb.cost.tot2.png", dist.cost.tot2,width = 8*0.9, height = 10*0.9)
 
 
 # 5.3 How distribution changes over time

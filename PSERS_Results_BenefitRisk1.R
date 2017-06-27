@@ -46,7 +46,7 @@ load("Results/BenefitRisk/list.benRisk.R725.RData")
 # SR1EL1.Reform_sep_R725.d725.DC4.obf
 
 i <- list.benRisk.R725$i.r[1,1]
-i.reduction <- 0.015
+i.reduction <- 0.0
 
 df_BenRisk <- 
 list.benRisk.R725$liab.tNE$active %>% 

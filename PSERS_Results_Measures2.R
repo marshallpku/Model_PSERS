@@ -127,20 +127,20 @@ runs_RS1 <- paste0("RS1_", rn_policy)
 runs_RS2 <- paste0("RS2_", rn_policy)
 runs_RS3 <- paste0("RS3_", rn_policy)
 
-runs_alt <- c("RS1_SR1EL1.open", "RS1_SR1EL1.PR")
+runs_alt <- c("RS1_SR1EL1.open", "RS1_SR1EL1.PR", "RS1_SR1EL1.s5")
 
 
-runs_reform <- c("SR1EL1.Reform_R725.d725.DC1",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
-                 "SR1EL1.Reform_R625.d725.DC1",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
-                 "SR1EL1.Reform_R625.d625.DC1",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: PVDC = PVDB  
-                
-                 "SR1EL1.Reform_R725.d725.DC3",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: 5% 
-                 "SR1EL1.Reform_R625.d725.DC3",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: 5% 
-                 "SR1EL1.Reform_R625.d625.DC3",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: 5% 
-                 
-                 "RS1_SR1EL1_R625.d725",       # No DC reform with expected return = 6.25%, discount rate = 7.25% 
-                 "RS1_SR1EL1_R625.d625")       # No DC reform with expected return = 6.25%, discount rate = 6.25%
-
+# runs_reform <- c("SR1EL1.Reform_R725.d725.DC1",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
+#                  "SR1EL1.Reform_R625.d725.DC1",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
+#                  "SR1EL1.Reform_R625.d625.DC1",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: PVDC = PVDB  
+#                 
+#                  "SR1EL1.Reform_R725.d725.DC3",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: 5% 
+#                  "SR1EL1.Reform_R625.d725.DC3",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: 5% 
+#                  "SR1EL1.Reform_R625.d625.DC3",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: 5% 
+#                  
+#                  "RS1_SR1EL1_R625.d725",       # No DC reform with expected return = 6.25%, discount rate = 7.25% 
+#                  "RS1_SR1EL1_R625.d625")       # No DC reform with expected return = 6.25%, discount rate = 6.25%
+# 
 
 
 
@@ -166,18 +166,20 @@ runs_RS3_labels <- c("High Volatility: Baseline",
                      "High Volatility: Risk-sharing 5% max",
                      "High Volatility: No ERC floor")
 
-runs_alt_labels    <- c("open amortization", "lower payroll growth assumption for amort")
+runs_alt_labels    <- c("open amortization", 
+                        "lower payroll growth assumption for amort",
+                        "5-year asset smoothing")
 
-runs_reform_labels <- c( "DC Reform; \nexpected return = 7.25%; \ndiscount rate = 7.25%, DC1", 
-                         "DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%, DC1", 
-                         "DC reform; \nexpected return = 6.25%, \ndiscount rate = 6.25%, DC1", 
-                         
-                         "DC Reform; \nexpected return = 7.25%; \ndiscount rate = 7.25%; DC3", 
-                         "DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%; DC3", 
-                         "DC reform; \nexpected return = 6.25%, \ndiscount rate = 6.25%; DC3", 
-                         
-                         "No DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%",
-                         "No DC reform; \nexpected return = 6.25%, \ndiscount rate = 6.25%")
+# runs_reform_labels <- c( "DC Reform; \nexpected return = 7.25%; \ndiscount rate = 7.25%, DC1", 
+#                          "DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%, DC1", 
+#                          "DC reform; \nexpected return = 6.25%, \ndiscount rate = 6.25%, DC1", 
+#                          
+#                          "DC Reform; \nexpected return = 7.25%; \ndiscount rate = 7.25%; DC3", 
+#                          "DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%; DC3", 
+#                          "DC reform; \nexpected return = 6.25%, \ndiscount rate = 6.25%; DC3", 
+#                          
+#                          "No DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%",
+#                          "No DC reform; \nexpected return = 6.25%, \ndiscount rate = 6.25%")
 
 
 
@@ -190,8 +192,8 @@ runs_reform_labels <- c( "DC Reform; \nexpected return = 7.25%; \ndiscount rate 
 # lab_s6 <- "Scenario 6 \nLower Return Assumption"
 
 
-runs_all <- c(runs_RS1, runs_RS2, runs_RS3, runs_alt, runs_reform)
-runs_all_labels <- c(runs_RS1_labels, runs_RS2_labels, runs_RS3_labels, runs_alt_labels, runs_reform_labels)
+runs_all <- c(runs_RS1, runs_RS2, runs_RS3, runs_alt)
+runs_all_labels <- c(runs_RS1_labels, runs_RS2_labels, runs_RS3_labels, runs_alt_labels)
 
 
 
@@ -213,7 +215,7 @@ results_all %<>%
 
 
 df_all.stch <- results_all  %>% 
-  filter(runname %in% runs_all, sim > 0, year %in% 2016:2045)
+  filter(runname %in% runs_all, sim > 0, year %in% 2016:2046)
 
 
 
@@ -271,7 +273,7 @@ df_all.stch %<>%
 df_all.stch %>% filter(runname == "RS1_SR1EL1")
 df_all.stch %>% filter(runname == "RS1_SR1EL1.PR")
 df_all.stch %>% filter(runname == "RS1_SR1EL1.open")
-
+df_all.stch %>% filter(runname == "RS1_SR1EL1.s5")
 
 
 
@@ -332,11 +334,6 @@ results_all %>% filter(runname != "Dev.allTiers", year >= 2016, runname == "RS3_
   summarise(ERC_PR = max(ERC_PR - lag(ERC.final_PR), na.rm = TRUE)) %>% 
   filter(ERC_PR >= 3)
   
-results_all %>% filter(runname != "Dev.allTiers", year >= 2016, runname == "RS1_SR1EL1") %>% 
-  group_by(runname, sim) %>%
-  mutate(ERC_PR = ERC_PR - lag(ERC.final_PR)) %>% 
-  filter(ERC_PR >= 4.5) %>% 
-  select(runname, sim, year, ERC_PR, ERC.final_PR)
 
 
 results_all %>% filter(year >= 2016, sim >= 1, runname %in% c("RS1_SR1EL1", "RS1_SR0EL1","RS2_SR1EL1", "RS2_SR0EL1","RS3_SR1EL1", "RS3_SR0EL1")) %>% 
@@ -374,6 +371,31 @@ results_all %>% select(runname, sim, year, ERC.final.0 = ERC.final) %>% filter(s
 # results_all %>% filter(runname == "RS4.closed", sim == 0, year %in% c(2016:2020) ) %>% select(runname, Tier, year, AL, PR, SC, ERC, GenFund, ERC_GF) %>% mutate(AL_PR = AL/PR)
 # results_all %>% filter(runname == "RS5.closed", sim == 0, year %in% c(2016:2020) ) %>% select(runname, Tier, year, AL, PR, SC, ERC, GenFund, ERC_GF) %>% mutate(AL_PR = AL/PR)
 
+
+
+#*****************************************************
+## Misc calculations in the report  ####
+#*****************************************************
+
+results_all %>% filter(runname != "Dev.allTiers", year %in% 2016:2046, runname == "RS3_SR1EL1.s5") %>% 
+  group_by(runname, sim) %>%
+  mutate(ERC_PR = ERC_PR - lag(ERC.final_PR)) %>% 
+  filter(ERC_PR >= 4.5) %>% 
+  select(runname, sim, year, ERC_PR, ERC.final_PR)
+
+
+results_all %>% select(runname, sim, year, ERC.final.0 = ERC.final) %>% filter(sim > 0, runname == "RS1_SR0EL1") %>%
+  left_join(results_all %>% filter(sim > 0, runname == "RS1_SR1EL1")%>% select(sim, year, ERC.final.1 = ERC.final)) %>% 
+  group_by(sim) %>% 
+  summarise(PV.ERC.0 = sum(ERC.final.0 / 1e6*(1 + 0.075)^(row_number() - 1)),
+            PV.ERC.1 = sum(ERC.final.1 / 1e6*(1 + 0.075)^(row_number() - 1))) %>%
+  mutate(diff.PV.ERC = 1 - PV.ERC.1 / PV.ERC.0 ) %>% 
+  ungroup() %>% 
+  summarise(diff.PV.ERC.q10   = quantile(diff.PV.ERC, 0.1,na.rm = T),
+            diff.PV.ERC.q25   = quantile(diff.PV.ERC, 0.25, na.rm = T),
+            diff.PV.ERC.q50   = quantile(diff.PV.ERC, 0.5, na.rm = T),
+            diff.PV.ERC.q75   = quantile(diff.PV.ERC, 0.75, na.rm = T),
+            diff.PV.ERC.q90   = quantile(diff.PV.ERC, 0.9, na.rm = T))
 
 
 
@@ -421,7 +443,7 @@ fig_distReturn <- results_all %>%
   summarize(geoReturn = get_geoReturn(i.r)) %>% 
   ggplot(aes(100*geoReturn)) + theme_bw() + 
   geom_histogram(color = "black", fill = RIG.blue, binwidth = 0.5, boundary = 0) + 
-  geom_vline(xintercept = 0.075 * 100, color = RIG.red) + 
+  geom_vline(xintercept = 0.0725 * 100, color = RIG.red) + 
   scale_x_continuous(breaks = seq(0,20,1))+
   labs(title = "Distribution of 30-year compound annual return over 2,000 simulations",
        x = "%",
@@ -441,7 +463,7 @@ fig_distReturn
 
 # Distribution of funded ratio 
 fig.title <- "Distribution of funded ratios across simulations"
-fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.5% achieved"
+fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.25% achieved"
 fig_CP.RS1.FRdist <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1") %>% 
   left_join(results_all  %>% 
               filter(runname  %in% "RS1_SR1EL1", sim == 0) %>% 
@@ -468,14 +490,14 @@ fig_CP.RS1.FRdist <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1") %>%
   theme(axis.text.x = element_text(size = 8)) + 
   RIG.theme()
 fig_CP.RS1.FRdist
-
+fig_CP.RS1.FRdist$data
 
 
 
 
 # Distribution of ERC as % Payroll
 fig.title    <- "Distribution of employer contribution as a percentage of payroll across simulations"
-fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.5% achieved"
+fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.25% achieved"
 fig_CP.RS1.ERCdist <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1") %>% 
   left_join(results_all  %>%
               filter(runname  %in% "RS1_SR1EL1", sim == 0) %>%
@@ -533,6 +555,7 @@ fig_CP.RS1.FR40less$data %>% filter(year == 2045)
 
 
 
+
 # Risk of sharp increase in ERC/PR
 fig.title <- "Probability of employer contribution rising more than 10% of payroll \nin a 5-year period at any time prior to and including the given year"
 fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.5% achieved"
@@ -543,8 +566,8 @@ fig_CP.RS1.ERChike <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1" , year >=
   #gather(variable, value, - year) %>% 
   ggplot(aes(x = year, y = ERC_hike)) + theme_bw() + 
   geom_point(size = 2, color = RIG.blue) + geom_line(color = RIG.blue) + 
-  coord_cartesian(ylim = c(0,25)) + 
-  scale_y_continuous(breaks = seq(0,200, 5)) +
+  coord_cartesian(ylim = c(0,10)) + 
+  scale_y_continuous(breaks = seq(0,200, 1)) +
   scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_color_manual(values = c("black", RIG.red, RIG.blue, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
@@ -554,7 +577,7 @@ fig_CP.RS1.ERChike <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1" , year >=
   guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
   RIG.theme()
 fig_CP.RS1.ERChike
-fig_CP.RS1.ERChike$data %>% filter(year == 2045)
+fig_CP.RS1.ERChike$data %>% filter(year == 2046)
 
 
 
@@ -588,7 +611,7 @@ fig_CP.RS23.FR40less <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_
   guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
   RIG.theme()
 fig_CP.RS23.FR40less
-fig_CP.RS23.FR40less$data %>% filter(year == 2045)
+fig_CP.RS23.FR40less$data %>% filter(year == 2046)
 
 
 
@@ -602,7 +625,7 @@ fig_CP.RS23.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_S
   #gather(variable, value, - year) %>% 
   ggplot(aes(x = year, y = ERC_hike, color = runname, shape = runname)) + theme_bw() + 
   geom_point(size = 2) + geom_line() + 
-  coord_cartesian(ylim = c(0,40)) + 
+  coord_cartesian(ylim = c(0,30)) + 
   scale_y_continuous(breaks = seq(0,200, 5)) +
   scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
@@ -613,14 +636,14 @@ fig_CP.RS23.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_S
   guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
   RIG.theme()
 fig_CP.RS23.ERChike
-fig_CP.RS23.ERChike$data %>% filter(year == 2045)
+fig_CP.RS23.ERChike$data %>% filter(year == 2046)
 
 
 
 
 
 #**********************************************************
-## 2. Current policy: 3 investment return scenarios    ####
+## 2. Shared Risk EEC: 3 investment return scenarios    ####
 #**********************************************************
 
 # # Risk of low funded ratio
@@ -667,7 +690,7 @@ fig_SR.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR0EL1","RS2_SR0EL1
   ggplot(aes(x = year, y = ERC_hike, color = policy.SR, shape = policy.SR)) + theme_bw() + 
   facet_grid(. ~ returnScn) + 
   geom_point(size = 2) + geom_line() + 
-  coord_cartesian(ylim = c(0,45)) + 
+  coord_cartesian(ylim = c(0,30)) + 
   scale_y_continuous(breaks = seq(0,200, 5)) +
   scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
@@ -678,7 +701,7 @@ fig_SR.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR0EL1","RS2_SR0EL1
   guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
   RIG.theme()
 fig_SR.ERChike
-fig_SR.ERChike$data %>% filter(year == 2045)
+fig_SR.ERChike$data %>% filter(year == 2046)
 
 
 
@@ -686,20 +709,25 @@ fig_SR.ERChike$data %>% filter(year == 2045)
 #*************************************************************************
 ##                        3. Fiscal analysis                              ####
 #*************************************************************************
+lab.RS1 <- "Scenario 1: \nAssumption Achieved: \nBase Case"
+lab.RS2 <- "Scenario 2: \n15 Years of Low Returns"
+lab.RS3 <- "Scenario 3: \nHigh Volatility"
+
 
 # Deterministic 
 fig.title <- "Employer contribution as a percentage of \nPennsylvania state general fund revenue"
 fig.subtitle <- "Current PSERS funding policy; Determinisc runs"
-fig_fiscal.det <- results_all %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1"), sim == 0) %>% 
-  mutate(returnScn = factor(returnScn, levels = c("RS1", "RS2"), labels = c("Scenario 1: Assumption Achived: \nDeterministic \nAnnual return = 7.5%",
-                                                                            "Scenario 2: 15 Years of Low Returns: \nDeterministic \nAnnual return = 6.1%"))) %>%  
+fig_fiscal.det <- results_all %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1"), sim == 0, year %in% 2016:2046) %>% 
+  mutate(returnScn = factor(returnScn, levels = c("RS1", "RS2"), labels = c("Scenario 1: Assumption Achived: \nDeterministic \nAnnual return = 7.25%",
+                                                                            "Scenario 2: 15 Years of Low Returns: \nDeterministic \nAnnual return = 6.4%"))) %>%  
   select(runname, policy.SR, returnScn, year, ERC.final_GF) %>% 
+  mutate(ERC.final_GF.xSchool = 0.5 * ERC.final_GF) %>% # about 50% is paid by school districts
   #mutate(ERChike.det = 0) %>% 
   # gather(variable, value, -year, -returnScn) %>% 
-  ggplot(aes(x = year, y = ERC.final_GF, color = returnScn, shape = returnScn)) + theme_bw() + 
+  ggplot(aes(x = year, y = ERC.final_GF.xSchool, color = returnScn, shape = returnScn)) + theme_bw() + 
   geom_point(size = 2) + geom_line() + 
-  coord_cartesian(ylim = c(0,20)) + 
-  scale_y_continuous(breaks = seq(0,200, 2)) +
+  coord_cartesian(ylim = c(0,10)) + 
+  scale_y_continuous(breaks = seq(0,200, 1)) +
   scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
@@ -715,10 +743,13 @@ fig_fiscal.det$data #%>% filter(year == 2045)
 # Risk of sharp increase in ERC/PR
 fig.title <- "Distribution of employer contribution as a percentage of Pennsylvania state general fund revenue \nunder different return scenarios"
 fig.subtitle <- "Current PSERS funding policy"
-fig_fiscal.stch <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1"), year >= 2016) %>% 
-  select(returnScn, year, ERC_GF.q25, ERC_GF.q50, ERC_GF.q75) %>% 
+fig_fiscal.stch <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1"), year %in% 2016:2046) %>%
+  mutate(ERC_GF.xSchool.q25 = 0.5 * ERC_GF.q25,
+         ERC_GF.xSchool.q50 = 0.5 * ERC_GF.q50,
+         ERC_GF.xSchool.q75 = 0.5 * ERC_GF.q75) %>% # about 50% is paid by school districts
+  select(returnScn, year, ERC_GF.xSchool.q25, ERC_GF.xSchool.q50, ERC_GF.xSchool.q75) %>% 
   gather(var, value, -year, -returnScn) %>% 
-  mutate(var       = factor(var, levels = c("ERC_GF.q75", "ERC_GF.q50", "ERC_GF.q25"),
+  mutate(var       = factor(var, levels = c("ERC_GF.xSchool.q75", "ERC_GF.xSchool.q50", "ERC_GF.xSchool.q25"),
                                  labels = c("75th percentile", "50th percentile", "25th percentile")),
          returnScn = factor(returnScn, levels = c("RS1", "RS2", "RS3"), 
                                        labels = c(lab.RS1, lab.RS2, lab.RS3))) %>%  
@@ -726,8 +757,8 @@ fig_fiscal.stch <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL
   ggplot(aes(x = year, y = value, color = var, shape = var)) + theme_bw() + 
   facet_grid(. ~ returnScn) + 
   geom_point(size = 1.5) + geom_line() + 
-  coord_cartesian(ylim = c(0,20)) + 
-  scale_y_continuous(breaks = seq(0,200, 2)) +
+  coord_cartesian(ylim = c(0,10)) + 
+  scale_y_continuous(breaks = seq(0,200, 1)) +
   scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_color_manual(values = c(RIG.red, RIG.blue, RIG.green, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
@@ -753,7 +784,7 @@ lvl_measures  <- c("FR40less", "ERC_hike")
 
 # Summary tables for the three major risk measures
 tab_summary <- 
-  df_all.stch %>% filter(runname %in% c(runs_report ), year == 2045) %>% 
+  df_all.stch %>% filter(runname %in% c(runs_report ), year == 2046) %>% 
   select(runname, FR40less, ERC_hike) %>% 
   gather(Measure, value, -runname) %>% 
   mutate(runname = factor(runname, levels = runs_report),

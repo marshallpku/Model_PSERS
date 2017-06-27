@@ -46,7 +46,7 @@ replicate(50000, create_returns(r.mean, r.sd, period) %>% get_geoReturn) %>% mea
 
 
 #RS3. 
-r.mean <- c(0.0572, 0.0722, 0.0822)
+r.mean <- c(0.0572, 0.0722, 0.0797)
 r.sd   <- c(0.12, 0.12, 0.12)
 period <- c(10, 5, 15)
 

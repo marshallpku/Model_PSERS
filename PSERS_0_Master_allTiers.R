@@ -111,10 +111,20 @@ if(paramlist$DC.rate == 4) {
     init_beneficiaries_all %<>% mutate(benefit = 0.5 * benefit)
     init_retirees_all      %<>% mutate(benefit = 0.5 * benefit)
   }
-
 }
 
 
+if(paramlist$DC.rate == 5) {
+  load("Data_inputs/DC_rate.tot625.RData")
+  DC_rate.tot %<>% mutate(DC_rate.tot = 0.072) 
+  
+    tier.param %<>%
+      mutate(bfactor     = c(0.025, 0.02, 0.02, 0.005, 0.005),
+             EEC_DC.rate = c(0, 0, 0,             0.075*0.25, 0.103*0.25),
+             EEC_rate    = c(0.075, 0.075, 0.103, 0.075*0.25, 0.103*0.25)
+      )
+    rownames(tier.param) <- tier.param$tier
+}
 
 
 
