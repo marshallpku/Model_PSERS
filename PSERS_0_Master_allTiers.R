@@ -119,9 +119,9 @@ if(paramlist$DC.rate == 5) {
   DC_rate.tot %<>% mutate(DC_rate.tot = 0.072) 
   
     tier.param %<>%
-      mutate(bfactor     = c(0.025, 0.02, 0.02, 0.005, 0.005),
-             EEC_DC.rate = c(0, 0, 0,             0.075*0.25, 0.103*0.25),
-             EEC_rate    = c(0.075, 0.075, 0.103, 0.075*0.25, 0.103*0.25)
+      mutate(bfactor     = c(0.025, 0.02, 0.02, 0.02*0.75, 0.02*0.75),
+             EEC_DC.rate = c(0, 0, 0,             0.075*0.75, 0.103*0.75),
+             EEC_rate    = c(0.075, 0.075, 0.103, 0.075*0.75, 0.103*0.75)
       )
     rownames(tier.param) <- tier.param$tier
 }

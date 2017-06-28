@@ -501,6 +501,9 @@ run_sim <- function(Tier_select_,
         } 
         
         if(useSharedRisk){ 
+          
+          if(useSharedRisk.tCD) penSim$EEC.totRate_tCD[j] <- EEC_baseRate_tCD + penSim$sharedRisk.rate[j]
+          
          penSim$EEC.totRate_tE[j] <- EEC_baseRate_tE + penSim$sharedRisk.rate[j]
          penSim$EEC.totRate_tF[j] <- EEC_baseRate_tF + penSim$sharedRisk.rate[j]
         }

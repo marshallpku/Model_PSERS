@@ -127,7 +127,8 @@ runs_RS1 <- paste0("RS1_", rn_policy)
 runs_RS2 <- paste0("RS2_", rn_policy)
 runs_RS3 <- paste0("RS3_", rn_policy)
 
-runs_alt <- c("RS1_SR1EL1.open", "RS1_SR1EL1.PR", "RS1_SR1EL1.s5")
+runs_alt <- c("RS1_SR1EL1.open", "RS1_SR1EL1.PR", "RS1_SR1EL1.s5",
+              "RS1_SR1allEL1", "RS2_SR1allEL1", "RS3_SR1allEL1")
 
 
 # runs_reform <- c("SR1EL1.Reform_R725.d725.DC1",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
@@ -168,7 +169,10 @@ runs_RS3_labels <- c("High Volatility: Baseline",
 
 runs_alt_labels    <- c("open amortization", 
                         "lower payroll growth assumption for amort",
-                        "5-year asset smoothing")
+                        "5-year asset smoothing",
+                        "Shared-risk EEC for all; RS1",
+                        "Shared-risk EEC for all; RS2",
+                        "Shared-risk EEC for all; RS3")
 
 # runs_reform_labels <- c( "DC Reform; \nexpected return = 7.25%; \ndiscount rate = 7.25%, DC1", 
 #                          "DC reform; \nexpected return = 6.25%, \ndiscount rate = 7.25%, DC1", 
@@ -215,7 +219,7 @@ results_all %<>%
 
 
 df_all.stch <- results_all  %>% 
-  filter(runname %in% runs_all, sim > 0, year %in% 2016:2046)
+  filter(runname %in% runs_all, sim > 0, year %in% 2017:2046)
 
 
 
@@ -275,6 +279,9 @@ df_all.stch %>% filter(runname == "RS1_SR1EL1.PR")
 df_all.stch %>% filter(runname == "RS1_SR1EL1.open")
 df_all.stch %>% filter(runname == "RS1_SR1EL1.s5")
 
+df_all.stch %>% filter(runname == "RS1_SR1allEL1")
+df_all.stch %>% filter(runname == "RS3_SR1EL1")
+
 
 
 df_all.stch %>% filter(runname == "RS1_SR0EL1")
@@ -319,7 +326,10 @@ results_all %>% filter(runname == "RS1_SR1EL1", sim == 0)            %>% select(
 results_all %>% filter(runname == "RS1_SR1EL1_R625.d725", sim == 0)  %>% select(runname, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.final_PR, DC_ERC_PR.tEF, DC_PR.tEF, DC_ERC, ERC.DB.final, ExF_MA)
 results_all %>% filter(runname == "RS1_SR1EL1_R625.d625", sim == 0)  %>% select(runname, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.final_PR, DC_ERC_PR.tEF, DC_PR.tEF, DC_ERC, ERC.DB.final, ExF_MA)
 
-
+results_all %>% filter(runname == "RS1_SR1EL1", sim == 0) %>% select(runname, year, PR_tCD, PR_tE, PR_tF, PR) %>% 
+  mutate(PR_tCD_pct = PR_tCD/PR,
+         PR_tE_pct = PR_tE/PR,
+         PR_tF_pct = PR_tF/PR)
 
 
 
@@ -478,7 +488,7 @@ fig_CP.RS1.FRdist <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1") %>%
   geom_point(size = 2) + 
   geom_hline(yintercept = 100, linetype = 2, size = 1) +
   coord_cartesian(ylim = c(0,180)) + 
-  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2017, seq(2020, 2040, 5),2046)) + 
   scale_y_continuous(breaks = seq(0, 500, 20)) + 
   scale_color_manual(values = c(RIG.green, RIG.blue, RIG.red, "black"),  name = NULL, 
                      label  = c("75th percentile", "50th percentile", "25th percentile", "Deterministic")) + 
@@ -513,7 +523,7 @@ fig_CP.RS1.ERCdist <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1") %>%
   geom_point(size = 2) + 
   geom_hline(yintercept = 100, linetype = 2, size = 1) +
   coord_cartesian(ylim = c(0,50)) + 
-  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2017, seq(2020, 2040, 5), 2046)) + 
   scale_y_continuous(breaks = seq(0, 500, 5)) + 
   scale_color_manual(values = c(RIG.red, RIG.blue, RIG.green, "black"),  name = NULL, 
                      label  = c("75th percentile", "50th percentile", "25th percentile", "Deterministic")) + 
@@ -542,7 +552,7 @@ fig_CP.RS1.FR40less <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1", year >=
   geom_line(color = RIG.blue) + 
   coord_cartesian(ylim = c(0,35)) + 
   scale_y_continuous(breaks = seq(0,200, 5)) +
-  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2017, seq(2020, 2040, 5), 2046)) + 
   scale_color_manual(values = c(RIG.blue),  name = "") + 
   scale_shape_manual(values = c(17,16),  name = "") +
   labs(title = fig.title,
@@ -568,7 +578,7 @@ fig_CP.RS1.ERChike <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1" , year >=
   geom_point(size = 2, color = RIG.blue) + geom_line(color = RIG.blue) + 
   coord_cartesian(ylim = c(0,10)) + 
   scale_y_continuous(breaks = seq(0,200, 1)) +
-  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2017, seq(2020, 2040, 5), 2046)) + 
   scale_color_manual(values = c("black", RIG.red, RIG.blue, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
   labs(title = fig.title,
@@ -602,7 +612,7 @@ fig_CP.RS23.FR40less <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_
   geom_line() + 
   coord_cartesian(ylim = c(0,50)) + 
   scale_y_continuous(breaks = seq(0,200, 5)) +
-  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2017, seq(2020, 2040, 5), 2046)) + 
   scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red),  name = "") + 
   scale_shape_manual(values = c(17,16, 15),  name = "") +
   labs(title = fig.title,
@@ -627,7 +637,7 @@ fig_CP.RS23.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_S
   geom_point(size = 2) + geom_line() + 
   coord_cartesian(ylim = c(0,30)) + 
   scale_y_continuous(breaks = seq(0,200, 5)) +
-  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2017, seq(2020, 2040, 5), 2046)) + 
   scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
   labs(title = fig.title,
@@ -692,7 +702,7 @@ fig_SR.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR0EL1","RS2_SR0EL1
   geom_point(size = 2) + geom_line() + 
   coord_cartesian(ylim = c(0,30)) + 
   scale_y_continuous(breaks = seq(0,200, 5)) +
-  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2017, seq(2020, 2040, 5), 2046)) + 
   scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
   labs(title = fig.title,
@@ -702,6 +712,37 @@ fig_SR.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR0EL1","RS2_SR0EL1
   RIG.theme()
 fig_SR.ERChike
 fig_SR.ERChike$data %>% filter(year == 2046)
+
+
+
+# Risk of sharp increase in ERC/PR
+fig.title <- "Probability of employer contribution rising more than 10% of payroll \nin a 5-year period at any time prior to and including the given year"
+fig.subtitle <- "Current PSERS funding policy"
+fig_SR.ERChike <- df_all.stch %>% filter(runname %in% c("RS1_SR0EL1","RS2_SR0EL1", "RS3_SR0EL1",
+                                                        "RS1_SR1EL1","RS2_SR1EL1", "RS3_SR1EL1"), 
+                                         year >= 2016) %>% 
+  mutate(policy.SR = factor(policy.SR, levels = c(1, 0), labels = c("Current policy", "No risk-sharing")),
+         returnScn = factor(returnScn, levels = c("RS1", "RS2", "RS3"), labels = c(lab.RS1, lab.RS2, lab.RS3))) %>%  
+  select(policy.SR, returnScn, year, ERC_hike) %>% 
+  #mutate(ERChike.det = 0) %>% 
+  # gather(variable, value, -year, -returnScn) %>% 
+  ggplot(aes(x = year, y = ERC_hike, color = policy.SR, shape = policy.SR)) + theme_bw() + 
+  facet_grid(. ~ returnScn) + 
+  geom_point(size = 2) + geom_line() + 
+  coord_cartesian(ylim = c(0,30)) + 
+  scale_y_continuous(breaks = seq(0,200, 5)) +
+  scale_x_continuous(breaks = c(2017, seq(2020, 2040, 5), 2046)) + 
+  scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
+  scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
+  labs(title = fig.title,
+       subtitle = fig.subtitle,
+       x = NULL, y = "Probability (%)") + 
+  guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
+  RIG.theme()
+fig_SR.ERChike
+fig_SR.ERChike$data %>% filter(year == 2046)
+
+
 
 
 
@@ -728,7 +769,7 @@ fig_fiscal.det <- results_all %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1
   geom_point(size = 2) + geom_line() + 
   coord_cartesian(ylim = c(0,10)) + 
   scale_y_continuous(breaks = seq(0,200, 1)) +
-  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2017, seq(2020, 2040, 5), 2046)) + 
   scale_color_manual(values = c(RIG.blue, RIG.green, RIG.red, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
   labs(title = fig.title,
@@ -759,7 +800,7 @@ fig_fiscal.stch <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL
   geom_point(size = 1.5) + geom_line() + 
   coord_cartesian(ylim = c(0,10)) + 
   scale_y_continuous(breaks = seq(0,200, 1)) +
-  scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
+  scale_x_continuous(breaks = c(2017, seq(2020, 2040, 5), 2046)) + 
   scale_color_manual(values = c(RIG.red, RIG.blue, RIG.green, RIG.green, RIG.purple),  name = "") + 
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
   labs(title = fig.title,

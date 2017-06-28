@@ -183,12 +183,15 @@ runs_reform_sep <- c(
                  # Versions with EEC sharedRisk turned off
                  "RS1_SR0EL1_sep_R725.d725",
                  "RS1_SR0EL1_sep_R625.d725",
+                 "RS1_SR0EL1_sep_R525.d725",
                  
                  "SR0EL1.Reform_sep_R725.d725.DC4",
                  "SR0EL1.Reform_sep_R625.d725.DC4",
+                 "SR0EL1.Reform_sep_R525.d725.DC4",
                  
                  "SR0EL1.Reform_sep_R725.d725.DC4a",
                  "SR0EL1.Reform_sep_R625.d725.DC4a",
+                 "SR0EL1.Reform_sep_R525.d725.DC4a",
                  
                  "SR0EL1.Reform_sep_R725.d725.DC5",
                  "SR0EL1.Reform_sep_R625.d725.DC5"
@@ -390,7 +393,7 @@ results_all %>% filter(runname == "SR1EL1.Reform_sep_R725.d725.DC4a", sim == 0, 
 
 
 #*************************************************************************
-##                        4. DC reform                                ####
+##             4. Determinitic measrues of risk transfer             ####
 #*************************************************************************
 
 # load("Data_inputs/DC_rate.tot725.RData")
@@ -570,7 +573,7 @@ get_riskTransfer.pew1 <- function(df, rn, year_range = 2017:2048){
 
 
 
-# 4.4.1 risk transfer: 9% total DC rate; SumTiers, hybrid for new hires ####
+# 4.4.1 risk transfer: 7.2% total DC rate; costs of all, hybrid for new hires ####
 
 
 # deterministic Pew method; sumTiers
@@ -622,7 +625,7 @@ riskTransfer.pew.DC4.p3 %>% filter(str_detect(var, "CF"))
 
 
 
-# 4.4.2 risk transfer: 9% total DC rate; new hires, hybrid for new hires ####
+# 4.4.2 risk transfer: 7.2% total DC rate; costs of new, hybrid for new hires ####
 
 
 # deterministic Pew method; new hires only
@@ -675,7 +678,7 @@ riskTransfer.pew.DC4.new.p2 %>% filter(str_detect(var, "CF"))
 riskTransfer.pew.DC4.new.p3 %>% filter(str_detect(var, "CF"))
 
 
-# 4.4.3 risk transfer: 9% total DC rate; sumTiers, hybrid for new hires; SR turned off ####
+# 4.4.3 risk transfer: 7.2% total DC rate; costs of all, hybrid for new hires; SR turned off ####
 
 
 riskTransfer.pew.DC4.SR0 <- 
@@ -684,17 +687,6 @@ riskTransfer.pew.DC4.SR0 <-
                                                "SR0EL1.Reform_sep_R725.d725.DC4",
                                                "SR0EL1.Reform_sep_R625.d725.DC4")
   )
-
-riskTransfer.pew.DC4.SR0 %>% filter(str_detect(var, "CF"))
-
-x <- results_all.sumTiers %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, year %in% 2017:2048) %>% select(year, FR_MA, ERC.DB.final,ERC.tot.final, ERC, EEC_PR,  ADC, SC, NC, sharedRisk.rate)
-x
-x$ERC.final %>% sum
-
-
-x <- results_all.xNew %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, year %in% 2017:2048) %>% select(year, FR_MA, ERC.DB.final,ERC.tot.final, ERC, EEC_PR,  ADC, SC, NC, sharedRisk.rate)
-x
-
 
 # deterministic Pew method; sumTiers
 riskTransfer.pew.DC4.SR0.p1 <- 
@@ -731,7 +723,7 @@ riskTransfer.pew.DC4.SR0.p3 %>% filter(str_detect(var, "CF"))
 
 
 
-# 4.4.4 Pew method, deterministic, new hires, hybrid for new hires; SR turned off ####
+# 4.4.4 risk transfer: 7.2% total DC rate; costs of new, hybrid for new hires ; SR turned off ####
 
 
 riskTransfer.pew.DC4.new.SR0 <- 
@@ -783,7 +775,7 @@ riskTransfer.pew.DC4.new.SR0.p3 %>% filter(str_detect(var, "CF"))
 
 
 
-#4.4.5 deterministic Pew method, reform applied to all; sumTiers ####
+#4.4.5 hybrid for all; costs of all ####
 riskTransfer.pew2.DC4 <- 
   get_riskTransfer.pew(results_all.sumTiers, c("RS1_SR1EL1_sep_R725.d725",
                                                "RS1_SR1EL1_sep_R625.d725",
@@ -948,6 +940,7 @@ write.xlsx2(riskTransfer.tab, "Results/RiskTransfer/riskTransfer.tab.xlsx")
 
 # 4.4.7 Mics ####
 
+# benefit factor and DB EEC rate are reduced by 75% or 25%
 
 riskTransfer.pew.DC5 <- 
   get_riskTransfer.pew(results_all.sumTiers, c("RS1_SR0EL1_sep_R725.d725",
@@ -965,44 +958,43 @@ riskTransfer.pew.DC5.new <-
                                           "RS1_SR0EL1_sep_R625.d725",
                                           "SR0EL1.Reform_sep_R725.d725.DC5",
                                           "SR0EL1.Reform_sep_R625.d725.DC5"),
-                       2029:2038
+                       2017:2048
   )
 
 riskTransfer.pew.DC5.new %>% filter(str_detect(var, "CF"))
 
 
-
-riskTransfer.pew.DC4.1 <- 
-  get_riskTransfer.pew1(results_all.sumTiers, c("RS1_SR0EL1_sep_R725.d725",
-                                                "RS1_SR0EL1_sep_R625.d725",
-                                                "SR0EL1.Reform_sep_R725.d725.DC4",
-                                                "SR0EL1.Reform_sep_R625.d725.DC4"),
-                        riskTransfer_simPeriod
+# Risk transfer based on 2% reduction of annual investment return. 
+riskTransfer.2lowerReturn <- 
+  get_riskTransfer.pew(results_all.sumTiers, c("RS1_SR0EL1_sep_R725.d725",
+                                               "RS1_SR0EL1_sep_R525.d725",
+                                               "SR0EL1.Reform_sep_R725.d725.DC4",
+                                               "SR0EL1.Reform_sep_R525.d725.DC4"),
+                       riskTransfer_simPeriod
   )
 
-riskTransfer.pew.DC4.1 %>% filter(str_detect(var, "CF"))
- 
+
+riskTransfer.2lowerReturn.new <- 
+  get_riskTransfer.pew(results_all.New, c("RS1_SR0EL1_sep_R725.d725",
+                                          "RS1_SR0EL1_sep_R525.d725",
+                                          "SR0EL1.Reform_sep_R725.d725.DC4",
+                                          "SR0EL1.Reform_sep_R525.d725.DC4"),
+                       2039:2048
+  )
+
+riskTransfer.pew.DC4.SR0 %>% filter(str_detect(var, "CF"))
+riskTransfer.2lowerReturn %>% filter(str_detect(var, "CF"))
+
+riskTransfer.pew.DC4.new.SR0 %>% filter(str_detect(var, "CF"))
+riskTransfer.2lowerReturn.new %>% filter(str_detect(var, "CF"))
 
 
 
 
-# Method with 9% total DC rate; hybrid reform affects new hires as well as current members
-riskTransfer.pew2.DC4 %>% filter(str_detect(var, "CF"))
-
-# Under pew approach, why the cost is lower in the low return scenarios in the first two 10-year periods. 
-
-results_all %>% filter(runname == "RS1_SR1EL1_sep_R725.d725", sim == 0, Tier == "sumTiers.New", year %in% 2017:2038)  %>% select(runname,Tier, year, EEC_PR, ERC, ERC.final_PR, UAAL, FR_MA)
-results_all %>% filter(runname == "RS1_SR1EL1_sep_R625.d725", sim == 0, Tier == "sumTiers.New", year %in% 2017:2038)  %>% select(runname,Tier, year, EEC_PR, ERC, ERC.final_PR, UAAL, FR_MA)
-
-results_all %>% filter(runname == "SR1EL1.Reform_sep_R725.d725.DC4", sim == 0, Tier == "sumTiers.New", year %in% 2017:2028)  %>% select(runname,Tier, year, ERC.final, UAAL, FR_MA)
-results_all %>% filter(runname == "SR1EL1.Reform_sep_R625.d725.DC4", sim == 0, Tier == "sumTiers.New", year %in% 2017:2028)  %>% select(runname,Tier, year, ERC.final, UAAL, FR_MA)
 
 
 
-
-
-
-## 5. Alternative measures of risk transfer ####
+## 5. Stochastic measures of risk transfer ####
 
 # This section explores alternative measures of risk transfer under stochastic simulation approaches. 
 
@@ -1139,7 +1131,7 @@ dist.cost.tot
 
 fig.lab <- c("Pure DB plan",
              "DB/DC hybrid for new hires only")
-fig.title <- "Distributions of 30-year employer pension costs (including UAAL in 2048)"
+fig.title <- "Distributions of total employer pension costs in 2017-2048 \n(including UAAL in 2048)"
 fig.subtitle <- "All current and future members"
 
 rn <- c("RS1_SR0EL1_sep_R725.d725", 
@@ -1169,9 +1161,42 @@ dist.cost.tot2
 
 
 
+
+fig.lab <- c("Pure DB plan",
+             "DB/DC hybrid for \all current and future members")
+fig.title <- "Distributions of total employer pension costs in 2017-2048 \n(including UAAL in 2048)"
+fig.subtitle <- "All current and future members are affected by the hybrid plan reform"
+
+rn <- c("RS1_SR0EL1_sep_R725.d725", 
+        "SR0EL1.Reform_sep_R725.d725.DC4a")
+year_range <- 2017:2048
+
+dist.cost.allHybrid <- 
+  results_all.sumTiers %>% filter(runname %in% rn, 
+                                  sim > 0,
+                                  year %in% year_range) %>% 
+  mutate(runname = factor(runname, levels = rn, labels = fig.lab)) %>% 
+  group_by(runname, sim) %>% 
+  summarize(cost_0 = sum(ERC.tot.final, na.rm = TRUE)/1e9 + UAAL[year == max(year)]/1e9) %>% 
+  group_by(runname) %>% 
+  ggplot(aes(cost_0)) + theme_bw() + 
+  facet_wrap(~runname, nrow = 3) + 
+  geom_histogram(color = "black", fill = RIG.blue, binwidth = 20, boundary = 0) + 
+  coord_cartesian(xlim = c(-400, 400)) + 
+  scale_x_continuous(breaks = seq(-2000,2000,100)) + 
+  labs(title = fig.title,
+       subtitle = fig.subtitle,
+       x = "Employer pension cost",
+       y = "Count of simulations") + 
+  centeringTitles()
+dist.cost.allHybrid
+
+
+
+
 fig.lab <- c("Pure DB plan",
              "DB/DC hybrid")
-fig.title <- "Distributions of 30-year employer pension costs (including UAAL in year 30)"
+fig.title <- "Distributions of total employer pension costs in 2017-2048 \n(including UAAL in 2048)"
 fig.subtitle <- "Future members only"
 
 rn <- c("RS1_SR0EL1_sep_R725.d725", 
@@ -1202,6 +1227,7 @@ dist.cost.new
 ggsave(file = "Results/RiskTransfer/disb.cost.tot.png", dist.cost.tot, width = 8*0.9, height = 14*0.9)
 ggsave(file = "Results/RiskTransfer/disb.cost.new.png", dist.cost.new, width = 8*0.9, height = 10*0.9)
 ggsave(file = "Results/RiskTransfer/disb.cost.tot2.png", dist.cost.tot2,width = 8*0.9, height = 10*0.9)
+ggsave(file = "Results/RiskTransfer/disb.cost.allHybrid.png", dist.cost.allHybrid,width = 8*0.9, height = 10*0.9)
 
 
 # 5.3 How distribution changes over time
@@ -1314,9 +1340,25 @@ df_all.stch %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
   results_all.New %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, year %in% d.year) %>% select(year, FR_MA, ERC.DB.final, ERC, EEC_PR,  ADC, SC, NC_PR, sharedRisk.rate, DC_EEC_PR)
   
   
+# 6. Payroll and liability for new hires
+
+  df_sumTiers <- results_all.sumTiers %>% filter(runname == "RS1_SR0EL1_sep_R725.d725", sim == 0, year %in% 2017:2055) %>% select(year, PR.tot = PR, AL.tot = AL, nactives.tot = nactives)
+  df_New <- results_all.New %>% filter(runname == "RS1_SR0EL1_sep_R725.d725", sim == 0, year %in% 2017:2055) %>% select(year, PR.new = PR, AL.new = AL, nactives.new = nactives)
+  
+  df <- left_join(df_sumTiers, df_New)
+  df %<>% mutate(PR_pct.new = 100 * PR.new / PR.tot,
+                AL_pct.new = 100 * AL.new / AL.tot,
+                nactives_pct.new = 100 * nactives.new / nactives.tot) %>% 
+    select(year, PR_pct.new, AL_pct.new,  nactives_pct.new) 
+  
+  df.short <- df %>% filter(year %in% c(2017, seq(2020, 2045, 5), 2048))
   
   
+  df
+  df.short
   
+  write.xlsx2(df,       file = "Results/RiskTransfer/RiskTransfer_shareNew.xlsx", sheetName = "long")
+  write.xlsx2(df.short, file = "Results/RiskTransfer/RiskTransfer_shareNew.xlsx", sheetName = "short",  append = T)
   
   
   
