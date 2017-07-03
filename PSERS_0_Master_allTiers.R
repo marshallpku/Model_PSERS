@@ -96,9 +96,31 @@ if(paramlist$DC.rate == 3) {
   
 }
 
+# if(paramlist$DC.rate == 4) {
+#   load("Data_inputs/DC_rate.tot625.RData")
+#   DC_rate.tot %<>% mutate(DC_rate.tot = 0.072) 
+#   
+#   if(paramlist$DC_reform_all){
+#     tier.param %<>%
+#       mutate(bfactor     = c(0.0125, 0.01, 0.01, 0.01, 0.01),
+#              EEC_DC.rate = c(0.0375, 0.0375, 0.0515, 0.0375, 0.0515),
+#              EEC_rate    = c(0.0375, 0.0375, 0.0515, 0.0375, 0.0515)
+#       )
+#     rownames(tier.param) <- tier.param$tier
+#     
+#     init_beneficiaries_all %<>% mutate(benefit = 0.5 * benefit)
+#     init_retirees_all      %<>% mutate(benefit = 0.5 * benefit)
+#   }
+# }
+
+
 if(paramlist$DC.rate == 4) {
   load("Data_inputs/DC_rate.tot625.RData")
-  DC_rate.tot %<>% mutate(DC_rate.tot = 0.072) 
+  DC_rate.tot %<>% mutate(DC_rate.tot = 0.05)
+  
+  tier.param %<>%
+    mutate(EEC_DC.rate = c(0, 0, 0, 0.03, 0.03))
+  rownames(tier.param) <- tier.param$tier
   
   if(paramlist$DC_reform_all){
     tier.param %<>%
@@ -107,11 +129,12 @@ if(paramlist$DC.rate == 4) {
              EEC_rate    = c(0.0375, 0.0375, 0.0515, 0.0375, 0.0515)
       )
     rownames(tier.param) <- tier.param$tier
-    
+
     init_beneficiaries_all %<>% mutate(benefit = 0.5 * benefit)
     init_retirees_all      %<>% mutate(benefit = 0.5 * benefit)
   }
 }
+
 
 
 if(paramlist$DC.rate == 5) {

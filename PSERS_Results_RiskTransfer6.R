@@ -194,8 +194,10 @@ runs_reform_sep <- c(
                  "SR0EL1.Reform_sep_R525.d725.DC4a",
                  
                  "SR0EL1.Reform_sep_R725.d725.DC5",
-                 "SR0EL1.Reform_sep_R625.d725.DC5"
+                 "SR0EL1.Reform_sep_R625.d725.DC5",
                  
+                 "SR0EL1.Reform_sep_R625.d625.DC4",
+                 "RS1_SR0EL1_sep_R625.d625"
                  )         
 
 
@@ -716,6 +718,7 @@ riskTransfer.pew.DC4.SR0.p3 <-
                        2039:2048
   )
 
+riskTransfer.pew.DC4.SR0  %>% filter(str_detect(var, "CF"))
 riskTransfer.pew.DC4.SR0.p1 %>% filter(str_detect(var, "CF"))
 riskTransfer.pew.DC4.SR0.p2 %>% filter(str_detect(var, "CF"))
 riskTransfer.pew.DC4.SR0.p3 %>% filter(str_detect(var, "CF"))
@@ -1340,7 +1343,7 @@ df_all.stch %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
   results_all.New %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, year %in% d.year) %>% select(year, FR_MA, ERC.DB.final, ERC, EEC_PR,  ADC, SC, NC_PR, sharedRisk.rate, DC_EEC_PR)
   
   
-# 6. Payroll and liability for new hires
+# 6. Payroll and liability for new hires ####
 
   df_sumTiers <- results_all.sumTiers %>% filter(runname == "RS1_SR0EL1_sep_R725.d725", sim == 0, year %in% 2017:2055) %>% select(year, PR.tot = PR, AL.tot = AL, nactives.tot = nactives)
   df_New <- results_all.New %>% filter(runname == "RS1_SR0EL1_sep_R725.d725", sim == 0, year %in% 2017:2055) %>% select(year, PR.new = PR, AL.new = AL, nactives.new = nactives)
@@ -1359,6 +1362,80 @@ df_all.stch %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
   
   write.xlsx2(df,       file = "Results/RiskTransfer/RiskTransfer_shareNew.xlsx", sheetName = "long")
   write.xlsx2(df.short, file = "Results/RiskTransfer/RiskTransfer_shareNew.xlsx", sheetName = "short",  append = T)
+  
+  
+# 7. Greg's question ####  
+
+  df.IFO <- 
+  results_all.sumTiers %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
+                                                 "RS1_SR0EL1_sep_R625.d625",
+                                                 "SR0EL1.Reform_sep_R725.d725.DC4",
+                                                 "SR0EL1.Reform_sep_R625.d625.DC4"),
+                                  sim == 0,
+                                  year %in% 2017:2048)  %>% 
+    group_by(runname) %>% 
+    summarise(NC = sum(NC)/1e9,
+              SC = sum(SC)/1e9,
+              ERC.tot = sum(ERC.DB.final)/1e9  + UAAL[year == max(year)]/1e9 * 0 ) %>% 
+    mutate(ERC.xNC = ERC.tot - NC)
+  df.IFO 
+  
+  
+  
+  df.pew <- 
+    results_all.sumTiers %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
+                                                   "RS1_SR0EL1_sep_R625.d725",
+                                                   "SR0EL1.Reform_sep_R725.d725.DC4",
+                                                   "SR0EL1.Reform_sep_R625.d725.DC4"),
+                                    sim == 0,
+                                    year %in% 2017:2048)  %>% 
+    group_by(runname) %>% 
+    summarise(NC = sum(NC - EEC)/1e9,
+              ERC.tot = sum(ERC.DB.final)/1e9  + UAAL[year == max(year)]/1e9) %>% 
+    mutate(ERC.xNC = ERC.tot - NC)
+  df.pew 
+  
+  
+  
+
+      
+  # with UAAL
+  diff.CL <- 166.7 - 132.4
+  diff.PL <- 168.2 - 139.78
+  diff.CL
+  diff.PL
+  diff.CL - diff.PL  
+  
+  diff.CL.xNC <-  
+  diff.PL.xNC <- 
+  diff.CL.xNC
+  diff.PL.xNC
+  diff.CL.xNC - diff.PL.xNC
+    
+  # without UAAL:
+  
+  diff.CL <- 169.61 - 134.99
+  diff.PL <- 169.85 - 141.24
+  diff.CL
+  diff.PL
+  diff.CL - diff.PL
+  
+  diff.CL.xNC <- 60.21 - 48.36
+  diff.PL.xNC <- 89.20 - 77.37
+  diff.CL.xNC
+  diff.PL.xNC
+  diff.CL.xNC - diff.PL.xNC
+  
+  
+ 
+  
+  df.IFO %>% filter(year == max(year)) %>% select(year, AL, FR_MA, UAAL)
+  
+  results_all.New %>% filter(runname == "RS1_SR0EL1_sep_R725.d725", sim == 0, year %in% 2017:2048) %>% 
+    select(year, FR_MA, NC, SC, ERC, EEC, ERC.final, UAAL,ERC.DB.final_PR) %>% 
+    mutate_all(.funs = funs(./1e9)) %>% 
+    mutate(ERC.DB.final_PR = ERC.DB.final_PR*1e9) %>% 
+    kable(digits = 2)
   
   
   

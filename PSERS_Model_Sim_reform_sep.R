@@ -279,6 +279,8 @@ run_sim <- function(Tier_select_,
     penSim0.xNew$sharedRisk.rate <- rep(0, nyear)
     penSim0.New$sharedRisk.rate  <- rep(0, nyear)
     
+    #penSim0.New$sharedRisk.rate.New  <- rep(0, nyear) # shared risk rate for new employees, which can go down when returns are good. 
+    
     penSim0.xNew$i.r_geoReturn <- rep(0, nyear) 
     penSim0.New$i.r_geoReturn  <- rep(0, nyear) 
     
@@ -288,6 +290,8 @@ run_sim <- function(Tier_select_,
     penSim0.xNew$SharedRiskEval <- ((seq_len(nyear) + init.year - 1) - 2016) %% 3 == 0  # TRUE in the year to determine if the EEC rate should be changed
     penSim0.New$SharedRiskEval  <- ((seq_len(nyear) + init.year - 1) - 2016) %% 3 == 0  # TRUE in the year to determine if the EEC rate should be changed
     
+    penSim0.xNew$AL.tot <- rep(0, nyear)
+    penSim0.xNew$AA.tot <- rep(0, nyear)
         
  # }
   
@@ -759,26 +763,48 @@ run_sim <- function(Tier_select_,
       #**************************************************************************************************************
       #                                        PSERS: shared-risk EEC rate 
       #**************************************************************************************************************
+        penSim.xNew$AL.tot[j]  <-  penSim.xNew$AL[j] + penSim.New$AL[j]
+        penSim.xNew$AA.tot[j]  <-  penSim.xNew$AA[j] + penSim.New$AA[j]
+        
       
         if(j > 1){
           
           # in the re-evaluation year
           if(penSim.xNew$SharedRiskEval[j - 1]){
             
-            penSim.xNew$sharedRisk.rate[j] <- ifelse(penSim.xNew$i.r_geoReturn[j - 1] >= i,              penSim.xNew$sharedRisk.rate[j - 1] - 0.005,
-                                                   ifelse(penSim.xNew$i.r_geoReturn[j - 1] < (i - 0.01), penSim.xNew$sharedRisk.rate[j - 1] + 0.005, 
-                                                                                                         penSim.xNew$sharedRisk.rate[j - 1]))
+            # shared risk rate for class E and F
+            penSim.xNew$sharedRisk.rate[j] <- ifelse(     penSim.xNew$i.r_geoReturn[j - 1] >= (i + 0.01), penSim.xNew$sharedRisk.rate[j - 1] - 0.005,
+                                                   ifelse(penSim.xNew$i.r_geoReturn[j - 1] <  (i - 0.01), penSim.xNew$sharedRisk.rate[j - 1] + 0.005, 
+                                                                                                          penSim.xNew$sharedRisk.rate[j - 1]))
             
             penSim.xNew$sharedRisk.rate[j] <- ifelse(            penSim.xNew$sharedRisk.rate[j] > SharedRisk_cap, SharedRisk_cap,
-                                                         ifelse( penSim.xNew$sharedRisk.rate[j] <    0 ,   0,
+                                                         ifelse( penSim.xNew$sharedRisk.rate[j] < -0.02,   -0.02,
                                                                  penSim.xNew$sharedRisk.rate[j])
                                                 )
             
             
-            penSim.xNew$sharedRisk.rate[j] <- ifelse(penSim.xNew$AL[j - 1] == 0, 0,
-                          ifelse( (penSim.xNew$MA[j - 1] / penSim.xNew$AL[j - 1]) > 1, 0, penSim.xNew$sharedRisk.rate[j]))
+            penSim.xNew$sharedRisk.rate[j] <- ifelse(penSim.xNew$AL.tot[j - 1] == 0, 0,
+                          ifelse( (penSim.xNew$AA.tot[j - 1] / penSim.xNew$AL.tot[j - 1]) > 1 & penSim.xNew$sharedRisk.rate[j - 1] > 0, 0, penSim.xNew$sharedRisk.rate[j]))
               
-            penSim.New$sharedRisk.rate[j] <- penSim.xNew$sharedRisk.rate[j]  
+            
+            # shared risk/gain rate for new hybrid plan members
+            
+            penSim.New$sharedRisk.rate[j] <- ifelse(        penSim.xNew$i.r_geoReturn[j - 1] >= (i + 0.01), penSim.New$sharedRisk.rate[j - 1] - 0.0075,
+                                                     ifelse(penSim.xNew$i.r_geoReturn[j - 1] <  (i - 0.01), penSim.New$sharedRisk.rate[j - 1] + 0.0075, 
+                                                                                                            penSim.New$sharedRisk.rate[j - 1]))
+            
+            penSim.New$sharedRisk.rate[j] <- ifelse(           penSim.New$sharedRisk.rate[j] >  0.03,   0.03,
+                                                       ifelse( penSim.New$sharedRisk.rate[j] < -0.03,  -0.03,
+                                                               penSim.New$sharedRisk.rate[j])
+            )
+            
+            
+            penSim.New$sharedRisk.rate[j] <- ifelse(penSim.xNew$AL.tot[j - 1] == 0, 0,
+                                                     ifelse( (penSim.xNew$AA.tot[j - 1] / penSim.xNew$AL.tot[j - 1]) > 1 & penSim.New$sharedRisk.rate[j - 1] > 0, 
+                                                             0, 
+                                                             penSim.New$sharedRisk.rate[j]))
+            
+            #penSim.New$sharedRisk.rate[j] <- penSim.xNew$sharedRisk.rate[j]  
               
             
             
