@@ -1374,7 +1374,7 @@ df_all.stch %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
                                   sim == 0,
                                   year %in% 2017:2048)  %>% 
     group_by(runname) %>% 
-    summarise(NC = sum(NC)/1e9,
+    summarise(NC = sum(NC-EEC)/1e9,
               SC = sum(SC)/1e9,
               ERC.tot = sum(ERC.DB.final)/1e9  + UAAL[year == max(year)]/1e9 * 0 ) %>% 
     mutate(ERC.xNC = ERC.tot - NC)
@@ -1395,9 +1395,6 @@ df_all.stch %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
     mutate(ERC.xNC = ERC.tot - NC)
   df.pew 
   
-  
-  
-
       
   # with UAAL
   diff.CL <- 166.7 - 132.4
@@ -1436,9 +1433,30 @@ df_all.stch %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
     mutate_all(.funs = funs(./1e9)) %>% 
     mutate(ERC.DB.final_PR = ERC.DB.final_PR*1e9) %>% 
     kable(digits = 2)
+
+df.IFO.full <-     
+results_all.sumTiers %>% filter( runname %in% c("RS1_SR0EL1_sep_R725.d725",
+                                                 "RS1_SR0EL1_sep_R625.d625",
+                                                 "SR0EL1.Reform_sep_R725.d725.DC4",
+                                                 "SR0EL1.Reform_sep_R625.d625.DC4")) %>% 
+  filter(sim == 0, year %in% 2017:2048) %>% 
+  select(runname, year, ERC.DB.final, NC, EEC) %>% 
+  mutate(NC.ER = NC - EEC) %>% 
+  mutate_at(vars(-runname, -year), funs(./1e9))
   
+df.pew.full <- 
+results_all.sumTiers %>% filter( runname %in% c("RS1_SR0EL1_sep_R725.d725",
+                                                "RS1_SR0EL1_sep_R625.d725",
+                                                "SR0EL1.Reform_sep_R725.d725.DC4",
+                                                "SR0EL1.Reform_sep_R625.d725.DC4")) %>% 
+  filter(sim == 0, year %in% 2017:2048) %>% 
+  select(runname, year, ERC.DB.final, NC, EEC, UAAL) %>% 
+  mutate(NC.ER = NC - EEC) %>% 
+  mutate_at(vars(-runname, -year), funs(./1e9))
   
-  
+write.xlsx2(df.IFO.full,  file = "Results/RiskTransfer/CompareApproaches.xlsx", sheetName = "DiscountRateLowered.raw")
+write.xlsx2(df.pew.full,  file = "Results/RiskTransfer/CompareApproaches.xlsx", sheetName = "DiscountRateNotLowered.raw",  append = T)
+
   
   
   
