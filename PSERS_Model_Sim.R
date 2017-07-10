@@ -480,12 +480,12 @@ run_sim <- function(Tier_select_,
           # in the re-evaluation year
           if(penSim$SharedRiskEval[j - 1]){
             
-            penSim$sharedRisk.rate[j] <-    ifelse(penSim$i.r_geoReturn[j - 1] >= i,                penSim$sharedRisk.rate[j - 1] - 0.005,
+            penSim$sharedRisk.rate[j] <-    ifelse(       penSim$i.r_geoReturn[j - 1] >=(i + 0.01), penSim$sharedRisk.rate[j - 1] - 0.005,
                                                    ifelse(penSim$i.r_geoReturn[j - 1] < (i - 0.01), penSim$sharedRisk.rate[j - 1] + 0.005, 
                                                                                                     penSim$sharedRisk.rate[j - 1]))
             
             penSim$sharedRisk.rate[j] <- ifelse(            penSim$sharedRisk.rate[j] > SharedRisk_cap, SharedRisk_cap,
-                                                    ifelse( penSim$sharedRisk.rate[j] <    0 ,   0,
+                                                    ifelse( penSim$sharedRisk.rate[j] < -SharedRisk_cap, -SharedRisk_cap,
                                                             penSim$sharedRisk.rate[j])
                                                 )
             

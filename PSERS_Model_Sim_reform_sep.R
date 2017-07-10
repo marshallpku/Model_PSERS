@@ -818,8 +818,8 @@ run_sim <- function(Tier_select_,
         if(useSharedRisk){ 
          penSim.xNew$EEC.totRate_tE[j] <-  (EEC_baseRate_tE + penSim.xNew$sharedRisk.rate[j])  #* include.old
          penSim.xNew$EEC.totRate_tF[j] <-  (EEC_baseRate_tF + penSim.xNew$sharedRisk.rate[j])  #* include.old
-         penSim.New$EEC.totRate_tNE[j] <- (EEC_baseRate_tNE + penSim.New$sharedRisk.rate[j]) #* include.new
-         penSim.New$EEC.totRate_tNF[j] <- (EEC_baseRate_tNF + penSim.New$sharedRisk.rate[j]) #* include.new
+         penSim.New$EEC.totRate_tNE[j] <- (EEC_baseRate_tNE + penSim.New$sharedRisk.rate[j])   #* include.new
+         penSim.New$EEC.totRate_tNF[j] <- (EEC_baseRate_tNF + penSim.New$sharedRisk.rate[j])   #* include.new
         }
           
         penSim.xNew$EEC_tCD[j] <- with(penSim.xNew, PR_tCD[j] * EEC.totRate_tCD[j]) 

@@ -16,6 +16,10 @@ library(microbenchmark)
 library(readxl)
 library(stringr)
 library(zoo)
+
+library(grid)
+library(gridExtra)
+
 library("readxl")
 library("XLConnect") # slow but convenient because it reads ranges; NOTE: I had to install Java 64-bit on Windows 10 64-bit to load properly
 library(xlsx)
@@ -638,6 +642,13 @@ riskTransfer.pew.DC4.new <-
                                           "SR1EL1.Reform_sep_R625.d725.DC4")
   )
 
+riskTransfer.pew.DC4.xNew <- 
+  get_riskTransfer.pew(results_all.xNew, c("RS1_SR1EL1_sep_R725.d725",
+                                          "RS1_SR1EL1_sep_R625.d725",
+                                          "SR1EL1.Reform_sep_R725.d725.DC4",
+                                          "SR1EL1.Reform_sep_R625.d725.DC4")
+  )
+riskTransfer.pew.DC4.xNew %>% filter(str_detect(var, "CF"))
 
 
 # deterministic Pew method; New hires
@@ -1133,7 +1144,7 @@ dist.cost.tot
 
 
 fig.lab <- c("Pure DB plan",
-             "DB/DC hybrid for new hires only")
+             "DB/DC hybrid for new hires")
 fig.title <- "Distributions of total employer pension costs in 2017-2048 \n(including UAAL in 2048)"
 fig.subtitle <- "All current and future members"
 
@@ -1152,13 +1163,14 @@ dist.cost.tot2 <-
   ggplot(aes(cost_0)) + theme_bw() + 
   facet_wrap(~runname, nrow = 3) + 
   geom_histogram(color = "black", fill = RIG.blue, binwidth = 20, boundary = 0) + 
-  coord_cartesian(xlim = c(-400, 400)) + 
+  coord_cartesian(xlim = c(-400, 400), ylim = c(0, 350)) + 
   scale_x_continuous(breaks = seq(-2000,2000,100)) + 
   labs(title = fig.title,
        subtitle = fig.subtitle,
        x = "Employer pension cost",
        y = "Count of simulations") + 
   centeringTitles()
+
 
 dist.cost.tot2
 
@@ -1217,7 +1229,7 @@ dist.cost.new <-
   ggplot(aes(cost_0)) + theme_bw() + 
   facet_wrap(~runname, nrow = 3) + 
   geom_histogram(color = "black", fill = RIG.blue, binwidth = 5, boundary = 0) + 
-  coord_cartesian(xlim = c(-100, 100)) + 
+  coord_cartesian(xlim = c(-100, 100), ylim = c(0, 350)) + 
   scale_x_continuous(breaks = seq(-2000,2000,20)) + 
   labs(title = fig.title,
        subtitle = fig.subtitle,
@@ -1225,12 +1237,22 @@ dist.cost.new <-
        y = "Count of simulations") + 
   centeringTitles()
 
+
+
+
 dist.cost.new
+dist.cost.tot2
+
+dist.cost.2cols <- grid.arrange(dist.cost.new, dist.cost.tot2, ncol = 2)
+
+
 
 ggsave(file = "Results/RiskTransfer/disb.cost.tot.png", dist.cost.tot, width = 8*0.9, height = 14*0.9)
 ggsave(file = "Results/RiskTransfer/disb.cost.new.png", dist.cost.new, width = 8*0.9, height = 10*0.9)
 ggsave(file = "Results/RiskTransfer/disb.cost.tot2.png", dist.cost.tot2,width = 8*0.9, height = 10*0.9)
 ggsave(file = "Results/RiskTransfer/disb.cost.allHybrid.png", dist.cost.allHybrid,width = 8*0.9, height = 10*0.9)
+ggsave(file = "Results/RiskTransfer/disb.cost.2cols.png", dist.cost.2cols, width = 12*0.9, height = 10*0.9)
+
 
 
 # 5.3 How distribution changes over time

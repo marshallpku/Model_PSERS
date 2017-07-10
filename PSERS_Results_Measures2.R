@@ -387,7 +387,7 @@ results_all %>% select(runname, sim, year, ERC.final.0 = ERC.final) %>% filter(s
 ## Misc calculations in the report  ####
 #*****************************************************
 
-results_all %>% filter(runname != "Dev.allTiers", year %in% 2016:2046, runname == "RS3_SR1EL1.s5") %>% 
+results_all %>% filter(runname != "Dev.allTiers", year %in% 2017:2046, runname == "RS1_SR1EL1.s5") %>% 
   group_by(runname, sim) %>%
   mutate(ERC_PR = ERC_PR - lag(ERC.final_PR)) %>% 
   filter(ERC_PR >= 4.5) %>% 
@@ -539,7 +539,7 @@ fig_CP.RS1.ERCdist
 
 # Risk of low funded ratio
 fig.title <- "Probability of funded ratio below 40% in any year up to the given year"
-fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.5% achieved"
+fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.25% achieved"
 fig_CP.RS1.FR40less <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1", year >= 2016) %>% 
   #mutate(runname = factor(runname, labels = c(lab_s1, lab_s2))) %>%  
   select(runname, year, FR40less) %>% 
@@ -568,7 +568,7 @@ fig_CP.RS1.FR40less$data %>% filter(year == 2045)
 
 # Risk of sharp increase in ERC/PR
 fig.title <- "Probability of employer contribution rising more than 10% of payroll \nin a 5-year period at any time prior to and including the given year"
-fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.5% achieved"
+fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.25% achieved"
 fig_CP.RS1.ERChike <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1" , year >= 2016) %>% 
   #mutate(runname = factor(runname, labels = c(lab_s1, lab_s2))) %>%  
   select(runname, year, ERC_hike) %>% 
