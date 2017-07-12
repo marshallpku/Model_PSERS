@@ -309,61 +309,61 @@ results_all.xNew <- results_all %>% filter(Tier == "sumTiers.xNew")
 results_all.New  <- results_all %>% filter(Tier == "sumTiers.New")
 
 
-df_all.stch <- results_all  %>% 
-  filter(runname %in% runs_all, 
-         sim > 0, 
-         year %in% 2016:2045)
-
-
-df_all.stch %<>%   
-  select(runname,Tier, returnScn, policy.SR, policy.EL, sim, year, FR_MA, AL, MA, ERC, EEC, PR, ERC_PR, ERC.final_PR, ERC.final_GF) %>%
-  group_by(runname, sim, Tier) %>% 
-  mutate(
-         #FR_MA     = 100 * MA / AL,
-         FR40less  = cumany(FR_MA <= 40),
-         FR100more = FR_MA >= 100,
-         ERC_high  = cumany(ERC.final_PR >= 50), 
-         ERC_hike     = cumany(na2zero(ERC.final_PR - lag(ifelse(year == 2016, NA, ERC.final_PR), 5) >= 10)),  # NA for 2016 value: excludes impact of new amort payment in 2017 
-         ERC_GF_hike  = cumany(na2zero(ERC.final_GF - lag(ifelse(year == 2016, NA, ERC.final_GF), 5) >= 5)),
-         EEC_PR       = 100 * EEC / PR
-         ) %>% 
-  group_by(runname, year, Tier) %>% 
-  summarize(FR40less = 100 * sum(FR40less, na.rm = T)/n(),
-            FR100more = 100 * sum(FR100more, na.rm = T)/n(),
-            ERC_high = 100 * sum(ERC_high, na.rm = T)/n(),
-            ERC_hike = 100 * sum(ERC_hike, na.rm = T)/n(),
-            ERC_GF_hike = 100 * sum(ERC_hike, na.rm = T)/n(),
-            
-            FR.q10   = quantile(FR_MA, 0.1,na.rm = T),
-            FR.q25   = quantile(FR_MA, 0.25, na.rm = T),
-            FR.q50   = quantile(FR_MA, 0.5, na.rm = T),
-            FR.q75   = quantile(FR_MA, 0.75, na.rm = T),
-            FR.q90   = quantile(FR_MA, 0.9, na.rm = T),
-            
-            ERC_PR.q10 = quantile(ERC.final_PR, 0.1, na.rm = T),
-            ERC_PR.q25 = quantile(ERC.final_PR, 0.25, na.rm = T),
-            ERC_PR.q50 = quantile(ERC.final_PR, 0.5, na.rm = T),
-            ERC_PR.q75 = quantile(ERC.final_PR, 0.75, na.rm = T),
-            ERC_PR.q90 = quantile(ERC.final_PR, 0.9, na.rm = T),
-            
-            EEC_PR.q10 = quantile(EEC_PR, 0.1, na.rm = T),
-            EEC_PR.q25 = quantile(EEC_PR, 0.25, na.rm = T),
-            EEC_PR.q50 = quantile(EEC_PR, 0.5, na.rm = T),
-            EEC_PR.q75 = quantile(EEC_PR, 0.75, na.rm = T),
-            EEC_PR.q90 = quantile(EEC_PR, 0.9, na.rm = T),
-            
-            ERC_GF.q10 = quantile(ERC.final_GF, 0.1, na.rm = T),
-            ERC_GF.q25 = quantile(ERC.final_GF, 0.25, na.rm = T),
-            ERC_GF.q50 = quantile(ERC.final_GF, 0.5, na.rm = T),
-            ERC_GF.q75 = quantile(ERC.final_GF, 0.75, na.rm = T),
-            ERC_GF.q90 = quantile(ERC.final_GF, 0.9, na.rm = T)
-            
-  ) %>% 
-  ungroup() %>%
-  mutate(runname.lab = factor(runname, 
-                              levels = runs_all)
-                              #labels = runs_all_labels
-         )
+# df_all.stch <- results_all  %>% 
+#   filter(runname %in% runs_all, 
+#          sim > 0, 
+#          year %in% 2016:2045)
+# 
+# 
+# df_all.stch %<>%   
+#   select(runname,Tier, returnScn, policy.SR, policy.EL, sim, year, FR_MA, AL, MA, ERC, EEC, PR, ERC_PR, ERC.final_PR, ERC.final_GF) %>%
+#   group_by(runname, sim, Tier) %>% 
+#   mutate(
+#          #FR_MA     = 100 * MA / AL,
+#          FR40less  = cumany(FR_MA <= 40),
+#          FR100more = FR_MA >= 100,
+#          ERC_high  = cumany(ERC.final_PR >= 50), 
+#          ERC_hike     = cumany(na2zero(ERC.final_PR - lag(ifelse(year == 2016, NA, ERC.final_PR), 5) >= 10)),  # NA for 2016 value: excludes impact of new amort payment in 2017 
+#          ERC_GF_hike  = cumany(na2zero(ERC.final_GF - lag(ifelse(year == 2016, NA, ERC.final_GF), 5) >= 5)),
+#          EEC_PR       = 100 * EEC / PR
+#          ) %>% 
+#   group_by(runname, year, Tier) %>% 
+#   summarize(FR40less = 100 * sum(FR40less, na.rm = T)/n(),
+#             FR100more = 100 * sum(FR100more, na.rm = T)/n(),
+#             ERC_high = 100 * sum(ERC_high, na.rm = T)/n(),
+#             ERC_hike = 100 * sum(ERC_hike, na.rm = T)/n(),
+#             ERC_GF_hike = 100 * sum(ERC_hike, na.rm = T)/n(),
+#             
+#             FR.q10   = quantile(FR_MA, 0.1,na.rm = T),
+#             FR.q25   = quantile(FR_MA, 0.25, na.rm = T),
+#             FR.q50   = quantile(FR_MA, 0.5, na.rm = T),
+#             FR.q75   = quantile(FR_MA, 0.75, na.rm = T),
+#             FR.q90   = quantile(FR_MA, 0.9, na.rm = T),
+#             
+#             ERC_PR.q10 = quantile(ERC.final_PR, 0.1, na.rm = T),
+#             ERC_PR.q25 = quantile(ERC.final_PR, 0.25, na.rm = T),
+#             ERC_PR.q50 = quantile(ERC.final_PR, 0.5, na.rm = T),
+#             ERC_PR.q75 = quantile(ERC.final_PR, 0.75, na.rm = T),
+#             ERC_PR.q90 = quantile(ERC.final_PR, 0.9, na.rm = T),
+#             
+#             EEC_PR.q10 = quantile(EEC_PR, 0.1, na.rm = T),
+#             EEC_PR.q25 = quantile(EEC_PR, 0.25, na.rm = T),
+#             EEC_PR.q50 = quantile(EEC_PR, 0.5, na.rm = T),
+#             EEC_PR.q75 = quantile(EEC_PR, 0.75, na.rm = T),
+#             EEC_PR.q90 = quantile(EEC_PR, 0.9, na.rm = T),
+#             
+#             ERC_GF.q10 = quantile(ERC.final_GF, 0.1, na.rm = T),
+#             ERC_GF.q25 = quantile(ERC.final_GF, 0.25, na.rm = T),
+#             ERC_GF.q50 = quantile(ERC.final_GF, 0.5, na.rm = T),
+#             ERC_GF.q75 = quantile(ERC.final_GF, 0.75, na.rm = T),
+#             ERC_GF.q90 = quantile(ERC.final_GF, 0.9, na.rm = T)
+#             
+#   ) %>% 
+#   ungroup() %>%
+#   mutate(runname.lab = factor(runname, 
+#                               levels = runs_all)
+#                               #labels = runs_all_labels
+#          )
 
 
 # Compare results: If asset side of new hires is modeled separately. 
@@ -377,6 +377,21 @@ results_all %>% filter(runname == "SR1EL1.Reform_sep_R725.d725.DC4", sim == 0, T
 
 results_all %>% filter(runname == "SR1EL1.Reform_R725.d725.DC4a", sim == 0)                               %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.DB.final_PR)
 results_all %>% filter(runname == "SR1EL1.Reform_sep_R725.d725.DC4a", sim == 0, Tier == "sumTiers")  %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.DB.final_PR)
+
+
+
+results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725",        sim == 0, Tier == "sumTiers.New", year <= 2048)  %>% select(runname,Tier, year, FR_MA, NC, SC, EEC, ERC, ERC.DB.final)
+results_all %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, Tier == "sumTiers.New", year <= 2048)  %>% select(runname,Tier, year, FR_MA, NC, SC, EEC, ERC, ERC.DB.final)
+
+
+results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725",    sim == 0, Tier == "sumTiers.xNew",  year == 2048)  %>% select(runname,Tier, year, FR_MA, NC,SC, EEC, ERC, ERC.DB.final)
+results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725",    sim == 0, Tier == "sumTiers.New", year == 2048)    %>% select(runname,Tier, year, FR_MA, NC,SC, EEC, ERC, ERC.DB.final)
+
+
+results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725",        sim == 0, Tier == "sumTiers.xNew") %>% filter(year <= 2048) %>%  summarise(ERC = sum(ERC.DB.final))
+results_all %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, Tier == "sumTiers.xNew") %>% filter(year <= 2048) %>%  summarise(ERC = sum(ERC.DB.final))
+
+
 
 
 
@@ -578,8 +593,7 @@ get_riskTransfer.pew1 <- function(df, rn, year_range = 2017:2048){
 
 
 
-
-# 4.4.1 risk transfer: 7.2% total DC rate; costs of all, hybrid for new hires ####
+# 4.4.1 risk transfer: 5% total DC rate; costs of all, hybrid for new hires ####
 
 
 # deterministic Pew method; sumTiers
@@ -631,7 +645,7 @@ riskTransfer.pew.DC4.p3 %>% filter(str_detect(var, "CF"))
 
 
 
-# 4.4.2 risk transfer: 7.2% total DC rate; costs of new, hybrid for new hires ####
+# 4.4.2 risk transfer: 5% total DC rate; costs of new, hybrid for new hires ####
 
 
 # deterministic Pew method; new hires only
@@ -691,7 +705,7 @@ riskTransfer.pew.DC4.new.p2 %>% filter(str_detect(var, "CF"))
 riskTransfer.pew.DC4.new.p3 %>% filter(str_detect(var, "CF"))
 
 
-# 4.4.3 risk transfer: 7.2% total DC rate; costs of all, hybrid for new hires; SR turned off ####
+# 4.4.3 risk transfer: 5% total DC rate; costs of all, hybrid for new hires; SR turned off ####
 
 
 riskTransfer.pew.DC4.SR0 <- 
@@ -737,7 +751,7 @@ riskTransfer.pew.DC4.SR0.p3 %>% filter(str_detect(var, "CF"))
 
 
 
-# 4.4.4 risk transfer: 7.2% total DC rate; costs of new, hybrid for new hires ; SR turned off ####
+# 4.4.4 risk transfer: 5% total DC rate; costs of new, hybrid for new hires ; SR turned off ####
 
 
 riskTransfer.pew.DC4.new.SR0 <- 
@@ -905,7 +919,8 @@ riskTransfer      <- df[7, "value" ]
 riskTransfer.pct  <- df[str_detect(df$var, "riskTransfer.pct"), "value" ]
 
 
-df.o <- matrix(c(DB_high, hybrid_high,
+df.o <- matrix(
+       c(DB_high, hybrid_high,
          DB_low,  hybrid_low, 
          Diff.CL, Diff.PL, 
          0,       riskTransfer,
@@ -1163,7 +1178,7 @@ dist.cost.tot2 <-
   ggplot(aes(cost_0)) + theme_bw() + 
   facet_wrap(~runname, nrow = 3) + 
   geom_histogram(color = "black", fill = RIG.blue, binwidth = 20, boundary = 0) + 
-  coord_cartesian(xlim = c(-400, 400), ylim = c(0, 350)) + 
+  coord_cartesian(xlim = c(-400, 400), ylim = c(0, 400)) + 
   scale_x_continuous(breaks = seq(-2000,2000,100)) + 
   labs(title = fig.title,
        subtitle = fig.subtitle,
@@ -1229,7 +1244,7 @@ dist.cost.new <-
   ggplot(aes(cost_0)) + theme_bw() + 
   facet_wrap(~runname, nrow = 3) + 
   geom_histogram(color = "black", fill = RIG.blue, binwidth = 5, boundary = 0) + 
-  coord_cartesian(xlim = c(-100, 100), ylim = c(0, 350)) + 
+  coord_cartesian(xlim = c(-100, 100), ylim = c(0, 400)) + 
   scale_x_continuous(breaks = seq(-2000,2000,20)) + 
   labs(title = fig.title,
        subtitle = fig.subtitle,
@@ -1480,5 +1495,23 @@ write.xlsx2(df.IFO.full,  file = "Results/RiskTransfer/CompareApproaches.xlsx", 
 write.xlsx2(df.pew.full,  file = "Results/RiskTransfer/CompareApproaches.xlsx", sheetName = "DiscountRateNotLowered.raw",  append = T)
 
   
+
+results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725", sim == -1, Tier == "sumTiers.New") %>% filter(year <= 2048) %>% 
+  select(Tier, year, FR_MA, AL, AL.act.laca, MA, AA, C, B, NC, NC.laca, AL.act.v, NC. SC)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
   

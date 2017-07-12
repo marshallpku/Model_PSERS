@@ -33,12 +33,12 @@ get_AggLiab <- function( Tier_select_,
 
    
    # for all tiers
-     # Tier_select_ = "tCD"
-     # liab_   = liab.tCD
-     # liab.ca_ = liab.ca.tCD
-     # liab.disb.ca_ = liab.disb.ca.tCD
-     # pop_    = pop$pop.tCD
-     # mortality.post.model_ = mortality.post.model.tCD
+     # Tier_select_ = "tNE"
+     # liab_   = liab.tNE
+     # liab.ca_ = liab.ca.tNE
+     # liab.disb.ca_ = liab.disb.ca.tNE
+     # pop_    = pop$pop.tNE
+     # mortality.post.model_ = mortality.post.model.tNE
      # 
      # init_beneficiaries_all_  = init_beneficiaries_all
      # init_retirees.ca_all_    = init_retirees.ca_all
@@ -142,7 +142,7 @@ get_AggLiab <- function( Tier_select_,
       as.matrix # extracting elements from matrices is much faster than from data.frame
   
   
-  active.agg %>% as.data.frame()
+  #active.agg %>% as.data.frame()
    
    
   #*************************************************************************************************************
@@ -210,7 +210,10 @@ get_AggLiab <- function( Tier_select_,
     as.matrix
 
   #death.agg
-  
+  # 
+  # liab_$death %>% filter(year.death == 2019, year %in% 2018:2019, number.deathBen !=0)
+  # liab_$death %>% filter(year == 2019, number.deathBen !=0)
+  # 
   #*************************************************************************************************************
   #                                     ## Liabilities and benefits for disability benefit (life annuitants)   ####
   #*************************************************************************************************************
@@ -268,6 +271,10 @@ get_AggLiab <- function( Tier_select_,
  
   #term.agg
 
+  # liab_$term %>% filter(year.term == 2029, year == 2029, number.v !=0)
+  # 
+  # liab_$term %>% filter(start.year == 2018, year.term == 2028, ea == 25)
+  # 
   #*******************************************************************************************************************************
   #                                 ## Liabilities and benefits for contingent annuitants and survivors of service retirees   ####
   #*******************************************************************************************************************************  

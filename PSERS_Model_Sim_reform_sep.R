@@ -969,11 +969,11 @@ run_sim <- function(Tier_select_,
             if(penSim.xNew$ERC.final.tot[j] == penSim.xNew$ERC.tot[j]){
               
               penSim.xNew$ERC.final[j] <- ifelse(penSim.xNew$ERC.final.tot[j] < (penSim.xNew$NC.tot[j] - penSim.xNew$EEC.tot[j]),   
-                                                 penSim.xNew$NC[j] - penSim.xNew$EEC[j],
+                                                 penSim.xNew$NC[j] - penSim.xNew$EEC[j], 
                                                  penSim.xNew$ERC.final[j]) 
               
               penSim.New$ERC.final[j]  <- ifelse(penSim.xNew$ERC.final.tot[j] < (penSim.xNew$NC.tot[j] - penSim.xNew$EEC.tot[j]),   
-                                                 penSim.New$NC[j] - penSim.New$EEC[j],
+                                                 penSim.New$NC[j] - penSim.New$EEC[j], 
                                                  penSim.New$ERC.final[j]) 
             }
           }

@@ -212,7 +212,7 @@ init_actives_all <- bind_rows(
 
 
 
-pct.init.ret.la  <-  0.75
+pct.init.ret.la  <- 0.75
 pct.init.ret.ca  <- 1 - pct.init.ret.la
 
 pct.init.disb.la  <- 1
@@ -236,9 +236,15 @@ init_disb.ca_all <- init_disb_all %>%
 
 
 
+
+
 #*********************************************************************************************************
 # 1.2 Create decrement tables ####
 #*********************************************************************************************************
+
+# termRates %<>% mutate(qxt.male = 0, qxt.female = 0)
+# disbRates %<>% mutate(qxd.male = 0, qxd.female = 0)
+
 
 # Decrement tables
 source("PSERS_Model_Decrements.R")
@@ -686,10 +692,11 @@ if(paramlist$DC_reform & paramlist$SepNewHires){
 #***************************************************************
 ## PSERS calibration: Initial vested who are not in pay status
 #***************************************************************
-
 # Assume the PVFB for initial vestees are paid up through out the next 50 years. 
 
 AL.init.v <- 1829457000 # AV2016 pdf p17
+if(paramlist$DC.rate == 4 & paramlist$DC_reform_all) AL.init.v <- AL.init.v/2
+
 
 df_init.vested <- data.frame(
   year = 1:51 + Global_paramlist$init.year - 1,
@@ -731,6 +738,7 @@ AggLiab.sumTiers$term %<>%
 #************************************************************************  
 
 B.lumpSumY1 <- 686988000
+if(paramlist$DC.rate == 4 & paramlist$DC_reform_all) B.lumpSumY1 <- B.lumpSumY1/2
 
 if(!paramlist$SepNewHires){
   
@@ -863,16 +871,20 @@ outputs_list <- list(paramlist = paramlist,
 
 # penSim_results.sumTiers %<>% mutate() 
 
-var_display1 <- c("sim", "year", "FR", "MA", "AL", 
+var_display1 <- c("Tier", "sim", "year", "FR", "MA", "AL", "NC", "SC", 
+                  "AL.act.v", "AL.term", "NC.v", "B.v", "nterms"
+                  # "AL.act.disb", "AL.disb.la", "AL.disb.ca", "NC.disb", "B.disb.la", "B.disb.ca"
+                  # "AL.act.laca", "AL.la", "AL.ca", "NC.laca", "B.la", "B.ca"
+                  # "AL.act.death", "AL.death", "NC.death", "AL.act.laca", "NC.laca", "B.death" #"B" 
                   # "AL.act", "AL.disb.la", "AL.act.disb", "AL.act.death", "AL.act.v", "AL.la", "AL.ca", "AL.term", "PVFB", "B",
                   # "AL.disb.la", "AL.disb.ca", "AL.death", "PVFB",
                   #"PVFB.laca", "PVFB.LSC", "PVFB.v", "PVFB", 
                   # "B", "B.la", "B.ca", "B.v", "B.disb.la","B.disb.ca", 
-                  "PR.growth", "ERC.final",
-                  "LG", "Amort_basis",
-                  "PR", "NC_PR","SC_PR")
-
-
+                  #"PR.growth", "ERC.final",
+                  #"LG", "Amort_basis",
+                  #"PR", "NC_PR","SC_PR")
+)
+kable(penSim_results.sumTiers %>% filter(sim == 0, Tier == "sumTiers.New", year <=2035) %>% select(one_of(var_display1)), digits = 2) %>% print 
 
 var_display2 <- c("Tier", "sim", "year", "FR_MA", "MA", "AL", "EEC","ERC","ERC_PR","B", "B.v", "SC", "C", 
                   "nactives", "nretirees", "nla", "n.ca.R1", "n.ca.R0S1", "nterms", 

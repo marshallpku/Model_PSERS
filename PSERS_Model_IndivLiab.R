@@ -51,14 +51,14 @@ get_indivLiab <- function(Tier_select_,
   # Global_paramlist_ =  Global_paramlist
    
   # Tier_select_ = "tNE"
-  # decrement.model_ = decrement.model.tE
-  # salary_          = salary.tE
-  # benefit_         = benefit.tE
-  # benefit.disb_    = benefit.disb.tE
-  # #bfactor_         = bfactor.tE
-  # mortality.post.model_ = mortality.post.model.tE
-  # liab.ca_ = liab.ca.tE
-  # liab.disb.ca_ = liab.disb.ca.tE
+  # decrement.model_ = decrement.model.tNE
+  # salary_          = salary.tNE
+  # benefit_         = benefit.tNE
+  # benefit.disb_    = benefit.disb.tNE
+  # #bfactor_         = bfactor.tNE
+  # mortality.post.model_ = mortality.post.model.tNE
+  # liab.ca_ = liab.ca.tNE
+  # liab.disb.ca_ = liab.disb.ca.tNE
   # init_terms_all_  = init_terms_all
   # paramlist_ = paramlist
   # Global_paramlist_ = Global_paramlist
@@ -372,7 +372,6 @@ init_terminated_ %<>%
 
 # init_terminated_
 
-
 liab.term.init <- expand.grid(ea         = unique(init_terminated_$ea),
                               age.term   = unique(init_terminated_$age.term),
                               start.year = unique(init_terminated_$start.year),
@@ -418,7 +417,6 @@ liab.term.init <- expand.grid(ea         = unique(init_terminated_$ea),
 # liab.term.init %>% filter(start.year == 2007, ea == 55, age.term == 63) %>% data.frame()
 
 
-
 ##  Calculate AL and benefit payment for vested terms terminating at different ages.
 # Merge by using data.table: does not save much time, but time consumpton seems more stable than dplyr. The time consuming part is the mutate step.
 liab.term <- expand.grid(# start.year   = (init.year - (r.vben - 1 - min.age)):(init.year + nyear - 1), # 2015
@@ -461,8 +459,6 @@ liab.term %<>% as.data.frame %>%
   filter(year %in% seq(init.year, len = nyear)) 
 
 
-# liab.term %<>% mutate(B.v   = ifelse(year.term == init.year - 1, 0, B.v),
-#                       ALx.v = ifelse(year.term == init.year - 1, 0, ALx.v))
 
 
 liab.term <-  bind_rows(list(liab.term.init,                                  # Using rbind produces duplicated rows with unknown reasons. Use bind_rows from dplyr instead.
@@ -473,7 +469,10 @@ liab.term <-  bind_rows(list(liab.term.init,                                  # 
 # liab.term[!duplicated(liab.term %>% select(start.year, ea, age, year.term)),]
 #   any(T)
 
+liab.active %>% filter(start.year == 2018, ea == 20) %>% select(year, ea, age, qxt)
 
+pop$pop.tNE$term %>% mutate(start.year = year - (age - ea) ) %>% 
+  filter(start.year == 2018, ea == 20)
 
 
 #*************************************************************************************************************
@@ -489,6 +488,8 @@ liab.term <-  bind_rows(list(liab.term.init,                                  # 
 liab.active %<>%   
   mutate( gx.death  = ifelse(elig_super == 1, 1,
                       ifelse(elig_super == 0 & elig_early == 1, (1 - 0.03 * (age_superFirst - age)),  0)),
+          
+          # gx.death = 0,
           
           Bx.death  = gx.death * yos * bfactor * fas, # annuity that would have been effective if the member retired on the 
           
@@ -566,8 +567,8 @@ liab.death %<>% as.data.frame  %>%
     Bx.death   = ifelse(is.na(Bx.death), 0, Bx.death),  # just for safety
     
     # For PSERS: Lump sum death benefit equal to PV of future benefit. Benefit claim 1 year after death
-    B.death    = ifelse(age == age.death + 1, Bx.death * ax.deathBen, 0),   # Bx.death[age == age.death] * COLA.scale / COLA.scale[age == age.death],               # Benefits for retirees after year 1
-    ALx.death  = ifelse(age == age.death + 1, B.death, 0)                   # B.death * ax.deathBen                                                                # Liability for remaining retirement benefits, PV of all future benefit adjusted with COLA
+    B.death    = ifelse(age == age.death, Bx.death * ax.deathBen, 0),   # Bx.death[age == age.death] * COLA.scale / COLA.scale[age == age.death],               # Benefits for retirees after year 1
+    ALx.death  = ifelse(age == age.death, B.death, 0)                   # B.death * ax.deathBen                                                                # Liability for remaining retirement benefits, PV of all future benefit adjusted with COLA
     
   ) %>% ungroup %>%
   # select(start.year, year, ea, age, year.retire, age.retire,  B.r, ALx.r)# , ax, Bx, COLA.scale, gx.r)

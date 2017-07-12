@@ -576,7 +576,7 @@ fig_CP.RS1.ERChike <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1" , year >=
   #gather(variable, value, - year) %>% 
   ggplot(aes(x = year, y = ERC_hike)) + theme_bw() + 
   geom_point(size = 2, color = RIG.blue) + geom_line(color = RIG.blue) + 
-  coord_cartesian(ylim = c(0,10)) + 
+  coord_cartesian(ylim = c(0,7)) + 
   scale_y_continuous(breaks = seq(0,200, 1)) +
   scale_x_continuous(breaks = c(2017, seq(2020, 2040, 5), 2046)) + 
   scale_color_manual(values = c("black", RIG.red, RIG.blue, RIG.green, RIG.purple),  name = "") + 

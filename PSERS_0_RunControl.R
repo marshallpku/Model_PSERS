@@ -76,7 +76,7 @@ source("Functions.R")
 
 # For PSERS term benefit: 
 #   1. Vested terms begin to receive benefit 1 year after termination. (use the same method as disability benefit.)
-#   2. benefits are equal to accrued benefit up to the year of termination 
+#   2. benefits are equal to accrued benefit up to the year when the term starts receiving benefit 
 #   3. Should be reduced later. 
 
 # PSERS: expand qxm.post.male/female with qxm.pre.male/female
@@ -165,6 +165,8 @@ for(runName in runList$runname ){
   # paramlist$bfactor <- 0.025
   
   # paramlist$r.full <- 50 # age at which vested terms are assumed to retire(Temp, should use r.vben)
+  
+  
   # paramlist$r.vben <- 50 # age at which vested terms are assumed to retire.
   
 
@@ -208,15 +210,15 @@ for(runName in runList$runname ){
   paramlist$v     = with(paramlist, 1/(1 + i))
   
   
-  if(paramlist$tier == "sumTiers"){
-    source("PSERS_0_Master_allTiers.R")
-    save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, "_", runName, ".RData"))
-
-  } else {
-    Tier_select <- paramlist$tier
-    source("PSERS_0_Master_singleTier.R")
-    save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, runName, ".RData"))
-  }
+  # if(paramlist$tier == "sumTiers"){
+  #   source("PSERS_0_Master_allTiers.R")
+  #   save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, "_", runName, ".RData"))
+  # 
+  # } else {
+  #   Tier_select <- paramlist$tier
+  #   source("PSERS_0_Master_singleTier.R")
+  #   save(outputs_list, file = paste0(folder_save, "results_",  paramlist$tier, runName, ".RData"))
+  # }
 
 }
 

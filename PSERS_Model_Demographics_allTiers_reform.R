@@ -100,9 +100,12 @@ wf_dim      <- c(length(range_ea), length(range_age), nyear)
 wf_dimnames <- list(range_ea, range_age, init.year:(init.year + nyear - 1))
 
 # The array of terminated has 4 dimensions: ea x age x year x year of termination
-wf_dim.term      <- c(length(range_ea), length(range_age), nyear, nyear + 1)
-wf_dimnames.term <- list(range_ea, range_age, init.year:(init.year + nyear - 1), (init.year - 1) :(init.year + nyear - 1))
+# wf_dim.term      <- c(length(range_ea), length(range_age), nyear, nyear + 1)
+# wf_dimnames.term <- list(range_ea, range_age, init.year:(init.year + nyear - 1), (init.year - 1) :(init.year + nyear - 1))
 
+# PSERS: terms are modeled the same way as disabled
+wf_dim.term      <- c(length(range_ea), length(range_age), nyear, nyear)
+wf_dimnames.term <- list(range_ea, range_age, init.year:(init.year + nyear - 1), (init.year) :(init.year + nyear - 1)) 
 
 # The array of retirees has 4 dimensions: ea x age x year x year of retirement
 wf_dim.la      <- c(length(range_ea), length(range_age), nyear, nyear)
@@ -965,7 +968,10 @@ get_df.wf_la <- function(df){
 
 
 get_df.wf_term <- function(df){
-    df <- data.frame(expand.grid(ea = range_ea, age = range_age, year = init.year:(init.year + nyear - 1), year.term = (init.year-1):(init.year + nyear - 1)),
+    #df <- data.frame(expand.grid(ea = range_ea, age = range_age, year = init.year:(init.year + nyear - 1), year.term = (init.year-1):(init.year + nyear - 1)),
+    #                number.v = as.vector(df)) %>% 
+    # PSERS: terms are modeled the same way as disabled.
+    df <- data.frame(expand.grid(ea = range_ea, age = range_age, year = init.year:(init.year + nyear - 1), year.term = (init.year):(init.year + nyear - 1)),
                      number.v = as.vector(df)) %>% 
     filter(age >= ea)
 }
