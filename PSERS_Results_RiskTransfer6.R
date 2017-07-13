@@ -1490,14 +1490,19 @@ results_all.sumTiers %>% filter( runname %in% c("RS1_SR0EL1_sep_R725.d725",
   select(runname, year, ERC.DB.final, NC, EEC, UAAL) %>% 
   mutate(NC.ER = NC - EEC) %>% 
   mutate_at(vars(-runname, -year), funs(./1e9))
+df.pew.full
+
   
 write.xlsx2(df.IFO.full,  file = "Results/RiskTransfer/CompareApproaches.xlsx", sheetName = "DiscountRateLowered.raw")
 write.xlsx2(df.pew.full,  file = "Results/RiskTransfer/CompareApproaches.xlsx", sheetName = "DiscountRateNotLowered.raw",  append = T)
 
   
 
-results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725", sim == -1, Tier == "sumTiers.New") %>% filter(year <= 2048) %>% 
-  select(Tier, year, FR_MA, AL, AL.act.laca, MA, AA, C, B, NC, NC.laca, AL.act.v, NC. SC)
+
+
+####
+results_all %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4a", sim == 0, Tier == "sumTiers.xNew") %>% filter(year <= 2051) %>% 
+  select(Tier, year, FR_MA, AL, AL.act.laca, MA, AA, C, B, NC, NC.laca, AL.act.v, NC)
 
 
 

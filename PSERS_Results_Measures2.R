@@ -809,9 +809,10 @@ fig_fiscal.stch <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL
   guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
   RIG.theme()
 fig_fiscal.stch
-fig_fiscal.stch$data %>% filter(year == 2034)
+fig_fiscal.stch$data %>% filter(year == 2017)
+fig_fiscal.stch$data %>% filter(year == 2046)
 
-
+fig_fiscal.stch$data
 
 #*************************************************************************
 ##                        Summary table                              ####
