@@ -50,15 +50,15 @@ get_indivLiab <- function(Tier_select_,
   # paramlist_       =  paramlist
   # Global_paramlist_ =  Global_paramlist
    
-  # Tier_select_ = "tNE"
-  # decrement.model_ = decrement.model.tNE
-  # salary_          = salary.tNE
-  # benefit_         = benefit.tNE
-  # benefit.disb_    = benefit.disb.tNE
-  # #bfactor_         = bfactor.tNE
-  # mortality.post.model_ = mortality.post.model.tNE
-  # liab.ca_ = liab.ca.tNE
-  # liab.disb.ca_ = liab.disb.ca.tNE
+  # Tier_select_ = "tCD"
+  # decrement.model_ = decrement.model.tCD
+  # salary_          = salary.tCD
+  # benefit_         = benefit.tCD
+  # benefit.disb_    = benefit.disb.tCD
+  # #bfactor_         = bfactor.tCD
+  # mortality.post.model_ = mortality.post.model.tCD
+  # liab.ca_ = liab.ca.tCD
+  # liab.disb.ca_ = liab.disb.ca.tCD
   # init_terms_all_  = init_terms_all
   # paramlist_ = paramlist
   # Global_paramlist_ = Global_paramlist
@@ -252,12 +252,6 @@ liab.la <- rbind(
 
 
 
-
-# x <- liab.la %>% mutate(year   = start.year + age - ea, year.r = start.year + age.r - ea) %>% filter(year == 2015, year.r == 2015)
-# x
-# benefit_%>% mutate(year   = start.year + age - ea, year.r = start.year + age.r - ea)
-
-
 liab.la <- liab.la[!duplicated(liab.la %>% select(start.year, ea, age, age.r ))]
  
  
@@ -354,8 +348,6 @@ liab.active %<>%
          ALx.EAN.CP.v = PVFBx.v - NCx.EAN.CP.v * axRs
   ) 
   
-# x <- liab.active %>% filter(start.year == 1, ea == 20)
-
 
 
 #*************************************************************************************************************
@@ -465,15 +457,6 @@ liab.term <-  bind_rows(list(liab.term.init,                                  # 
                              filter(liab.term, year.term != init.year - 1)))
 
 
-# liab.term %>% filter(year.term == 2014, start.year == 1980) %>% head
-# liab.term[!duplicated(liab.term %>% select(start.year, ea, age, year.term)),]
-#   any(T)
-
-liab.active %>% filter(start.year == 2018, ea == 20) %>% select(year, ea, age, qxt)
-
-pop$pop.tNE$term %>% mutate(start.year = year - (age - ea) ) %>% 
-  filter(start.year == 2018, ea == 20)
-
 
 #*************************************************************************************************************
 #                        4.1  ALs and NCs of benefit for death before retirement, for actives                  #####                  
@@ -577,9 +560,6 @@ liab.death %<>% as.data.frame  %>%
   arrange(age.death, start.year, ea, age)
 
 
-# liab.death %>% ungroup %>% arrange(start.year, ea, year.death, age) %>%  head(100)
-
-
 
 #*************************************************************************************************************
 #                        5.1  ALs and NCs of disability benefit, for actives                  #####                  
@@ -653,30 +633,23 @@ liab.disb.la <- rbind(
   data.table(key = "start.year,ea,age.disb,age")
 
 
-# x <- liab.disb.la %>% mutate(year   = start.year + age - ea, year.disb = start.year + age.disb - ea) %>% filter(year == 2015, year.disb == 2015)
-# x
-# benefit.disb_%>% mutate(year   = start.year + age - ea, year.disb = start.year + age.disb - ea)
-
-
 
 
 liab.disb.la <- liab.disb.la[!duplicated(liab.disb.la %>% select(start.year, ea, age, age.disb ))]
 
 
 liab.disb.la <- merge(liab.disb.la,
-                    select(liab.active, start.year, ea, age, Bx.disb, COLA.scale, gx.disb, ax.disb.la, pxm.d) %>% data.table(key = "ea,age,start.year"),
+                    select(liab.active, start.year, ea, age, Bx.disb, COLA.scale, gx.disb, ax.disb.la #pxm.d
+                           ) %>% data.table(key = "ea,age,start.year"),
                     all.x = TRUE, 
                     by = c("ea", "age","start.year")) %>%
   arrange(start.year, ea, age.disb) %>% 
   as.data.frame %>% 
   left_join(benefit.disb_)
-#%>% 
-# left_join(select(mortality.post.model_, age, age.r, ax.r.W.ret = ax.r.W)) %>%  #  load present value of annuity for all retirement ages, ax.r.W in liab.active cannot be used anymore. 
 
-#liab.disb.la %>% as.data.frame %>% mutate(year = start.year + age - ea) %>% 
- # filter(year == 2015, age.disb == age)
 
 liab.disb.la %<>% as.data.frame  %>% 
+  left_join(decrement.model_ %>% select(ea, age, pxm.d)) %>%  # getting pxm.d from liab.active causes problem
   group_by(start.year, ea, age.disb) %>%
   mutate(
     year       = start.year + age - ea,
@@ -692,13 +665,8 @@ liab.disb.la %<>% as.data.frame  %>%
   ) %>% ungroup %>%
   # select(start.year, year, ea, age, year.retire, age.retire,  B.r, ALx.r)# , ax, Bx, COLA.scale, gx.r)
   filter(year %in% seq(init.year, len = nyear) ) %>%
-  select(year, ea, age, year.disb, age.disb, start.year, B.disb.la, ALx.disb.la) 
+  select(year, ea, age, year.disb, age.disb, start.year, B.disb.la, ALx.disb.la, pxm.d) 
   #%>%   arrange(age.disb, start.year, ea, age)
-
-
-# liab.disb %>% ungroup %>% arrange(start.year, ea, year.disb, age) %>%  head(100)
-
-
 
 
 
@@ -740,12 +708,11 @@ liab.active %<>%
 
 
 
-
 ## Final outputs
   # liab.active
   # liab.la
   # liab.term
-  # B.LSC
+
 
 liab <- list(active = liab.active, 
              la = liab.la, 
@@ -754,12 +721,4 @@ liab <- list(active = liab.active,
              disb.la = liab.disb.la)
 
 }
-
-
-# liab <- get_indivLab(decrement.ucrp,
-#                      salary,
-#                      benefit,
-#                      bfactor,
-#                      init_terminated.t76)
-
 

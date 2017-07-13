@@ -17,8 +17,6 @@ load("Data_inputs/PSERS_MemberData_AV2016.RData")  # for all tiers
 # if(paramlist$i == 0.0625) load("Data_inputs/DC_rate.tot625.RData")              
 
 
-
-
 ## DC contribution rate
  # 0. No DC reform
  # 1. Entry age specific total DC contribution rates obtained using PV approach with 7.25% discount rate
@@ -96,23 +94,6 @@ if(paramlist$DC.rate == 3) {
   
 }
 
-# if(paramlist$DC.rate == 4) {
-#   load("Data_inputs/DC_rate.tot625.RData")
-#   DC_rate.tot %<>% mutate(DC_rate.tot = 0.072) 
-#   
-#   if(paramlist$DC_reform_all){
-#     tier.param %<>%
-#       mutate(bfactor     = c(0.0125, 0.01, 0.01, 0.01, 0.01),
-#              EEC_DC.rate = c(0.0375, 0.0375, 0.0515, 0.0375, 0.0515),
-#              EEC_rate    = c(0.0375, 0.0375, 0.0515, 0.0375, 0.0515)
-#       )
-#     rownames(tier.param) <- tier.param$tier
-#     
-#     init_beneficiaries_all %<>% mutate(benefit = 0.5 * benefit)
-#     init_retirees_all      %<>% mutate(benefit = 0.5 * benefit)
-#   }
-# }
-
 
 if(paramlist$DC.rate == 4) {
   load("Data_inputs/DC_rate.tot625.RData")
@@ -150,18 +131,18 @@ if(paramlist$DC.rate == 5) {
 }
 
 
-
-
-
 init_beneficiaries_all %<>% filter(age >= 25) 
 
 
+
 ## Exclude selected type(s) of initial members
- #init_actives_all %<>% mutate(nactives = 0) 
+ # init_actives_all %<>% mutate(nactives = 0) 
  # init_retirees_all %<>% mutate(nretirees = 0)
- # init_beneficiaries_all %<>% mutate(n.R0S1 = 0)
- # init_terms_all %<>% mutate(nterm = 0)
- # init_disb_all  %<>% mutate(ndisb = 0) 
+ # init_beneficiaries_all %<>% mutate(nbeneficiaries = 0)
+ # init_terms_all %<>% mutate(nterms = 0)
+ # init_disb_all  %<>% mutate(ndisb = 0)
+
+
 
 init_retirees_all <- bind_rows(
   init_retirees_all,
@@ -319,22 +300,6 @@ salgrowth %<>% mutate(salgrowth.unadj = salgrowth,
                             adj.factor = c(seq(f1, f2, length.out = 36), rep(f2, 20)),
                             salgrowth = salgrowth.unadj * adj.factor
 )
-
-# salgrowth
-
-# prod((salgrowth %>% filter(age %in% 19:60))$salgrowth + 1)
-
-
-
-
-## Exclude selected type(s) of initial members
- # init_actives_all %<>% mutate(nactives = 0) 
- # init_retirees_all %<>% mutate(nretirees = 0)
- # init_beneficiaries_all %<>% mutate(n.R0S1 = 0)
- # init_terms_all %<>% mutate(nterm = 0)
- 
-
- 
 
 
 
@@ -694,7 +659,7 @@ if(paramlist$DC_reform & paramlist$SepNewHires){
 #***************************************************************
 # Assume the PVFB for initial vestees are paid up through out the next 50 years. 
 
-AL.init.v <- 1829457000 # AV2016 pdf p17
+AL.init.v <-  1829457000 # AV2016 pdf p17
 if(paramlist$DC.rate == 4 & paramlist$DC_reform_all) AL.init.v <- AL.init.v/2
 
 
@@ -737,7 +702,7 @@ AggLiab.sumTiers$term %<>%
 ## PSERS calibration: year-1 lump sum benefit payment as external fund
 #************************************************************************  
 
-B.lumpSumY1 <- 686988000
+B.lumpSumY1 <-  686988000
 if(paramlist$DC.rate == 4 & paramlist$DC_reform_all) B.lumpSumY1 <- B.lumpSumY1/2
 
 if(!paramlist$SepNewHires){
@@ -872,8 +837,8 @@ outputs_list <- list(paramlist = paramlist,
 # penSim_results.sumTiers %<>% mutate() 
 
 var_display1 <- c("Tier", "sim", "year", "FR", "MA", "AL", "NC", "SC", 
-                  "AL.act.v", "AL.term", "NC.v", "B.v", "nterms"
-                  # "AL.act.disb", "AL.disb.la", "AL.disb.ca", "NC.disb", "B.disb.la", "B.disb.ca"
+                  # "AL.act.v", "AL.term", "NC.v", "B.v", "nterms"
+                   "AL.act.disb", "AL.disb.la", "AL.disb.ca", "NC.disb", "B.disb.la", "B.disb.ca"
                   # "AL.act.laca", "AL.la", "AL.ca", "NC.laca", "B.la", "B.ca"
                   # "AL.act.death", "AL.death", "NC.death", "AL.act.laca", "NC.laca", "B.death" #"B" 
                   # "AL.act", "AL.disb.la", "AL.act.disb", "AL.act.death", "AL.act.v", "AL.la", "AL.ca", "AL.term", "PVFB", "B",
@@ -882,9 +847,10 @@ var_display1 <- c("Tier", "sim", "year", "FR", "MA", "AL", "NC", "SC",
                   # "B", "B.la", "B.ca", "B.v", "B.disb.la","B.disb.ca", 
                   #"PR.growth", "ERC.final",
                   #"LG", "Amort_basis",
-                  #"PR", "NC_PR","SC_PR")
+             #"PR", "NC_PR","SC_PR")
 )
-kable(penSim_results.sumTiers %>% filter(sim == 0, Tier == "sumTiers.New", year <=2035) %>% select(one_of(var_display1)), digits = 2) %>% print 
+
+kable(penSim_results.sumTiers %>% filter(sim == 0, Tier == "sumTiers.New", year <=2055) %>% select(one_of(var_display1)), digits = 2) %>% print 
 
 var_display2 <- c("Tier", "sim", "year", "FR_MA", "MA", "AL", "EEC","ERC","ERC_PR","B", "B.v", "SC", "C", 
                   "nactives", "nretirees", "nla", "n.ca.R1", "n.ca.R0S1", "nterms", 
@@ -943,7 +909,7 @@ kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display
 # 
 # 
 # df_all.stch <- penSim_results.sumTiers  %>%
-#   filter(sim >= 0, year <= 2045, Tier == "sumTiers")
+#   filter(sim >= 0, year <= 2046, Tier == "sumTiers")
 # 
 # 
 # df_all.stch %<>%
@@ -980,8 +946,8 @@ kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display
 # 
 # 
 # df_all.stch
-# 
-# 
+
+
 
 
 

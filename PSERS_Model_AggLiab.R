@@ -33,12 +33,12 @@ get_AggLiab <- function( Tier_select_,
 
    
    # for all tiers
-     # Tier_select_ = "tNE"
-     # liab_   = liab.tNE
-     # liab.ca_ = liab.ca.tNE
-     # liab.disb.ca_ = liab.disb.ca.tNE
-     # pop_    = pop$pop.tNE
-     # mortality.post.model_ = mortality.post.model.tNE
+     # Tier_select_ = "tCD"
+     # liab_   = liab.tCD
+     # liab.ca_ = liab.ca.tCD
+     # liab.disb.ca_ = liab.disb.ca.tCD
+     # pop_    = pop$pop.tCD
+     # mortality.post.model_ = mortality.post.model.tCD
      # 
      # init_beneficiaries_all_  = init_beneficiaries_all
      # init_retirees.ca_all_    = init_retirees.ca_all
@@ -237,9 +237,32 @@ get_AggLiab <- function( Tier_select_,
     # mutate(runname = runname) %>% 
     as.matrix
   
-  disb.la.agg
-  
-  
+  # disb.la.agg
+  # 
+  # 
+  # l1 <- liab_$disb.la %>% filter(year == 2016, year.disb == 2016, ea == 20) %>% 
+  #   mutate(AL.next = ((ALx.disb.la.tot - B.disb.la.tot) * 1.0725),
+  #          age = age + 1) %>% 
+  #   select(ea, age, year.disb, AL.next)
+  #   
+  # l2 <- liab_$disb.la %>% filter(year == 2017, year.disb == 2016, ea == 20) %>% 
+  #   select(ea, age, year.disb, ALx.disb.la.tot)
+  # 
+  # left_join(l1, l2) %>% 
+  #   mutate(diff = 100*AL.next / ALx.disb.la.tot)
+  # 
+  # l1 %>% summarise(sum(AL.next, na.rm = TRUE))
+  # l2 %>% summarise(sum(ALx.disb.la.tot, na.rm = TRUE))
+  # 
+  # liab_$disb.la %>% filter(year == 2016, year.disb == 2016, ea == 20) %>% summarise(AL = sum(ALx.disb.la.tot, na.rm = T),
+  #                                                                                   B  = sum(B.disb.la.tot, na.rm = T))
+  # liab_$disb.la %>% filter(year == 2017, year.disb == 2016, ea == 20) %>% summarise(AL = sum(ALx.disb.la.tot, na.rm = T))
+  # 
+  # decrement.model.tCD
+  # 
+  # liab_$disb.la %>% filter(year == 2016, year.disb == 2016, ea == 20)
+  # liab_$disb.la %>% filter(year == 2017, year.disb == 2016, ea == 20)
+  # 
   #*************************************************************************************************************
   #                                 ## Liabilities and benefits for vested terms.   ####
   #*************************************************************************************************************
