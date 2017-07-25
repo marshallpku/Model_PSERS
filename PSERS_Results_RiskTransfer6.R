@@ -367,29 +367,29 @@ results_all.New  <- results_all %>% filter(Tier == "sumTiers.New")
 
 
 # Compare results: If asset side of new hires is modeled separately. 
-results_all %>% filter(runname == "RS1_SR1EL1", sim == 0)                                    %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.final_PR)
-results_all %>% filter(runname == "RS1_SR1EL1_sep_R725.d725", sim == 0, Tier == "sumTiers")  %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.final_PR)
-
-
-results_all %>% filter(runname == "SR1EL1.Reform_R725.d725.DC4", sim == 0)                          %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.DB.final_PR)
-results_all %>% filter(runname == "SR1EL1.Reform_sep_R725.d725.DC4", sim == 0, Tier == "sumTiers")  %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.DB.final_PR)
-
-
-results_all %>% filter(runname == "SR1EL1.Reform_R725.d725.DC4a", sim == 0)                               %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.DB.final_PR)
-results_all %>% filter(runname == "SR1EL1.Reform_sep_R725.d725.DC4a", sim == 0, Tier == "sumTiers")  %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.DB.final_PR)
-
-
-
-results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725",        sim == 0, Tier == "sumTiers.New", year <= 2048)  %>% select(runname,Tier, year, FR_MA, NC, SC, EEC, ERC, ERC.DB.final)
-results_all %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, Tier == "sumTiers.New", year <= 2048)  %>% select(runname,Tier, year, FR_MA, NC, SC, EEC, ERC, ERC.DB.final)
-
-
-results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725",    sim == 0, Tier == "sumTiers.xNew",  year == 2048)  %>% select(runname,Tier, year, FR_MA, NC,SC, EEC, ERC, ERC.DB.final)
-results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725",    sim == 0, Tier == "sumTiers.New", year == 2048)    %>% select(runname,Tier, year, FR_MA, NC,SC, EEC, ERC, ERC.DB.final)
-
-
-results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725",        sim == 0, Tier == "sumTiers.xNew") %>% filter(year <= 2048) %>%  summarise(ERC = sum(ERC.DB.final))
-results_all %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, Tier == "sumTiers.xNew") %>% filter(year <= 2048) %>%  summarise(ERC = sum(ERC.DB.final))
+# results_all %>% filter(runname == "RS1_SR1EL1", sim == 0)                                    %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.final_PR)
+# results_all %>% filter(runname == "RS1_SR1EL1_sep_R725.d725", sim == 0, Tier == "sumTiers")  %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.final_PR)
+# 
+# 
+# results_all %>% filter(runname == "SR1EL1.Reform_R725.d725.DC4", sim == 0)                          %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.DB.final_PR)
+# results_all %>% filter(runname == "SR1EL1.Reform_sep_R725.d725.DC4", sim == 0, Tier == "sumTiers")  %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.DB.final_PR)
+# 
+# 
+# results_all %>% filter(runname == "SR1EL1.Reform_R725.d725.DC4a", sim == 0)                               %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.DB.final_PR)
+# results_all %>% filter(runname == "SR1EL1.Reform_sep_R725.d725.DC4a", sim == 0, Tier == "sumTiers")  %>% select(runname,Tier, year, FR_MA, AL, PR, NC_PR, B,SC, EEC_PR, ERC_PR, ERC.DB.final_PR)
+# 
+# 
+# 
+# results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725",        sim == 0, Tier == "sumTiers.New", year <= 2048)  %>% select(runname,Tier, year, FR_MA, NC, SC, EEC, ERC, ERC.DB.final)
+# results_all %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, Tier == "sumTiers.New", year <= 2048)  %>% select(runname,Tier, year, FR_MA, NC, SC, EEC, ERC, ERC.DB.final)
+# 
+# 
+# results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725",    sim == 0, Tier == "sumTiers.xNew",  year == 2048)  %>% select(runname,Tier, year, FR_MA, NC,SC, EEC, ERC, ERC.DB.final)
+# results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725",    sim == 0, Tier == "sumTiers.New", year == 2048)    %>% select(runname,Tier, year, FR_MA, NC,SC, EEC, ERC, ERC.DB.final)
+# 
+# 
+# results_all %>% filter(runname == "RS1_SR0EL1_sep_R725.d725",        sim == 0, Tier == "sumTiers.xNew") %>% filter(year <= 2048) %>%  summarise(ERC = sum(ERC.DB.final))
+# results_all %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, Tier == "sumTiers.xNew") %>% filter(year <= 2048) %>%  summarise(ERC = sum(ERC.DB.final))
 
 
 
@@ -413,45 +413,45 @@ results_all %>% filter(runname == "SR0EL1.Reform_sep_R725.d725.DC4", sim == 0, T
 
 
 
-#*************************************************************************
-##             4. Determinitic measrues of risk transfer             ####
-#*************************************************************************
-
-# load("Data_inputs/DC_rate.tot725.RData")
-# load("Data_inputs/DC_rate.tot625.RData")              
+# #*************************************************************************
+# ##             4. Determinitic measrues of risk transfer             ####
+# #*************************************************************************
 # 
-# DC_rate.tot
-
-runs_reform <- c("SR1EL1.Reform_R725.d725.DC1",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
-                 "SR1EL1.Reform_R625.d725.DC1",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
-                 "SR1EL1.Reform_R625.d625.DC1",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: PVDC = PVDB  
-                 
-                 "SR1EL1.Reform_R725.d725.DC3",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: 5% 
-                 "SR1EL1.Reform_R625.d725.DC3",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: 5% 
-                 "SR1EL1.Reform_R625.d625.DC3",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: 5% 
-                 
-                 "SR1EL1.Reform_R725.d725.DC4",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: 9% 
-                 "SR1EL1.Reform_R625.d725.DC4",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: 9% 
-                 "SR1EL1.Reform_R625.d625.DC4",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: 9% 
-                 
-                 "RS1_SR1EL1_R625.d725",       # No DC reform with expected return = 6.25%, discount rate = 7.25% 
-                 "RS1_SR1EL1_R625.d625")       # No DC reform with expected return = 6.25%, discount rate = 6.25%
-
-
-# 4.1 Deterministic run ####
-
-# Impact on AL of DB plan
-results_all %>% filter(runname %in% c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC1"), sim == 0) %>% 
-  select(runname, sim, year, AL) %>% 
-  spread(runname, AL) %>% 
-  mutate(AL_reduction = SR1EL1.Reform_R725.d725.DC1/RS1_SR1EL1)
-
-
-# Impact on ERC
-results_all %>% filter(runname %in% c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC1", "SR1EL1.Reform_R725.d725.DC3"), sim == 0) %>% 
-  select(runname, sim, year, ERC.final_PR) %>% 
-  spread(runname, ERC.final_PR)
-
+# # load("Data_inputs/DC_rate.tot725.RData")
+# # load("Data_inputs/DC_rate.tot625.RData")              
+# # 
+# # DC_rate.tot
+# 
+# runs_reform <- c("SR1EL1.Reform_R725.d725.DC1",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
+#                  "SR1EL1.Reform_R625.d725.DC1",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: PVDC = PVDB 
+#                  "SR1EL1.Reform_R625.d625.DC1",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: PVDC = PVDB  
+#                  
+#                  "SR1EL1.Reform_R725.d725.DC3",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: 5% 
+#                  "SR1EL1.Reform_R625.d725.DC3",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: 5% 
+#                  "SR1EL1.Reform_R625.d625.DC3",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: 5% 
+#                  
+#                  "SR1EL1.Reform_R725.d725.DC4",  # DC reform with expected return = 7.25%, discount rate = 7.25%; DC rate: 9% 
+#                  "SR1EL1.Reform_R625.d725.DC4",  # DC reform with expected return = 6.25%, discount rate = 7.25%; DC rate: 9% 
+#                  "SR1EL1.Reform_R625.d625.DC4",  # DC reform with expected return = 6.25%, discount rate = 6.25%; DC rate: 9% 
+#                  
+#                  "RS1_SR1EL1_R625.d725",       # No DC reform with expected return = 6.25%, discount rate = 7.25% 
+#                  "RS1_SR1EL1_R625.d625")       # No DC reform with expected return = 6.25%, discount rate = 6.25%
+# 
+# 
+# # 4.1 Deterministic run ####
+# 
+# # Impact on AL of DB plan
+# results_all %>% filter(runname %in% c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC1"), sim == 0) %>% 
+#   select(runname, sim, year, AL) %>% 
+#   spread(runname, AL) %>% 
+#   mutate(AL_reduction = SR1EL1.Reform_R725.d725.DC1/RS1_SR1EL1)
+# 
+# 
+# # Impact on ERC
+# results_all %>% filter(runname %in% c("RS1_SR1EL1", "SR1EL1.Reform_R725.d725.DC1", "SR1EL1.Reform_R725.d725.DC3"), sim == 0) %>% 
+#   select(runname, sim, year, ERC.final_PR) %>% 
+#   spread(runname, ERC.final_PR)
+# 
 
 
 
@@ -1258,7 +1258,23 @@ dist.cost.new <-
 dist.cost.new
 dist.cost.tot2
 
-dist.cost.2cols <- grid.arrange(dist.cost.new, dist.cost.tot2, ncol = 2)
+
+n1 <- "Notes:\n"
+n2 <- "1. Employer pension cost: nominal value (no discounting) of the total employer contribution to PSERS during the \n"
+n3 <- "simulation period of 2017-2048, plus the remaining unfunded liability at the end of 2048.\n"
+n4 <- "2. There are negative values of total contribution because in simulations with very good realized investment returns in\n"
+n5 <- "the 30-year period the plan can have a surplus in assets that is even larger than the total employer pension cost\n"
+n6 <- "during the period. One reason for the existence of very large surplus is that our simulation model intentionally does\n" 
+n7 <- "not allow for withdrawal from the assets when when there is a surplus (no amortization for the surplus).\n"
+n8 <- "3. Total DC contribution rate = 5% (employer rate + employee rate).\n"
+n9 <- "4. Shared-risk employee contribution rates are not modeled in these simulations."
+
+
+notes <- grid.text(paste0(n1, n2, n3, n4, n5, n6, n7, n8, n9), 
+    just = "left",
+    x = 0.05) 
+
+dist.cost.2cols <- grid.arrange(dist.cost.new, dist.cost.tot2, ncol = 2, bottom = notes)
 
 
 
@@ -1266,7 +1282,9 @@ ggsave(file = "Results/RiskTransfer/disb.cost.tot.png", dist.cost.tot, width = 8
 ggsave(file = "Results/RiskTransfer/disb.cost.new.png", dist.cost.new, width = 8*0.9, height = 10*0.9)
 ggsave(file = "Results/RiskTransfer/disb.cost.tot2.png", dist.cost.tot2,width = 8*0.9, height = 10*0.9)
 ggsave(file = "Results/RiskTransfer/disb.cost.allHybrid.png", dist.cost.allHybrid,width = 8*0.9, height = 10*0.9)
-ggsave(file = "Results/RiskTransfer/disb.cost.2cols.png", dist.cost.2cols, width = 12*0.9, height = 10*0.9)
+
+ggsave(file = "Results/RiskTransfer/fig10.disb.cost.2cols.png", dist.cost.2cols, width = 12*0.9, height = 13*0.9)
+ggsave(file = "Results/RiskTransfer/fig10.disb.cost.2cols.pdf", dist.cost.2cols, width = 12*0.9, height = 13*0.9)
 
 
 
@@ -1413,8 +1431,9 @@ df_all.stch %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
     group_by(runname) %>% 
     summarise(NC = sum(NC-EEC)/1e9,
               SC = sum(SC)/1e9,
-              ERC.tot = sum(ERC.DB.final)/1e9  + UAAL[year == max(year)]/1e9 * 0 ) %>% 
-    mutate(ERC.xNC = ERC.tot - NC)
+              UAAL30 = UAAL[year == max(year)]/1e9,
+              ERC.tot = sum(ERC.DB.final)/1e9  + UAAL[year == max(year)]/1e9 * 1 ) %>% 
+    mutate(ERC.xNC = ERC.tot - NC - UAAL30)
   df.IFO 
   
   
@@ -1428,8 +1447,10 @@ df_all.stch %>% filter(runname %in% c("RS1_SR0EL1_sep_R725.d725",
                                     year %in% 2017:2048)  %>% 
     group_by(runname) %>% 
     summarise(NC = sum(NC - EEC)/1e9,
+              SC = sum(SC)/1e9,
+              UAAL30 = UAAL[year == max(year)]/1e9,
               ERC.tot = sum(ERC.DB.final)/1e9  + UAAL[year == max(year)]/1e9) %>% 
-    mutate(ERC.xNC = ERC.tot - NC)
+    mutate(ERC.xNC = ERC.tot - NC - UAAL30)
   df.pew 
   
       
@@ -1477,7 +1498,7 @@ results_all.sumTiers %>% filter( runname %in% c("RS1_SR0EL1_sep_R725.d725",
                                                  "SR0EL1.Reform_sep_R725.d725.DC4",
                                                  "SR0EL1.Reform_sep_R625.d625.DC4")) %>% 
   filter(sim == 0, year %in% 2017:2048) %>% 
-  select(runname, year, ERC.DB.final, NC, EEC) %>% 
+  select(runname, year, ERC.DB.final, NC, EEC, UAAL) %>% 
   mutate(NC.ER = NC - EEC) %>% 
   mutate_at(vars(-runname, -year), funs(./1e9))
   
@@ -1490,6 +1511,8 @@ results_all.sumTiers %>% filter( runname %in% c("RS1_SR0EL1_sep_R725.d725",
   select(runname, year, ERC.DB.final, NC, EEC, UAAL) %>% 
   mutate(NC.ER = NC - EEC) %>% 
   mutate_at(vars(-runname, -year), funs(./1e9))
+
+df.IFO.full
 df.pew.full
 
   

@@ -71,8 +71,8 @@ RIG.theme <- function(){
 # source: City of LA Revenue Outlook, FY 2016-17
 df_revenue <- read_ExcelRange("Data_inputs/PSERS_PlanInfo_AV2016.xlsx", sheet = "Fiscal")
 
-# extend the projection into 2044 using the projected growth rate of 2.9% in 2020 
-rev.growth <- 0.033
+# extend the projection into 2044
+rev.growth <- 0.035
 
 df_revenue %<>% 
   mutate(GenFund.proj = ifelse(year <= 2021, GenFund.original, GenFund.original[year == 2021] * (1 + rev.growth)^(year - 2021))) 

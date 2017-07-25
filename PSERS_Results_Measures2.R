@@ -473,7 +473,7 @@ fig_distReturn
 
 # Distribution of funded ratio 
 fig.title <- "Distribution of funded ratios across simulations"
-fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.25% achieved"
+fig.subtitle <- "Current PSERS funding policy; Scenario 1: Assumption Achieved" 
 fig_CP.RS1.FRdist <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1") %>% 
   left_join(results_all  %>% 
               filter(runname  %in% "RS1_SR1EL1", sim == 0) %>% 
@@ -507,7 +507,7 @@ fig_CP.RS1.FRdist$data
 
 # Distribution of ERC as % Payroll
 fig.title    <- "Distribution of employer contribution as a percentage of payroll across simulations"
-fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.25% achieved"
+fig.subtitle <- "Current PSERS funding policy; Scenario 1: Assumption Achieved"
 fig_CP.RS1.ERCdist <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1") %>% 
   left_join(results_all  %>%
               filter(runname  %in% "RS1_SR1EL1", sim == 0) %>%
@@ -539,7 +539,7 @@ fig_CP.RS1.ERCdist
 
 # Risk of low funded ratio
 fig.title <- "Probability of funded ratio below 40% in any year up to the given year"
-fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.25% achieved"
+fig.subtitle <- "Current PSERS funding policy; Scenario 1: Assumption Achieved"
 fig_CP.RS1.FR40less <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1", year >= 2016) %>% 
   #mutate(runname = factor(runname, labels = c(lab_s1, lab_s2))) %>%  
   select(runname, year, FR40less) %>% 
@@ -568,7 +568,7 @@ fig_CP.RS1.FR40less$data %>% filter(year == 2045)
 
 # Risk of sharp increase in ERC/PR
 fig.title <- "Probability of employer contribution rising more than 10% of payroll \nin a 5-year period at any time prior to and including the given year"
-fig.subtitle <- "Current PSERS funding policy; Return assumption of 7.25% achieved"
+fig.subtitle <- "Current PSERS funding policy; Scenario 1: Assumption Achieved"
 fig_CP.RS1.ERChike <- df_all.stch %>% filter(runname %in% "RS1_SR1EL1" , year >= 2016) %>% 
   #mutate(runname = factor(runname, labels = c(lab_s1, lab_s2))) %>%  
   select(runname, year, ERC_hike) %>% 
@@ -757,7 +757,7 @@ lab.RS3 <- "Scenario 3: \nHigh Volatility"
 
 # Deterministic 
 fig.title <- "Employer contribution as a percentage of \nPennsylvania state general fund revenue"
-fig.subtitle <- "Current PSERS funding policy; Determinisc runs"
+fig.subtitle <- "Current PSERS funding policy; Deterministic runs"
 fig_fiscal.det <- results_all %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1"), sim == 0, year %in% 2016:2046) %>% 
   mutate(returnScn = factor(returnScn, levels = c("RS1", "RS2"), labels = c("Scenario 1: Assumption Achived: \nDeterministic \nAnnual return = 7.25%",
                                                                             "Scenario 2: 15 Years of Low Returns: \nDeterministic \nAnnual return = 6.4%"))) %>%  
@@ -774,7 +774,7 @@ fig_fiscal.det <- results_all %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL1
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
   labs(title = fig.title,
        subtitle = fig.subtitle,
-       x = NULL, y = "Probability (%)") + 
+       x = NULL, y = "Percent of general fund revenue (%)") + 
   guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
   RIG.theme()
 fig_fiscal.det
@@ -805,11 +805,12 @@ fig_fiscal.stch <- df_all.stch %>% filter(runname %in% c("RS1_SR1EL1","RS2_SR1EL
   scale_shape_manual(values = c(17,16, 15, 18, 19),  name = "") +
   labs(title = fig.title,
        subtitle = fig.subtitle,
-       x = NULL, y = "Probability (%)") + 
+       x = NULL, y = "Percent of general fund revenue (%)") + 
   guides(color = guide_legend(keywidth = 1.5, keyheight = 3))+
   RIG.theme()
 fig_fiscal.stch
 fig_fiscal.stch$data %>% filter(year == 2017)
+fig_fiscal.stch$data %>% filter(year == 2034)
 fig_fiscal.stch$data %>% filter(year == 2046)
 
 fig_fiscal.stch$data
@@ -859,26 +860,40 @@ g.width.3col  <- 15*0.8
 ggsave(file = paste0(Outputs_folder, "distReturn.png"),   fig_distReturn, height = g.height.1col, width = g.width.1col)
 
 # 1. Current policy
-ggsave(file = paste0(Outputs_folder, "CP.RS1.FRdist.png"),   fig_CP.RS1.FRdist,  height = g.height.1col, width = g.width.1col)
-ggsave(file = paste0(Outputs_folder, "CP.RS1.ERCdist.png"),  fig_CP.RS1.ERCdist, height = g.height.1col, width = g.width.1col)
-ggsave(file = paste0(Outputs_folder, "CP.RS1.FR40less.png"), fig_CP.RS1.FR40less,height = g.height.1col, width = g.width.1col*0.8)
-ggsave(file = paste0(Outputs_folder, "CP.RS1.ERChike.png"),  fig_CP.RS1.ERChike, height = g.height.1col, width = g.width.1col*0.8)
+ggsave(file = paste0(Outputs_folder, "fig1.CP.RS1.FRdist.png"),   fig_CP.RS1.FRdist,  height = g.height.1col, width = g.width.1col)
+ggsave(file = paste0(Outputs_folder, "fig2.CP.RS1.FR40less.png"), fig_CP.RS1.FR40less,height = g.height.1col, width = g.width.1col*0.8)
+ggsave(file = paste0(Outputs_folder, "fig3.CP.RS1.ERCdist.png"),  fig_CP.RS1.ERCdist, height = g.height.1col, width = g.width.1col)
+ggsave(file = paste0(Outputs_folder, "fig4.CP.RS1.ERChike.png"),  fig_CP.RS1.ERChike, height = g.height.1col, width = g.width.1col*0.8)
+
+ggsave(file = paste0(Outputs_folder, "fig1.CP.RS1.FRdist.pdf"),   fig_CP.RS1.FRdist,  height = g.height.1col, width = g.width.1col)
+ggsave(file = paste0(Outputs_folder, "fig2.CP.RS1.FR40less.pdf"), fig_CP.RS1.FR40less,height = g.height.1col, width = g.width.1col*0.8)
+ggsave(file = paste0(Outputs_folder, "fig3.CP.RS1.ERCdist.pdf"),  fig_CP.RS1.ERCdist, height = g.height.1col, width = g.width.1col)
+ggsave(file = paste0(Outputs_folder, "fig4.CP.RS1.ERChike.pdf"),  fig_CP.RS1.ERChike, height = g.height.1col, width = g.width.1col*0.8)
+
 
 
 # 1. Current policy
-ggsave(file = paste0(Outputs_folder, "CP.RS23.FR40less.png"), fig_CP.RS23.FR40less,height = g.height.1col, width = g.width.1col)
-ggsave(file = paste0(Outputs_folder, "CP.RS23.ERChike.png"),  fig_CP.RS23.ERChike, height = g.height.1col, width = g.width.1col)
+ggsave(file = paste0(Outputs_folder, "fig5.CP.RS23.FR40less.png"), fig_CP.RS23.FR40less,height = g.height.1col, width = g.width.1col)
+ggsave(file = paste0(Outputs_folder, "fig6.CP.RS23.ERChike.png"),  fig_CP.RS23.ERChike, height = g.height.1col, width = g.width.1col)
+
+ggsave(file = paste0(Outputs_folder, "fig5.CP.RS23.FR40less.pdf"), fig_CP.RS23.FR40less,height = g.height.1col, width = g.width.1col)
+ggsave(file = paste0(Outputs_folder, "fig6.CP.RS23.ERChike.pdf"),  fig_CP.RS23.ERChike, height = g.height.1col, width = g.width.1col)
 
 # 2. Impact of policies 
-ggsave(file = paste0(Outputs_folder, "SR.ERChike.png"),  fig_SR.ERChike, height = g.height.3col*0.9*1.15, width = g.width.3col*0.9)
+ggsave(file = paste0(Outputs_folder, "fig7.SR.ERChike.png"),  fig_SR.ERChike, height = g.height.3col*0.9*1.15, width = g.width.3col*0.9)
+ggsave(file = paste0(Outputs_folder, "fig7.SR.ERChike.pdf"),  fig_SR.ERChike, height = g.height.3col*0.9*1.15, width = g.width.3col*0.9)
 
 
 # 3. Fiscal
-ggsave(file = paste0(Outputs_folder, "fiscal.det.png"),  fig_fiscal.det, height = g.height.1col, width = g.width.1col*1.1)
-ggsave(file = paste0(Outputs_folder, "fiscal.stch.png"), fig_fiscal.stch, height = g.height.3col*0.9*1.15, width = g.width.3col*0.9)
+ggsave(file = paste0(Outputs_folder, "fig8.fiscal.det.png"),  fig_fiscal.det, height = g.height.1col, width = g.width.1col*1.1)
+ggsave(file = paste0(Outputs_folder, "fig9.fiscal.stch.png"), fig_fiscal.stch, height = g.height.3col*0.9*1.15, width = g.width.3col*0.9)
 
-ggsave(file = paste0(Outputs_folder, "projGenFun.png"),  fig_projGenFund,  height = g.height.1col, width = g.width.1col)
+ggsave(file = paste0(Outputs_folder, "fig8.fiscal.det.pdf"),  fig_fiscal.det, height = g.height.1col, width = g.width.1col*1.1)
+ggsave(file = paste0(Outputs_folder, "fig9.fiscal.stch.pdf"), fig_fiscal.stch, height = g.height.3col*0.9*1.15, width = g.width.3col*0.9)
 
+
+ggsave(file = paste0(Outputs_folder, "fig11.projGenFun.png"),  fig_projGenFund,  height = g.height.1col, width = g.width.1col)
+ggsave(file = paste0(Outputs_folder, "fig11.projGenFun.pdf"),  fig_projGenFund,  height = g.height.1col, width = g.width.1col)
 
 
 
