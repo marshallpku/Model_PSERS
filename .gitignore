@@ -21,4 +21,4 @@ vignettes/*.pdf
 
 
 Results*/**/*.RData
-# ~$*
+~$*
