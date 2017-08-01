@@ -948,6 +948,17 @@ kable(penSim_results.sumTiers %>% filter(sim == 0) %>% select(one_of(var_display
 # df_all.stch
 
 
+# decrement.model.PSERS.tF <- decrement.model.tF
+# save(decrement.model.PSERS.tF, file = "decrement.model.PSERS.RData")
+
+
+
+
+
+
+
+
+
 
 
 

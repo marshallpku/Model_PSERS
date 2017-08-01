@@ -1130,7 +1130,7 @@ write.xlsx2(dist_cost.hybAll.tot.SR0, file = "Results/RiskTransfer/RiskTransfer_
 fig.lab <- c("Pure DB plan",
              "DB/DC hybrid for new hires only",
              "DB/DC hybrid for all current and future employees")
-fig.title <- "Distributions of 30-year employer pension costs (including UAAL in 2048)"
+fig.title <- "Distributions of 30-year employer pension costs (including unfunded liability in 2048)"
 
 rn <- c("RS1_SR0EL1_sep_R725.d725", 
         "SR0EL1.Reform_sep_R725.d725.DC4",
@@ -1160,7 +1160,7 @@ dist.cost.tot
 
 fig.lab <- c("Pure DB plan",
              "DB/DC hybrid for new hires")
-fig.title <- "Distributions of total employer pension costs in 2017-2048 \n(including UAAL in 2048)"
+fig.title <- "Distributions of total employer pension costs in 2017-2048 \n(including unfunded liability in 2048)"
 fig.subtitle <- "All current and future members"
 
 rn <- c("RS1_SR0EL1_sep_R725.d725", 
@@ -1194,7 +1194,7 @@ dist.cost.tot2
 
 fig.lab <- c("Pure DB plan",
              "DB/DC hybrid for \all current and future members")
-fig.title <- "Distributions of total employer pension costs in 2017-2048 \n(including UAAL in 2048)"
+fig.title <- "Distributions of total employer pension costs in 2017-2048 \n(including unfunded liability in 2048)"
 fig.subtitle <- "All current and future members are affected by the hybrid plan reform"
 
 rn <- c("RS1_SR0EL1_sep_R725.d725", 
@@ -1226,7 +1226,7 @@ dist.cost.allHybrid
 
 fig.lab <- c("Pure DB plan",
              "DB/DC hybrid")
-fig.title <- "Distributions of total employer pension costs in 2017-2048 \n(including UAAL in 2048)"
+fig.title <- "Distributions of total employer pension costs in 2017-2048 \n(including unfunded liability in 2048)"
 fig.subtitle <- "Future members only"
 
 rn <- c("RS1_SR0EL1_sep_R725.d725", 

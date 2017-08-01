@@ -435,7 +435,7 @@ fig_projGenFund <-
   RIG.theme() + 
   scale_x_continuous(breaks = c(2016, seq(2020, 2045, 5))) + 
   scale_y_continuous(breaks = seq(0, 100000, 5000), labels = comma(seq(0, 100000, 5000))) + 
-  labs(title = "Projected General fund of the state of Pennsylvania",
+  labs(#title = "Projected General fund of the state of Pennsylvania",
        y = "$Million",
        x = NULL)
 fig_projGenFund
@@ -922,6 +922,14 @@ ggsave(file = paste0(Outputs_folder, "fig11.projGenFun.pdf"),  fig_projGenFund, 
 # fig_stchDet.ERChigh
 # 
 # 
+
+
+# results_all %>% filter(runname == "RS1_SR1EL1", sim == 1 ) %>% 
+#   select(runname, year, UAAL, EUAAL, LG, SC, Amort_basis) %>% 
+#   mutate(basis1 = UAAL - (lag(UAAL - SC)) * 1.0725,
+#          diff = basis1 - Amort_basis) 
+
+
 
 
 
